@@ -357,7 +357,10 @@ aside.side .logo{cursor:pointer}
             <div><label for="wFmt">Format ảnh</label><select id="wFmt"></select></div>
             <div><label for="wFont">Kiểu chữ</label><select id="wFont"></select></div>
           </div>
-          <div class="row"><button type="button" class="btn ghost" id="wReimg" style="width:100%">AI tạo ảnh khác</button></div>
+          <div class="grid2">
+            <button type="button" class="btn ghost" id="wReimg" style="margin-top:10px">AI tạo ảnh khác</button>
+            <button type="button" class="btn" id="wDraw" style="margin-top:10px" title="AI vẽ tranh nền mới hợp với bài (khoảng 30–90 giây)">AI vẽ tranh mới</button>
+          </div>
           <canvas id="wCanvas" width="1200" height="630"></canvas>
           <div class="grid2">
             <div><label for="wHead">Tiêu đề trên ảnh</label><input id="wHead"></div>
@@ -882,6 +885,24 @@ $("#wHead").oninput=$("#wSub").oninput=redrawW;
 ["#wTag","#wHi","#wBadgeBig","#wBadgeSmall","#wSlogan"].forEach(id=>$(id).oninput=syncWImg);
 $("#wSub").addEventListener("input",()=>{wSubTouched=true});
 ["#wFrom","#wTo","#wTime"].forEach(id=>$(id).addEventListener("change",()=>{if(!wSubTouched){$("#wSub").value=timeText();redrawW()}}));
+/* AI paints a new background: Claude writes the English brief, the draw-image function paints it (OpenAI) and files it in Kho ảnh */
+$("#wDraw").onclick=async()=>{const post=$("#wPost").value.trim(),head=$("#wHead").value.trim();
+  if(!post&&!head){toast("Viết bài hoặc nhập tiêu đề trước, AI sẽ dựa vào đó để vẽ");return}
+  if(!artReady){toast("Cần bật Kho ảnh trước (chạy supabase/kho-anh.sql)");return}
+  const btn=$("#wDraw");btn.disabled=true;$("#wErr").textContent="";$("#wThinking").textContent="AI đang nghĩ bối cảnh tranh…";
+  try{const r=await aiJson(`Bạn là họa sĩ thiết kế key art cho game kiếm hiệp cổ trang "Tam Sinh Duyên". Dựa vào bài đăng dưới đây, viết đề bài để mô hình AI vẽ ảnh nền cho ảnh bìa Facebook.
+BÀI ĐĂNG:
+"""${(post||head).slice(0,4000)}"""
+Trả về DUY NHẤT một JSON hợp lệ: {"prompt":"đề bài bằng TIẾNG ANH, 60–120 từ: bối cảnh, nhân vật (trang phục cổ trang), hành động, không khí, ánh sáng, màu chủ đạo hợp với sự kiện; tuyệt đối không có chữ, logo","name":"tên tranh tiếng Việt 2–5 chữ","tags":["4–8 nhãn tiếng Việt viết thường như ở Kho ảnh"]}`);
+    if(!r.prompt)throw {code:"bad_json",message:"AI chưa viết được đề bài vẽ, bấm lại để thử"};
+    $("#wThinking").textContent="AI đang vẽ tranh, thường mất 30–90 giây…";
+    const cur=artById(wImg?.art),ref=cur?cur.url:new URL(BG,location.href).href;
+    const {data,error}=await sb.functions.invoke("draw-image",{body:{prompt:String(r.prompt),ref,name:r.name,tags:r.tags}});
+    if(error)throw {code:"ai_error",message:await fnErr(error,"draw-image")};
+    await loadArt();if(!wImg)wImg=normImg({format:fmtChoice()||"poster"});wImg.art=data.id;wArtPicked=data.id;
+    $("#wArt").value=data.id;renderPicker();redrawW();$("#wThinking").textContent="Đã vẽ xong và lưu vào Kho ảnh. Bấm lần nữa để vẽ tranh khác.";
+  }catch(e){$("#wThinking").textContent="";$("#wErr").textContent=e.code==="bad_json"?e.message:e.code==="ai_error"?"AI chưa vẽ được: "+e.message:aiErrMsg(e)}
+  finally{btn.disabled=false}};
 /* Picking a picture: everything else (title, slogan, time, logo) is laid on automatically */
 function renderPicker(){const cur=wImg?.art||"";
   $("#wPicker").innerHTML=`<button type="button" data-pick="" aria-pressed="${!cur}"><img src="${BG}" alt=""><span>Tranh mặc định</span></button>`+
