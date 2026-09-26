@@ -362,7 +362,10 @@ aside.side .logo{cursor:pointer}
         <div class="panel">
           <label for="wPost" style="margin-top:0">Bài đăng</label>
           <textarea id="wPost" style="min-height:260px" placeholder="Bài viết sẽ hiện ở đây."></textarea>
-          <button class="btn copybig" id="wCopy">Copy để đăng Facebook</button>
+          <div class="grid2" style="margin-top:10px">
+            <button class="btn copybig" id="wCopyAll" style="margin:0">Copy toàn bộ (bài + ảnh)</button>
+            <button class="btn ghost copybig" id="wCopy" style="margin:0">Chỉ copy nội dung</button>
+          </div>
           <div class="imgmaker" id="aiImg">
             <h4>Ảnh bài đăng</h4>
             <p class="hint" style="margin:0;font-size:13px;color:var(--ink-soft)">Chọn một ảnh hoạt động đã lưu, hoặc để AI đọc bài và motip để vẽ ảnh mới. Bấm <b>Copy ảnh</b> rồi dán (Ctrl+V) vào bài đăng Facebook.</p>
@@ -1008,6 +1011,18 @@ $("#wAiOut").onclick=async e=>{if(!wAiUrl)return;const id=e.target.id;
     try{await db.collection("artworks").add({kind:"activity",name:name.trim()||"Ảnh hoạt động",url:wAiUrl,path:src?.path||"",w:src?.w||0,h:src?.h||0,addedBy:me.id,created:Date.now()});await loadArt();showAiImg(wAiUrl,true);toast("Đã lưu vào Ảnh hoạt động")}
     catch(err){toast("Không lưu được: "+errMsg(err))}}};
 /* Clipboard images must be PNG; the promise form keeps Safari's user-gesture rule happy */
+/* one clipboard item with the post as text + HTML and the chosen picture as PNG */
+function pngOf(url){return new Promise((res,rej)=>{const im=new Image();im.crossOrigin="anonymous";im.onload=()=>{const c=document.createElement("canvas");c.width=im.naturalWidth;c.height=im.naturalHeight;
+  c.getContext("2d").drawImage(im,0,0);c.toBlob(b=>b?res(b):rej(new Error("png")),"image/png")};im.onerror=()=>rej(new Error("load"));im.src=url})}
+function copyAll(){const text=$("#wPost").value.trim();if(!text){toast("Chưa có nội dung để copy");return}
+  if(!wAiUrl){copyText($("#wPost"));return}
+  if(!navigator.clipboard?.write||!window.ClipboardItem){copyText($("#wPost"));toast("Trình duyệt chỉ copy được chữ, hãy bấm Copy ảnh riêng");return}
+  const png=pngOf(wAiUrl);
+  const html=png.then(b=>new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(new Blob([`<div>${esc(text).replace(/\n/g,"<br>")}</div><img src="${fr.result}">`],{type:"text/html"}));fr.readAsDataURL(b)}));
+  navigator.clipboard.write([new ClipboardItem({"text/plain":new Blob([text],{type:"text/plain"}),"text/html":html,"image/png":png})])
+    .then(()=>toast("Đã copy bài + ảnh. Dán (Ctrl+V) vào ô tạo bài Facebook; nếu ảnh chưa vào, bấm Copy ảnh rồi dán thêm"),
+      ()=>{copyText($("#wPost"));toast("Chỉ copy được chữ, hãy bấm Copy ảnh để copy ảnh riêng")})}
+$("#wCopyAll").onclick=copyAll;
 function copyImage(url){if(!navigator.clipboard?.write||!window.ClipboardItem){toast("Trình duyệt chưa hỗ trợ copy ảnh, hãy dùng Tải ảnh");return}
   const png=new Promise((res,rej)=>{const im=new Image();im.crossOrigin="anonymous";im.onload=()=>{const c=document.createElement("canvas");c.width=im.naturalWidth;c.height=im.naturalHeight;
     c.getContext("2d").drawImage(im,0,0);c.toBlob(b=>b?res(b):rej(new Error("png")),"image/png")};im.onerror=()=>rej(new Error("load"));im.src=url});
