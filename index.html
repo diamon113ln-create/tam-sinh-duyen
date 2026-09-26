@@ -140,16 +140,60 @@ canvas{width:100%;height:auto;border-radius:10px;border:1px solid var(--line);ma
 .acc table td,.acc table th{padding:10px}
 .toast{position:fixed;left:50%;bottom:calc(80px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--mist);padding:10px 18px;border-radius:10px;z-index:50;font-size:14px}
 
+/* Home: artwork hero + portal cards; clicking a card opens its view */
+.hero{position:relative;overflow:hidden;border-radius:20px;min-height:min(58vh,480px);display:flex;flex-direction:column;justify-content:flex-end;
+  padding:32px;color:#fff;isolation:isolate;box-shadow:0 18px 40px rgba(20,10,22,.35)}
+.hero .art{position:absolute;inset:0;z-index:-2;background:url(assets/bg.jpg) center 35%/cover;animation:kenburns 26s ease-in-out infinite alternate}
+.hero::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(0deg,rgba(26,12,28,.92) 0%,rgba(26,12,28,.35) 45%,rgba(26,12,28,0) 70%)}
+.hero .kicker{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:#F2B8C6;opacity:0;animation:rise .8s .15s ease-out forwards}
+.hero h1{margin:6px 0 8px;font:700 clamp(28px,4.2vw,46px)/1.15 var(--serif);text-shadow:0 4px 18px rgba(0,0,0,.5);opacity:0;animation:rise .8s .3s ease-out forwards}
+.hero p{margin:0;max-width:560px;color:#EBDDE6;opacity:0;animation:rise .8s .45s ease-out forwards}
+.petals{position:absolute;inset:0;pointer-events:none;z-index:0}
+.petals i{position:absolute;top:-24px;width:12px;height:10px;border-radius:12px 0 12px 0;background:linear-gradient(135deg,#FFD6E0,#F28AA7);opacity:.85;
+  animation:fall linear infinite}
+@keyframes kenburns{from{transform:scale(1.02)}to{transform:scale(1.14) translate(-2%,-1%)}}
+@keyframes portalin{from{opacity:0;translate:0 18px}to{opacity:1;translate:0 0}}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes fall{0%{transform:translate(0,0) rotate(0)}100%{transform:translate(var(--dx,60px),calc(min(58vh,480px) + 40px)) rotate(540deg)}}
+.portals{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;margin-top:22px;perspective:1000px}
+.portal{position:relative;aspect-ratio:3/4;border:0;padding:0;border-radius:18px;overflow:hidden;cursor:pointer;text-align:left;color:#fff;background:#1a0f1c;
+  box-shadow:0 10px 26px rgba(20,10,22,.35),inset 0 0 0 1px rgba(217,178,106,.55);transform-style:preserve-3d;
+  transition:transform .35s cubic-bezier(.2,.8,.2,1),box-shadow .35s;opacity:0;animation:portalin .7s ease-out forwards}
+.portal:nth-child(1){animation-delay:.35s}.portal:nth-child(2){animation-delay:.45s}.portal:nth-child(3){animation-delay:.55s}.portal:nth-child(4){animation-delay:.65s}
+.portal .art{position:absolute;inset:0;background:url(assets/bg.jpg) var(--pos,center)/auto 170% no-repeat;transition:transform .6s cubic-bezier(.2,.8,.2,1)}
+.portal::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(0deg,rgba(26,12,28,.95) 0%,rgba(26,12,28,.25) 55%,rgba(26,12,28,0) 80%)}
+.portal::after{content:"";position:absolute;inset:0;z-index:2;background:linear-gradient(115deg,transparent 30%,rgba(255,236,200,.35) 48%,transparent 62%);
+  transform:translateX(-120%);transition:transform .8s ease}
+.portal:hover{box-shadow:0 22px 44px rgba(158,27,58,.45),inset 0 0 0 1px rgba(242,200,130,.95)}
+.portal:hover .art{transform:scale(1.08)}
+.portal:hover::after{transform:translateX(120%)}
+.portal .txt{position:absolute;left:0;right:0;bottom:0;z-index:3;padding:18px}
+.portal .num{font:700 34px/1 var(--serif);color:#F2C882;text-shadow:0 2px 10px rgba(0,0,0,.5)}
+.portal h3{margin:6px 0 2px;font:700 20px/1.25 var(--serif)}
+.portal .sub{font-size:13px;color:#E3D3DE}
+.portal .go{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font-size:13px;font-weight:600;color:#F2B8C6}
+.portal:hover .go{color:#fff}
+/* Opening a view: morph from the clicked card when supported, else zoom in */
+.view-enter{animation:viewin .45s cubic-bezier(.2,.8,.2,1)}
+@keyframes viewin{from{opacity:0;transform:scale(.96) translateY(14px)}to{opacity:1;transform:none}}
+::view-transition-old(root),::view-transition-new(root){animation-duration:.35s}
+::view-transition-group(portal){animation-duration:.55s;animation-timing-function:cubic-bezier(.2,.8,.2,1)}
+aside.side .logo{cursor:pointer}
+
 @media (max-width:860px){
-  #app{grid-template-columns:1fr}
+  .hero{min-height:52vh;padding:22px;border-radius:16px}
+  .portals{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .portal h3{font-size:17px}.portal .num{font-size:28px}.portal .txt{padding:14px}
+  #app{grid-template-columns:minmax(0,1fr)}
   aside.side{position:fixed;top:auto;bottom:0;left:0;right:0;height:auto;z-index:20;flex-direction:row;align-items:center;
     padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));background:rgba(42,26,44,.97)}
   aside.side .logo,aside.side .me b,aside.side .me .role,aside.side .me span{display:none}
   aside.side nav{flex-direction:row;flex:1;justify-content:space-around}
-  aside.side nav button{flex-direction:column;gap:2px;font-size:11px;padding:6px 4px;border-left:0;border-top:3px solid transparent;border-radius:8px}
+  aside.side nav button{flex-direction:column;gap:2px;flex:1 1 0;min-width:0;font-size:10.5px;line-height:1.2;text-align:center;padding:6px 2px;border-left:0;border-top:3px solid transparent;border-radius:8px}
   aside.side nav button[aria-current="true"]{border-top-color:#F2B8C6}
   aside.side .me{margin:0;border:0;padding:0}
-  aside.side .me .btn{margin:0;width:auto;font-size:11px;padding:6px 8px}
+  aside.side .me{display:flex;flex-direction:column;gap:4px}
+  aside.side .me .btn{margin:0;width:auto;font-size:10.5px;padding:4px 6px}
   main{padding:12px 12px 90px}
   .two{grid-template-columns:1fr}
   .board{grid-template-columns:1fr}
@@ -184,7 +228,8 @@ canvas{width:100%;height:auto;border-radius:10px;border:1px solid var(--line);ma
   <aside class="side">
     <img class="logo" src="assets/logo.jpg" alt="Tam Sinh Duyên">
     <nav id="tabs">
-      <button data-view="write" aria-current="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/></svg><span>Viết bài nhanh</span></button>
+      <button data-view="home" aria-current="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg><span>Trang chủ</span></button>
+      <button data-view="write"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/></svg><span>Viết bài nhanh</span></button>
       <button data-view="board"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="5" height="16" rx="1"/><rect x="10" y="4" width="5" height="10" rx="1"/><rect x="17" y="4" width="4" height="13" rx="1"/></svg><span>Công việc</span></button>
       <button data-view="templates"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/></svg><span>Mẫu bài viết</span></button>
       <button data-view="accounts" id="tabAcc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M17 8v6M14 11h6"/></svg><span>Tài khoản</span></button>
@@ -192,7 +237,17 @@ canvas{width:100%;height:auto;border-radius:10px;border:1px solid var(--line);ma
     <div class="me"><b id="meName"></b><span class="role" id="meRole"></span><button class="btn ghost small" id="chgPass">Đổi mật khẩu</button><button class="btn ghost small" id="logout">Đăng xuất</button></div>
   </aside>
   <main>
-    <div id="viewWrite">
+    <div id="viewHome">
+      <div class="hero">
+        <div class="art"></div>
+        <div class="petals" id="petals" aria-hidden="true"></div>
+        <div class="kicker">Tam Sinh Duyên · Fanpage</div>
+        <h1 id="homeHi">Chào mừng trở lại</h1>
+        <p>Chọn một thẻ bên dưới để bắt đầu: viết bài, theo dõi công việc hoặc quản lý mẫu bài.</p>
+      </div>
+      <div class="portals" id="portals"></div>
+    </div>
+    <div id="viewWrite" class="hidden">
       <div class="strip"><h2>Viết bài nhanh theo mẫu</h2></div>
       <div class="two">
         <div class="panel">
@@ -255,7 +310,7 @@ canvas{width:100%;height:auto;border-radius:10px;border:1px solid var(--line);ma
       </div>
     </div>
 
-    <div id="viewBoard">
+    <div id="viewBoard" class="hidden">
       <div class="strip"><h2>Việc cần làm cho fanpage</h2><button class="btn" id="newTask">Tạo việc mới</button></div>
       <div class="coltabs" id="colTabs"></div>
       <div class="board" id="board"></div>
@@ -367,9 +422,9 @@ async function loadTable(name){const {data,error}=await sb.from(name).select("id
   return data.map(r=>({id:r.id,...(r.data||{}),createdBy:r.created_by}))}
 async function refresh(name){try{
   if(name==="profiles"){const {data,error}=await sb.from("profiles").select("id,username,name,role");if(error)throw error;accounts=data;
-    if(me){const u=accounts.find(a=>a.id===me.id);if(u){me=u;renderShell()}}}
-  if(name==="tasks"){tasks=await loadTable("tasks");if(me)renderBoard()}
-  if(name==="templates"){templates=(await loadTable("templates")).sort((a,b)=>(a.name||"").localeCompare(b.name||"","vi"));if(me){renderTemplates();fillTplSelects()}}
+    if(me){const u=accounts.find(a=>a.id===me.id);if(u){me=u;renderShell()}}renderHome()}
+  if(name==="tasks"){tasks=await loadTable("tasks");if(me){renderBoard();renderHome()}}
+  if(name==="templates"){templates=(await loadTable("templates")).sort((a,b)=>(a.name||"").localeCompare(b.name||"","vi"));if(me){renderTemplates();fillTplSelects();renderHome()}}
 }catch(e){toast("Lỗi tải dữ liệu: "+errMsg(e))}}
 const db={
   collection:name=>({async add(obj){const {data,error}=await sb.from(name).insert({data:obj}).select("id").single();if(error)throw error;refresh(name);return{id:data.id}}}),
@@ -409,7 +464,7 @@ $("#loginForm").onsubmit=async e=>{e.preventDefault();$("#loginErr").textContent
   $("#loginBtn").disabled=false;
   if(error){$("#loginErr").textContent="Sai tên đăng nhập hoặc mật khẩu.";return}
   $("#lPass").value="";await afterLogin(data.user)};
-function enter(){$("#login").classList.add("hidden");$("#app").classList.remove("hidden");renderShell();renderBoard();renderTemplates();fillTplSelects();show("write");drawCard($("#wCanvas"),"","")}
+function enter(){$("#login").classList.add("hidden");$("#app").classList.remove("hidden");renderShell();renderBoard();renderTemplates();fillTplSelects();renderHome();show("home");drawCard($("#wCanvas"),"","")}
 async function logout(){await sb.auth.signOut();me=null;showLogin()}
 $("#logout").onclick=logout;
 $("#chgPass").onclick=async()=>{const p=prompt("Nhập mật khẩu mới (ít nhất 8 ký tự):");if(!p)return;
@@ -418,10 +473,33 @@ $("#chgPass").onclick=async()=>{const p=prompt("Nhập mật khẩu mới (ít n
 function renderShell(){$("#meName").textContent=me.name;$("#meRole").textContent=ROLE_NAME[me.role];
   $("#tabAcc").classList.toggle("hidden",me.role!=="admin");if(me.role==="admin")renderAccounts()}
 $("#tabs").onclick=e=>{const b=e.target.closest("button");if(b)show(b.dataset.view)};
-const VIEWS={write:"#viewWrite",board:"#viewBoard",templates:"#viewTemplates",accounts:"#viewAccounts"};
-function show(v){if(v==="accounts"&&me.role!=="admin")v="write";
+$("aside.side .logo").onclick=()=>show("home");
+const VIEWS={home:"#viewHome",write:"#viewWrite",board:"#viewBoard",templates:"#viewTemplates",accounts:"#viewAccounts"};
+function show(v){if(v==="accounts"&&me.role!=="admin")v="home";
   document.querySelectorAll("#tabs button").forEach(b=>b.setAttribute("aria-current",b.dataset.view===v));
   for(const k in VIEWS)$(VIEWS[k]).classList.toggle("hidden",k!==v);scrollTo(0,0)}
+
+/* ---------- home ---------- */
+const PORTALS=[
+  {v:"write",t:"Viết bài nhanh",s:"Viết bài theo mẫu, copy đăng Facebook",pos:"20% 40%",n:()=>""},
+  {v:"board",t:"Công việc",s:"việc đang chờ xử lý",pos:"42% 70%",n:()=>tasks.filter(t=>t.status!=="done").length},
+  {v:"templates",t:"Mẫu bài viết",s:"mẫu đã lưu",pos:"78% 55%",n:()=>templates.length},
+  {v:"accounts",t:"Tài khoản",s:"thành viên trong nhóm",pos:"92% 20%",n:()=>accounts.length,admin:true}];
+function renderHome(){if(!me)return;
+  $("#homeHi").textContent="Chào "+me.name;
+  $("#portals").innerHTML=PORTALS.filter(p=>!p.admin||me.role==="admin").map(p=>{const n=p.n();
+    return `<button class="portal" data-open="${p.v}" style="--pos:${p.pos}"><div class="art"></div><div class="txt">${n!==""?`<div class="num">${n}</div>`:""}<h3>${p.t}</h3><div class="sub">${p.s}</div><span class="go">Mở →</span></div></button>`}).join("")}
+function openFromCard(card){const v=card.dataset.open,strip=$(VIEWS[v]+" .strip"),art=card.querySelector(".art");
+  if(!document.startViewTransition||matchMedia("(prefers-reduced-motion:reduce)").matches){
+    show(v);const el=$(VIEWS[v]);el.classList.remove("view-enter");void el.offsetWidth;el.classList.add("view-enter");return}
+  art.style.viewTransitionName="portal";
+  const vt=document.startViewTransition(()=>{art.style.viewTransitionName="";strip.style.viewTransitionName="portal";show(v)});
+  vt.finished.finally(()=>{strip.style.viewTransitionName=""})}
+$("#portals").onclick=e=>{const c=e.target.closest(".portal");if(c)openFromCard(c)};
+$("#portals").onpointermove=e=>{const c=e.target.closest(".portal");if(!c||e.pointerType!=="mouse")return;const r=c.getBoundingClientRect();
+  const x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;c.style.transform=`translateY(-6px) rotateX(${-y*10}deg) rotateY(${x*12}deg)`};
+$("#portals").onpointerout=e=>{const c=e.target.closest(".portal");if(c&&!c.contains(e.relatedTarget))c.style.transform=""};
+$("#petals").innerHTML=Array.from({length:18},()=>`<i style="left:${Math.random()*100}%;--dx:${(Math.random()*160-40)|0}px;animation-duration:${(7+Math.random()*7).toFixed(1)}s;animation-delay:${(-Math.random()*14).toFixed(1)}s;width:${(8+Math.random()*8)|0}px;height:${(6+Math.random()*6)|0}px"></i>`).join("");
 function fillStyleSelect(sel){sel.innerHTML=STYLES.map(x=>`<option>${esc(x)}</option>`).join("")}
 function fillLenSelect(sel){sel.innerHTML=LENS.map(([v,l])=>`<option value="${v}">${l}</option>`).join("");sel.value=LENS[1][0]}
 ["#dStyle","#tStyle"].forEach(x=>fillStyleSelect($(x)));["#dLen","#tLen"].forEach(x=>fillLenSelect($(x)));
