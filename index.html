@@ -1,0 +1,656 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tam Sinh Duyên · Bàn làm việc</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Noto+Serif:ital,wght@0,500;0,700;1,500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<style>
+:root{
+  --ink:#2A1A2C; --ink-soft:#5E5170; --crimson:#9E1B3A; --crimson-deep:#7A1230;
+  --blossom:#F2B8C6; --blossom-soft:#FBE7EC; --mist:#F8F5F9; --paper:#FFFFFF;
+  --gold:#B8904A; --line:#E6DCE6; --ok:#2F7D5B; --warn:#B4661C;
+  --shadow:0 8px 24px rgba(42,26,44,.12);
+  --sans:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --serif:"Noto Serif",Georgia,"Times New Roman",serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --ink:#F3E9F1; --ink-soft:#BBADC4; --crimson:#E2557A; --crimson-deep:#C23D62;
+  --blossom:#8C3E57; --blossom-soft:#3A2233; --mist:#1D1420; --paper:#271C2B;
+  --line:#3E2F44; --gold:#D9B26A; --ok:#5FBF93; --warn:#E3A057; --shadow:0 8px 24px rgba(0,0,0,.4);
+}}
+:root[data-theme="dark"]{
+  --ink:#F3E9F1; --ink-soft:#BBADC4; --crimson:#E2557A; --crimson-deep:#C23D62;
+  --blossom:#8C3E57; --blossom-soft:#3A2233; --mist:#1D1420; --paper:#271C2B;
+  --line:#3E2F44; --gold:#D9B26A; --ok:#5FBF93; --warn:#E3A057; --shadow:0 8px 24px rgba(0,0,0,.4);
+}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100%;background:var(--mist);color:var(--ink);font:15px/1.55 var(--sans)}
+img{max-width:100%}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--crimson);outline-offset:2px}
+.hidden{display:none!important}
+.btn{border:0;border-radius:10px;padding:10px 16px;font-weight:600;cursor:pointer;background:var(--crimson);color:#fff}
+.btn:hover{background:var(--crimson-deep)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.ghost:hover{background:var(--blossom-soft)}
+.btn.small{padding:6px 12px;font-size:13px}
+label{display:block;font-size:13px;font-weight:600;color:var(--ink-soft);margin:12px 0 4px}
+input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--paper)}
+textarea{resize:vertical;min-height:90px}
+.err{color:var(--crimson);font-size:13px;min-height:1.2em;margin-top:8px}
+
+/* Login: the artwork is the page */
+#login{min-height:100vh;display:grid;place-items:center;padding:24px;
+  background:linear-gradient(90deg,rgba(20,10,22,.15),rgba(20,10,22,.55)),url(assets/bg.jpg) center/cover no-repeat}
+.login-card{width:min(400px,100%);background:rgba(255,255,255,.9);backdrop-filter:blur(8px);color:#2A1A2C;
+  border-radius:20px;padding:28px;box-shadow:0 20px 50px rgba(0,0,0,.3)}
+.login-card input{background:#fff;color:#2A1A2C;border-color:#E6DCE6}
+.login-card h1{font:700 26px/1.25 var(--serif);margin:10px 0 4px}
+.login-card p{margin:0 0 8px;color:#5E5170}
+.logo{width:120px;border-radius:14px;display:block}
+
+/* Shell: left HUD */
+#app{min-height:100vh;display:grid;grid-template-columns:240px 1fr}
+aside.side{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:6px;padding:18px 14px;
+  background:linear-gradient(180deg,rgba(42,26,44,.92),rgba(58,20,40,.96)),url(assets/bg.jpg) 20% center/cover;color:#F7EAF0}
+aside.side .logo{width:150px;margin:0 auto 14px;box-shadow:0 6px 18px rgba(0,0,0,.35)}
+aside.side nav{display:flex;flex-direction:column;gap:4px}
+aside.side nav button{display:flex;align-items:center;gap:10px;text-align:left;background:none;border:0;border-radius:10px;padding:11px 12px;
+  cursor:pointer;font-weight:600;color:#E9D6E0;border-left:3px solid transparent}
+aside.side nav button svg{width:20px;height:20px;flex:none}
+aside.side nav button:hover{background:rgba(255,255,255,.08)}
+aside.side nav button[aria-current="true"]{background:rgba(242,184,198,.18);color:#fff;border-left-color:#F2B8C6}
+aside.side .me{margin-top:auto;border-top:1px solid rgba(255,255,255,.15);padding-top:12px;font-size:13px}
+aside.side .me b{display:block;font-size:14px}
+aside.side .me .btn{margin-top:10px;width:100%;color:#F7EAF0;border-color:rgba(255,255,255,.3)}
+aside.side .me .btn:hover{background:rgba(255,255,255,.1)}
+.role{display:inline-block;padding:2px 8px;border-radius:999px;background:rgba(242,184,198,.25);color:#FBD9E2;font-weight:600;font-size:12px;margin-top:2px}
+main{padding:22px;max-width:1300px;width:100%}
+
+/* Quick write + templates */
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:18px}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+.copybig{width:100%;padding:14px;font-size:16px;margin-top:10px}
+.tpl-list{display:grid;gap:10px}
+.tpl{border:1px solid var(--line);border-left:4px solid var(--crimson);border-radius:10px;padding:12px 14px;background:var(--mist)}
+.tpl .n{font:700 16px var(--serif)}
+.tpl .m{font-size:12px;color:var(--ink-soft);margin:2px 0 6px}
+.tpl pre{white-space:pre-wrap;font:13px/1.5 var(--sans);margin:0;max-height:88px;overflow:hidden;color:var(--ink-soft)}
+.empty{padding:18px;border:1px dashed var(--line);border-radius:12px;color:var(--ink-soft);font-size:14px}
+
+/* Banner strip from the artwork */
+.strip{height:120px;border-radius:16px;margin-bottom:18px;background:url(assets/bg.jpg) center 40%/cover;position:relative;overflow:hidden;display:flex;align-items:flex-end;padding:16px 20px}
+.strip::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(42,26,44,.75),rgba(42,26,44,0) 70%)}
+.strip h2{position:relative;z-index:1;margin:0;color:#fff;font:700 24px/1.2 var(--serif)}
+.strip .btn{position:relative;z-index:1;margin-left:auto}
+
+/* Board */
+.board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.col{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:12px;min-height:200px}
+.col h3{margin:0 0 10px;font-size:14px;display:flex;align-items:center;gap:8px}
+.col h3 .dot{width:10px;height:10px;border-radius:50%}
+.col h3 .n{margin-left:auto;color:var(--ink-soft);font-weight:500}
+.col.drop{outline:2px dashed var(--crimson);outline-offset:-4px}
+.task{background:var(--mist);border:1px solid var(--line);border-left:4px solid var(--blossom);border-radius:10px;padding:10px 12px;margin-bottom:10px;cursor:pointer}
+.task:hover{border-color:var(--crimson)}
+.task .t{font-weight:600;margin-bottom:4px}
+.task .meta{font-size:12px;color:var(--ink-soft);display:flex;flex-wrap:wrap;gap:8px}
+.task .late{color:var(--crimson);font-weight:600}
+.pill{font-size:11px;padding:1px 7px;border-radius:999px;border:1px solid var(--line)}
+.coltabs{display:none;gap:6px;overflow-x:auto;margin-bottom:12px}
+.coltabs button{white-space:nowrap}
+
+/* Modal */
+dialog{border:0;border-radius:18px;padding:0;width:min(980px,96vw);max-height:92vh;background:var(--paper);color:var(--ink);box-shadow:var(--shadow)}
+dialog::backdrop{background:rgba(20,10,22,.55)}
+.dlg-head{display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--paper);z-index:2}
+.dlg-head h3{margin:0;font:700 19px var(--serif);flex:1}
+.dlg-body{padding:4px 20px 20px;overflow:auto}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+.section{border-top:1px solid var(--line);margin-top:18px;padding-top:6px}
+.section h4{margin:10px 0 2px;font:700 16px var(--serif)}
+.section .hint{font-size:13px;color:var(--ink-soft);margin:0}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;margin-top:10px}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+th{background:var(--blossom-soft);position:sticky;top:0}
+td[contenteditable]:focus{background:var(--blossom-soft);outline:none}
+canvas{width:100%;height:auto;border-radius:10px;border:1px solid var(--line);margin-top:10px;display:block}
+.status-flow{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.status-flow button{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:5px 12px;cursor:pointer;font-size:13px}
+.status-flow button[aria-pressed="true"]{background:var(--crimson);border-color:var(--crimson);color:#fff}
+.thinking{font-size:13px;color:var(--ink-soft);font-style:italic}
+
+/* Accounts */
+.acc{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;max-width:760px}
+.acc table td,.acc table th{padding:10px}
+.toast{position:fixed;left:50%;bottom:calc(80px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--mist);padding:10px 18px;border-radius:10px;z-index:50;font-size:14px}
+
+@media (max-width:860px){
+  #app{grid-template-columns:1fr}
+  aside.side{position:fixed;top:auto;bottom:0;left:0;right:0;height:auto;z-index:20;flex-direction:row;align-items:center;
+    padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));background:rgba(42,26,44,.97)}
+  aside.side .logo,aside.side .me b,aside.side .me .role,aside.side .me span{display:none}
+  aside.side nav{flex-direction:row;flex:1;justify-content:space-around}
+  aside.side nav button{flex-direction:column;gap:2px;font-size:11px;padding:6px 4px;border-left:0;border-top:3px solid transparent;border-radius:8px}
+  aside.side nav button[aria-current="true"]{border-top-color:#F2B8C6}
+  aside.side .me{margin:0;border:0;padding:0}
+  aside.side .me .btn{margin:0;width:auto;font-size:11px;padding:6px 8px}
+  main{padding:12px 12px 90px}
+  .two{grid-template-columns:1fr}
+  .board{grid-template-columns:1fr}
+  .coltabs{display:flex}
+  .board .col{display:none}
+  .board .col.active{display:block}
+  .grid2{grid-template-columns:1fr}
+  .strip{height:96px}
+  .strip h2{font-size:19px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<section id="boot" style="padding:40px;text-align:center;color:var(--ink-soft)">Đang tải…</section>
+
+<section id="login" class="hidden">
+  <form class="login-card" id="loginForm" autocomplete="on">
+    <img class="logo" src="assets/logo.jpg" alt="Tam Sinh Duyên">
+    <h1 id="loginTitle">Đăng nhập</h1>
+    <p id="loginSub">Dùng tài khoản do admin cấp.</p>
+    <div id="nameWrap" class="hidden"><label for="lName">Họ tên</label><input id="lName" autocomplete="name"></div>
+    <label for="lUser">Tên đăng nhập</label><input id="lUser" autocomplete="username" required>
+    <label for="lPass">Mật khẩu</label><input id="lPass" type="password" autocomplete="current-password" required>
+    <div class="err" id="loginErr"></div>
+    <button class="btn" style="width:100%;margin-top:6px" id="loginBtn">Đăng nhập</button>
+  </form>
+</section>
+
+<section id="app" class="hidden">
+  <aside class="side">
+    <img class="logo" src="assets/logo.jpg" alt="Tam Sinh Duyên">
+    <nav id="tabs">
+      <button data-view="write" aria-current="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/></svg><span>Viết bài nhanh</span></button>
+      <button data-view="board"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="5" height="16" rx="1"/><rect x="10" y="4" width="5" height="10" rx="1"/><rect x="17" y="4" width="4" height="13" rx="1"/></svg><span>Công việc</span></button>
+      <button data-view="templates"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/></svg><span>Mẫu bài viết</span></button>
+      <button data-view="accounts" id="tabAcc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M17 8v6M14 11h6"/></svg><span>Tài khoản</span></button>
+    </nav>
+    <div class="me"><b id="meName"></b><span class="role" id="meRole"></span><button class="btn ghost small" id="chgPass">Đổi mật khẩu</button><button class="btn ghost small" id="logout">Đăng xuất</button></div>
+  </aside>
+  <main>
+    <div id="viewWrite">
+      <div class="strip"><h2>Viết bài nhanh theo mẫu</h2></div>
+      <div class="two">
+        <div class="panel">
+          <label for="wTpl" style="margin-top:0">Mẫu bài viết</label>
+          <select id="wTpl"></select>
+          <p class="hint" id="wTplHint" style="font-size:13px;color:var(--ink-soft);margin:6px 0 0"></p>
+          <div id="wFields">
+            <div class="grid2">
+              <div><label for="wFrom">Ngày bắt đầu</label><input id="wFrom" type="date" required></div>
+              <div><label for="wTo">Ngày kết thúc (không bắt buộc)</label><input id="wTo" type="date"></div>
+            </div>
+            <label for="wReward">Phần thưởng mới (không bắt buộc)</label>
+            <textarea id="wReward" style="min-height:90px" placeholder="Để trống thì giữ nguyên phần thưởng như bài mẫu."></textarea>
+            <label style="display:flex;gap:8px;align-items:flex-start;font-weight:500;margin-top:14px;color:var(--ink)">
+              <input type="checkbox" id="wVary" style="width:auto;margin-top:4px">
+              <span>Viết format khác bài mẫu<br><span style="font-size:12px;color:var(--ink-soft)">Không tích: giữ y bố cục, câu chữ, emoji của bài mẫu, chỉ thay thời gian và thưởng. Tích: giữ nội dung chính nhưng trình bày và diễn đạt mới.</span></span>
+            </label>
+          </div>
+          <div class="row"><button class="btn" id="wGen">Viết bài</button><button type="button" class="btn ghost" id="wClear">Làm bài mới</button><button class="btn ghost hidden" id="wStop">Dừng</button><span class="thinking" id="wThinking"></span></div>
+          <div class="err" id="wErr"></div>
+          <div class="row" style="margin-top:14px"><label style="margin:0;display:flex;gap:8px;align-items:center;font-weight:500"><input type="checkbox" id="wSheetOn" style="width:auto"> Tạo kèm sheet hoạt động</label></div>
+        </div>
+        <div class="panel">
+          <label for="wPost" style="margin-top:0">Bài đăng</label>
+          <textarea id="wPost" style="min-height:260px" placeholder="Bài viết sẽ hiện ở đây."></textarea>
+          <button class="btn copybig" id="wCopy">Copy để đăng Facebook</button>
+          <canvas id="wCanvas" width="1200" height="630"></canvas>
+          <div class="grid2">
+            <div><label for="wHead">Tiêu đề trên ảnh</label><input id="wHead"></div>
+            <div><label for="wSub">Dòng phụ</label><input id="wSub"></div>
+          </div>
+          <div class="row"><button class="btn ghost small" id="wPng">Tải ảnh PNG</button><button class="btn ghost small" id="wToTask">Lưu vào bảng công việc</button></div>
+          <div id="wSheetBox" class="hidden">
+            <div class="tablewrap" id="wSheetWrap"></div>
+            <div class="row"><button class="btn ghost small" id="wXlsx">Tải file Excel</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="viewTemplates" class="hidden">
+      <div class="strip"><h2>Mẫu bài viết</h2><button class="btn" id="tNew">Thêm mẫu</button></div>
+      <div class="two">
+        <div class="tpl-list" id="tList"></div>
+        <form class="panel hidden" id="tForm">
+          <h4 style="margin:0;font:700 17px var(--serif)" id="tFormTitle">Mẫu mới</h4>
+          <label for="tName">Tên mẫu (loại sự kiện)</label><input id="tName" required placeholder="Ví dụ: Đua Top, Bảo trì, Giftcode, Server mới">
+          <div class="grid2">
+            <div><label for="tStyle">Phong cách</label><select id="tStyle"></select></div>
+            <div><label for="tLen">Độ dài</label><select id="tLen"></select></div>
+          </div>
+          <label for="tSample">Bài mẫu</label>
+          <textarea id="tSample" style="min-height:220px" placeholder="Dán một bài đã đăng mà bạn ưng ý, có đủ tên sự kiện, cách chơi và phần thưởng. Lần sau chỉ cần nhập ngày, AI giữ nguyên phần còn lại."></textarea>
+          <label for="tFixed">Luôn giữ nguyên (không bắt buộc)</label>
+          <textarea id="tFixed" style="min-height:70px" placeholder="Ví dụ: dòng cuối luôn là link tải game, hashtag #TamSinhDuyen #TSD"></textarea>
+          <label for="tHead">Tiêu đề ảnh mặc định (không bắt buộc)</label><input id="tHead" placeholder="Để trống thì AI tự đặt">
+          <div class="row"><button class="btn">Lưu mẫu</button><button type="button" class="btn ghost" id="tCancel">Hủy</button><button type="button" class="btn ghost hidden" id="tDel" style="margin-left:auto">Xóa mẫu</button></div>
+          <div class="err" id="tErr"></div>
+        </form>
+      </div>
+    </div>
+
+    <div id="viewBoard">
+      <div class="strip"><h2>Việc cần làm cho fanpage</h2><button class="btn" id="newTask">Tạo việc mới</button></div>
+      <div class="coltabs" id="colTabs"></div>
+      <div class="board" id="board"></div>
+    </div>
+    <div id="viewAccounts" class="hidden">
+      <div class="strip"><h2>Quản lý tài khoản</h2></div>
+      <div class="acc">
+        <h4 style="margin:0;font:700 17px var(--serif)">Cấp tài khoản mới</h4>
+        <form id="accForm" class="grid2">
+          <div><label for="aName">Họ tên</label><input id="aName" required></div>
+          <div><label for="aUser">Tên đăng nhập</label><input id="aUser" required pattern="[a-zA-Z0-9_.]{3,30}" title="3–30 ký tự: chữ không dấu, số, dấu chấm, gạch dưới"></div>
+          <div><label for="aPass">Mật khẩu</label><input id="aPass" type="text" required minlength="8"></div>
+          <div><label for="aRole">Vai trò</label><select id="aRole"><option value="member">Thành viên</option><option value="lead">Trưởng nhóm</option><option value="admin">Admin</option></select></div>
+          <div style="grid-column:1/-1" class="row"><button class="btn">Tạo tài khoản</button><span class="err" id="accErr"></span></div>
+        </form>
+        <div class="tablewrap" style="margin-top:18px"><table><thead><tr><th>Họ tên</th><th>Tên đăng nhập</th><th>Vai trò</th><th></th></tr></thead><tbody id="accRows"></tbody></table></div>
+      </div>
+    </div>
+  </main>
+</section>
+
+<dialog id="dlg">
+  <div class="dlg-head"><h3 id="dTitleHead">Công việc</h3><button class="btn ghost small" id="dClose">Đóng</button></div>
+  <div class="dlg-body">
+    <div class="grid2">
+      <div style="grid-column:1/-1"><label for="dTitle">Tên công việc</label><input id="dTitle" placeholder="Ví dụ: Bài đăng sự kiện Hoa Đào Tái Ngộ"></div>
+      <div><label for="dAssignee">Người phụ trách</label><select id="dAssignee"></select></div>
+      <div><label for="dDue">Hạn chót</label><input id="dDue" type="date"></div>
+    </div>
+    <label>Trạng thái</label>
+    <div class="status-flow" id="dStatus"></div>
+    <div class="err" id="dStatusErr"></div>
+
+    <div class="section">
+      <h4>Viết bài bằng AI</h4>
+      <p class="hint">Gõ yêu cầu ngắn, chọn phong cách. AI viết bài đăng, lập sheet hoạt động và gợi ý tiêu đề cho ảnh.</p>
+      <label for="dTpl">Theo mẫu</label><select id="dTpl"></select>
+      <label for="dReq">Yêu cầu / thông tin</label>
+      <textarea id="dReq" placeholder="Ví dụ: Viết bài giới thiệu hoạt động Đua Top Tình Duyên từ 1/10 đến 7/10, thưởng trang phục Đào Hoa Tiên Y"></textarea>
+      <div class="grid2">
+        <div><label for="dStyle">Phong cách</label>
+          <select id="dStyle">
+            <option>Ngắn gọn, rõ ý</option>
+            <option>Kiếm hiệp mạnh mẽ</option>
+            <option>Cổ phong lãng mạn</option>
+            <option>Hài hước, gần gũi</option>
+            <option>Thông báo trang trọng</option>
+          </select></div>
+        <div><label for="dLen">Độ dài</label>
+          <select id="dLen"><option value="ngắn (80–120 chữ)">Ngắn</option><option value="vừa (150–220 chữ)" selected>Vừa</option><option value="dài (250–350 chữ)">Dài</option></select></div>
+      </div>
+      <div class="row"><button class="btn" id="dGen">Viết bài</button><button class="btn ghost hidden" id="dStop">Dừng</button><span class="thinking" id="dThinking"></span></div>
+      <div class="err" id="dAiErr"></div>
+
+      <label for="dPost">Nội dung bài đăng (sửa trực tiếp được)</label>
+      <textarea id="dPost" style="min-height:200px"></textarea>
+      <div class="row"><button class="btn ghost small" id="dCopy">Sao chép để đăng Facebook</button></div>
+    </div>
+
+    <div class="section">
+      <h4>Sheet hoạt động</h4>
+      <p class="hint">Bảng do AI lập theo nội dung bài. Bấm vào ô để sửa.</p>
+      <div class="tablewrap" id="dSheetWrap"><p class="hint" style="padding:10px">Chưa có sheet. Bấm “Viết bài” để AI tạo.</p></div>
+      <div class="row"><button class="btn ghost small" id="dXlsx">Tải file Excel</button><button class="btn ghost small" id="dCsv">Tải CSV</button></div>
+    </div>
+
+    <div class="section">
+      <h4>Ảnh bài đăng</h4>
+      <p class="hint">Ảnh 1200×630 chuẩn Facebook, dùng artwork và logo của game.</p>
+      <div class="grid2">
+        <div><label for="dHeadline">Tiêu đề trên ảnh</label><input id="dHeadline"></div>
+        <div><label for="dSubline">Dòng phụ</label><input id="dSubline" placeholder="Ví dụ: 01/10 – 07/10"></div>
+      </div>
+      <canvas id="dCanvas" width="1200" height="630"></canvas>
+      <div class="row"><button class="btn ghost small" id="dPng">Tải ảnh PNG</button></div>
+    </div>
+
+    <div class="row" style="margin-top:20px;justify-content:space-between">
+      <button class="btn ghost" id="dDelete">Xóa việc</button>
+      <button class="btn" id="dSave">Lưu</button>
+    </div>
+  </div>
+</dialog>
+
+<script>
+const BG="assets/bg.jpg", LOGO="assets/logo.jpg";
+const STATUSES=[["todo","Chưa làm","#9A8FA8"],["doing","Đang làm","#B4661C"],["review","Chờ duyệt","#6A55B8"],["done","Hoàn thành","#2F7D5B"]];
+const ROLE_NAME={admin:"Admin",lead:"Trưởng nhóm",member:"Thành viên"};
+const $=s=>document.querySelector(s);
+const sample=true, downloads=true;
+let templates=[];
+const STYLES=["Ngắn gọn, rõ ý","Kiếm hiệp mạnh mẽ","Cổ phong lãng mạn","Hài hước, gần gũi","Thông báo trang trọng"];
+const LENS=[["ngắn (80–120 chữ)","Ngắn"],["vừa (150–220 chữ)","Vừa"],["dài (250–350 chữ)","Dài"]];
+let accounts=[], tasks=[], me=null, editing=null, sheet=null, abortCtl=null, mobileCol="todo";
+const bgImg=new Image(); bgImg.src=BG; const logoImg=new Image(); logoImg.src=LOGO;
+
+function toast(m){const t=document.createElement("div");t.className="toast";t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2400)}
+function esc(s){const d=document.createElement("div");d.textContent=s??"";return d.innerHTML}
+function can(action){ if(!me) return false; if(me.role==="admin") return true;
+  if(action==="approve"||action==="delete") return me.role==="lead"; return true; }
+
+/* ---------- Supabase ---------- */
+const CFG=window.APP_CONFIG||{};
+const sb=window.supabase&&CFG.SUPABASE_URL?window.supabase.createClient(CFG.SUPABASE_URL,CFG.SUPABASE_ANON_KEY):null;
+const emailOf=u=>u.toLowerCase()+"@"+(CFG.USER_DOMAIN||"tsd-app.com");
+const loaders={};
+function errMsg(e){return e?.message||String(e)}
+async function loadTable(name){const {data,error}=await sb.from(name).select("id,data,created_by");if(error)throw error;
+  return data.map(r=>({id:r.id,...(r.data||{}),createdBy:r.created_by}))}
+async function refresh(name){try{
+  if(name==="profiles"){const {data,error}=await sb.from("profiles").select("id,username,name,role");if(error)throw error;accounts=data;
+    if(me){const u=accounts.find(a=>a.id===me.id);if(u){me=u;renderShell()}}}
+  if(name==="tasks"){tasks=await loadTable("tasks");if(me)renderBoard()}
+  if(name==="templates"){templates=(await loadTable("templates")).sort((a,b)=>(a.name||"").localeCompare(b.name||"","vi"));if(me){renderTemplates();fillTplSelects()}}
+}catch(e){toast("Lỗi tải dữ liệu: "+errMsg(e))}}
+const db={
+  collection:name=>({async add(obj){const {data,error}=await sb.from(name).insert({data:obj}).select("id").single();if(error)throw error;refresh(name);return{id:data.id}}}),
+  doc:path=>{const [name,id]=path.split("/");return{
+    async set(obj){const {createdBy:_c,...clean}=obj;const {error}=await sb.from(name).update({data:clean}).eq("id",id);if(error)throw error;refresh(name)},
+    async update(patch){const {data:row,error:e1}=await sb.from(name).select("data").eq("id",id).single();if(e1)throw e1;
+      const {error}=await sb.from(name).update({data:{...row.data,...patch}}).eq("id",id);if(error)throw error;refresh(name)},
+    async delete(){const {error}=await sb.from(name).delete().eq("id",id);if(error)throw error;refresh(name)}}}};
+let aiToken=0;
+async function aiJson(prompt){const my=++aiToken;
+  const {data,error}=await sb.functions.invoke("write-post",{body:{prompt}});
+  if(my!==aiToken)throw {code:"cancelled"};
+  if(error){let m=error.message;try{const j=await error.context.json();m=j.error||m}catch(_){}throw {code:"ai_error",message:m}}
+  const txt=String(data?.text||"").replace(/```json|```/g,"").trim();const i=txt.indexOf("{"),j=txt.lastIndexOf("}");
+  try{return JSON.parse(txt.slice(i,j+1))}catch(e){throw {code:"bad_json",message:"AI trả về sai định dạng, bấm Viết bài để thử lại"}}}
+function cancelAi(){aiToken++}
+async function save(filename,data){const blob=data instanceof Blob?data:new Blob([data]);const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000)}
+
+/* ---------- boot ---------- */
+(async()=>{
+  if(!sb){$("#boot").textContent="Chưa cấu hình kết nối. Mở file config.js và điền SUPABASE_URL, SUPABASE_ANON_KEY.";return}
+  $("#boot").classList.add("hidden");
+  const {data:{session}}=await sb.auth.getSession();
+  if(session)await afterLogin(session.user);else showLogin();
+  sb.auth.onAuthStateChange((ev)=>{if(ev==="SIGNED_OUT"){me=null;showLogin()}});
+  sb.channel("app").on("postgres_changes",{event:"*",schema:"public"},p=>{if(me&&["tasks","templates","profiles"].includes(p.table))refresh(p.table)}).subscribe();
+})();
+async function afterLogin(user){
+  const {data,error}=await sb.from("profiles").select("id,username,name,role").eq("id",user.id).maybeSingle();
+  if(error||!data){$("#loginErr").textContent="Tài khoản chưa được cấp quyền dùng app. Liên hệ admin.";await sb.auth.signOut();showLogin();return}
+  me=data;await Promise.all([refresh("profiles"),refresh("tasks"),refresh("templates")]);enter()}
+function showLogin(){$("#app").classList.add("hidden");$("#login").classList.remove("hidden");$("#nameWrap").classList.add("hidden");$("#lName").required=false}
+$("#loginForm").onsubmit=async e=>{e.preventDefault();$("#loginErr").textContent="";$("#loginBtn").disabled=true;
+  const user=$("#lUser").value.trim().toLowerCase(),pass=$("#lPass").value;
+  const {data,error}=await sb.auth.signInWithPassword({email:emailOf(user),password:pass});
+  $("#loginBtn").disabled=false;
+  if(error){$("#loginErr").textContent="Sai tên đăng nhập hoặc mật khẩu.";return}
+  $("#lPass").value="";await afterLogin(data.user)};
+function enter(){$("#login").classList.add("hidden");$("#app").classList.remove("hidden");renderShell();renderBoard();renderTemplates();fillTplSelects();show("write");drawCard($("#wCanvas"),"","")}
+async function logout(){await sb.auth.signOut();me=null;showLogin()}
+$("#logout").onclick=logout;
+$("#chgPass").onclick=async()=>{const p=prompt("Nhập mật khẩu mới (ít nhất 8 ký tự):");if(!p)return;
+  if(p.length<8){toast("Mật khẩu cần ít nhất 8 ký tự");return}
+  const {error}=await sb.auth.updateUser({password:p});toast(error?"Không đổi được: "+error.message:"Đã đổi mật khẩu")};
+function renderShell(){$("#meName").textContent=me.name;$("#meRole").textContent=ROLE_NAME[me.role];
+  $("#tabAcc").classList.toggle("hidden",me.role!=="admin");if(me.role==="admin")renderAccounts()}
+$("#tabs").onclick=e=>{const b=e.target.closest("button");if(b)show(b.dataset.view)};
+const VIEWS={write:"#viewWrite",board:"#viewBoard",templates:"#viewTemplates",accounts:"#viewAccounts"};
+function show(v){if(v==="accounts"&&me.role!=="admin")v="write";
+  document.querySelectorAll("#tabs button").forEach(b=>b.setAttribute("aria-current",b.dataset.view===v));
+  for(const k in VIEWS)$(VIEWS[k]).classList.toggle("hidden",k!==v);scrollTo(0,0)}
+function fillStyleSelect(sel){sel.innerHTML=STYLES.map(x=>`<option>${esc(x)}</option>`).join("")}
+function fillLenSelect(sel){sel.innerHTML=LENS.map(([v,l])=>`<option value="${v}">${l}</option>`).join("");sel.value=LENS[1][0]}
+["#dStyle","#tStyle"].forEach(x=>fillStyleSelect($(x)));["#dLen","#tLen"].forEach(x=>fillLenSelect($(x)));
+function fillTplSelects(){
+  for(const id of ["#wTpl","#dTpl"]){const sel=$(id),cur=sel.value;
+    sel.innerHTML=(id==="#dTpl"?'<option value="">Không dùng mẫu</option>':"")+templates.map(t=>`<option value="${esc(t.id)}">${esc(t.name)}</option>`).join("");
+    if([...sel.options].some(o=>o.value===cur))sel.value=cur}
+  wTplHint()}
+
+/* ---------- accounts (admin) ---------- */
+async function adminCall(body){const {data,error}=await sb.functions.invoke("admin-users",{body});
+  if(error){let m=error.message;try{const j=await error.context.json();m=j.error||m}catch(_){}throw new Error(m)}return data}
+function renderAccounts(){$("#accRows").innerHTML=[...accounts].sort((a,b)=>a.name.localeCompare(b.name,"vi")).map(a=>
+  `<tr><td>${esc(a.name)}</td><td>${esc(a.username)}</td><td>${ROLE_NAME[a.role]}</td><td style="text-align:right;white-space:nowrap">${a.id===me.id?'<span class="hint">Bạn</span>':`<button class="btn ghost small" data-reset="${esc(a.id)}">Đặt lại mật khẩu</button> <button class="btn ghost small" data-del="${esc(a.id)}">Xóa</button>`}</td></tr>`).join("")}
+$("#accRows").onclick=async e=>{const del=e.target.dataset.del,rs=e.target.dataset.reset;const a=accounts.find(x=>x.id===(del||rs));if(!a)return;
+  try{ if(del){if(!confirm(`Xóa tài khoản ${a.name}?`))return;await adminCall({action:"delete",id:del});toast("Đã xóa tài khoản")}
+       if(rs){const p=prompt(`Mật khẩu mới cho ${a.name} (ít nhất 8 ký tự):`);if(!p)return;await adminCall({action:"reset",id:rs,password:p});toast("Đã đặt lại mật khẩu")}
+       refresh("profiles")}catch(err){toast("Không thực hiện được: "+errMsg(err))}};
+$("#accForm").onsubmit=async e=>{e.preventDefault();$("#accErr").textContent="";
+  const user=$("#aUser").value.trim().toLowerCase();
+  if(accounts.some(a=>a.username===user)){$("#accErr").textContent="Tên đăng nhập đã có người dùng.";return}
+  try{await adminCall({action:"create",username:user,email:emailOf(user),name:$("#aName").value.trim(),role:$("#aRole").value,password:$("#aPass").value});
+    e.target.reset();refresh("profiles");toast("Đã tạo tài khoản "+user)}catch(err){$("#accErr").textContent="Không tạo được: "+errMsg(err)}};
+
+/* ---------- board ---------- */
+function nameOf(id){return accounts.find(a=>a.id===id)?.name||"Chưa giao"}
+function renderBoard(){
+  const today=new Date().toISOString().slice(0,10);
+  $("#colTabs").innerHTML=STATUSES.map(([k,l])=>`<button class="btn ${k===mobileCol?'':'ghost'} small" data-col="${k}">${l} (${tasks.filter(t=>t.status===k).length})</button>`).join("");
+  $("#board").innerHTML=STATUSES.map(([k,l,c])=>{
+    const list=tasks.filter(t=>t.status===k).sort((a,b)=>(a.due||"9").localeCompare(b.due||"9"));
+    return `<div class="col ${k===mobileCol?'active':''}" data-status="${k}"><h3><span class="dot" style="background:${c}"></span>${l}<span class="n">${list.length}</span></h3>
+    ${list.map(t=>`<div class="task" draggable="true" data-id="${t.id}" style="border-left-color:${c}" tabindex="0">
+      <div class="t">${esc(t.title||"(Chưa đặt tên)")}</div>
+      <div class="meta"><span>${esc(nameOf(t.assignee))}</span>${t.due?`<span class="${t.due<today&&k!=='done'?'late':''}">Hạn ${t.due.split("-").reverse().join("/")}</span>`:""}${t.post?'<span class="pill">Có bài</span>':""}${t.sheetJson?'<span class="pill">Có sheet</span>':""}</div></div>`).join("")||'<p class="hint" style="font-size:13px;color:var(--ink-soft)">Trống</p>'}</div>`}).join("")}
+$("#colTabs").onclick=e=>{const c=e.target.dataset.col;if(c){mobileCol=c;renderBoard()}};
+$("#board").onclick=e=>{const t=e.target.closest(".task");if(t)openTask(t.dataset.id)};
+$("#board").onkeydown=e=>{const t=e.target.closest(".task");if(t&&e.key==="Enter")openTask(t.dataset.id)};
+$("#board").ondragstart=e=>{const t=e.target.closest(".task");if(t)e.dataTransfer.setData("text/plain",t.dataset.id)};
+$("#board").ondragover=e=>{const c=e.target.closest(".col");if(c){e.preventDefault();c.classList.add("drop")}};
+$("#board").ondragleave=e=>{const c=e.target.closest(".col");if(c)c.classList.remove("drop")};
+$("#board").ondrop=async e=>{const c=e.target.closest(".col");if(!c)return;e.preventDefault();c.classList.remove("drop");
+  const id=e.dataTransfer.getData("text/plain"),st=c.dataset.status,t=tasks.find(x=>x.id===id);if(!t||t.status===st)return;
+  if(st==="done"&&!can("approve")){toast("Chỉ Trưởng nhóm hoặc Admin được duyệt hoàn thành");return}
+  try{await db.doc("tasks/"+id).update({status:st,updated:Date.now()})}catch(err){toast("Không cập nhật được: "+err.message)}};
+$("#newTask").onclick=()=>openTask(null);
+
+/* ---------- task dialog ---------- */
+let curStatus="todo";
+function openTask(id){
+  const t=id?tasks.find(x=>x.id===id):{title:"",assignee:me.id,due:"",status:"todo",request:"",style:"Ngắn gọn, rõ ý",len:"vừa (150–220 chữ)",post:"",sheet:null,headline:"",subline:""};
+  editing=id; curStatus=t.status;
+  $("#dTitleHead").textContent=id?"Chi tiết công việc":"Tạo việc mới";
+  $("#dTitle").value=t.title||"";
+  $("#dAssignee").innerHTML=accounts.map(a=>`<option value="${esc(a.id)}">${esc(a.name)}</option>`).join("");
+  $("#dAssignee").value=t.assignee||me.id; $("#dDue").value=t.due||"";
+  $("#dTpl").value=t.templateId||""; $("#dReq").value=t.request||""; $("#dStyle").value=t.style||"Ngắn gọn, rõ ý"; $("#dLen").value=t.len||"vừa (150–220 chữ)";
+  $("#dPost").value=t.post||""; try{sheet=t.sheetJson?JSON.parse(t.sheetJson):null}catch(e){sheet=null} renderSheet();
+  $("#dHeadline").value=t.headline||""; $("#dSubline").value=t.subline||"";
+  $("#dDelete").classList.toggle("hidden",!id||!can("delete"));
+  $("#dAiErr").textContent="";$("#dStatusErr").textContent="";$("#dThinking").textContent="";
+  $("#dGen").classList.toggle("hidden",!sample);
+  $("#dXlsx").classList.toggle("hidden",!downloads);$("#dCsv").classList.toggle("hidden",!downloads);$("#dPng").classList.toggle("hidden",!downloads);
+  renderStatus(); $("#dlg").showModal(); drawImage();
+}
+function renderStatus(){$("#dStatus").innerHTML=STATUSES.map(([k,l])=>`<button type="button" data-s="${k}" aria-pressed="${k===curStatus}">${l}</button>`).join("")}
+$("#dStatus").onclick=e=>{const s=e.target.dataset.s;if(!s)return;
+  if(s==="done"&&!can("approve")){$("#dStatusErr").textContent="Chỉ Trưởng nhóm hoặc Admin được chuyển sang Hoàn thành.";return}
+  $("#dStatusErr").textContent="";curStatus=s;renderStatus()};
+$("#dClose").onclick=()=>{cancelAi();$("#dlg").close()};
+
+function collect(){return{title:$("#dTitle").value.trim()||"(Chưa đặt tên)",assignee:$("#dAssignee").value,due:$("#dDue").value,status:curStatus,
+  templateId:$("#dTpl").value,request:$("#dReq").value,style:$("#dStyle").value,len:$("#dLen").value,post:$("#dPost").value,sheetJson:sheet?JSON.stringify(sheet):"",
+  headline:$("#dHeadline").value,subline:$("#dSubline").value,updated:Date.now()}}
+$("#dSave").onclick=async()=>{const data=collect();
+  try{ if(editing) {const {id:_x,...old}=tasks.find(t=>t.id===editing)||{};await db.doc("tasks/"+editing).set({...old,...data})}
+       else { data.createdBy=me.id; data.created=Date.now(); const ref=await db.collection("tasks").add(data); editing=ref.id; }
+       toast("Đã lưu");$("#dlg").close()}catch(err){toast("Không lưu được: "+err.message)}};
+$("#dDelete").onclick=async()=>{if(!confirm("Xóa công việc này?"))return;
+  try{await db.doc("tasks/"+editing).delete();$("#dlg").close();toast("Đã xóa")}catch(err){toast("Không xóa được: "+err.message)}};
+
+/* ---------- AI ---------- */
+function buildPrompt(info,tpl,style,len,wantSheet){
+  const base=`Bạn là người viết nội dung fanpage Facebook cho game kiếm hiệp cổ trang "Tam Sinh Duyên" (tiếng Việt).`;
+  const body=tpl?`${base}
+Loại bài: ${tpl.name}. Phong cách: ${tpl.style}. Độ dài: ${tpl.len}.
+BÀI MẪU (giữ đúng bố cục, thứ tự các phần, cách xuống dòng, kiểu emoji, giọng văn và kiểu hashtag; chỉ thay nội dung bằng thông tin mới):
+"""${tpl.sample||"(không có bài mẫu, viết theo phong cách đã chọn)"}"""
+${tpl.fixed?`Các phần PHẢI giữ nguyên nguyên văn: """${tpl.fixed}"""`:""}
+THÔNG TIN MỚI cho lần này: """${info}"""
+Không dùng lại số liệu, ngày tháng, phần thưởng của bài mẫu. Thiếu thông tin nào thì ghi "[cần bổ sung]", không tự bịa.`
+  :`${base}
+Yêu cầu: """${info}"""
+Phong cách: ${style}. Độ dài: ${len}. Có xuống dòng, emoji vừa phải, kết thúc bằng 3–6 hashtag. Thiếu thông tin thì ghi "[cần bổ sung]", không bịa.`;
+  return body+`
+Trả về DUY NHẤT một JSON hợp lệ, không kèm chữ nào khác:
+{"post":"bài đăng hoàn chỉnh, dùng \\n để xuống dòng","headline":"tiêu đề ngắn cho ảnh, tối đa 8 chữ","subline":"dòng phụ cho ảnh (thời gian hoặc điểm nhấn), tối đa 10 chữ"${wantSheet?`,"sheet":{"columns":["..."],"rows":[["..."]]}`:""}}
+${wantSheet?`"sheet" là bảng kế hoạch triển khai hoạt động, chọn cột phù hợp (ví dụ Hạng mục, Nội dung chi tiết, Thời gian, Phần thưởng/Điều kiện, Ghi chú), 5–12 dòng.`:""}`}
+function normSheet(r){return r.sheet&&Array.isArray(r.sheet.columns)?{columns:r.sheet.columns.map(String),rows:(r.sheet.rows||[]).map(row=>r.sheet.columns.map((_,i)=>String((row||[])[i]??"")))}:null}
+function aiErrMsg(e){return {not_granted:"Bạn chưa cho phép dùng AI trên trang này.",cancelled:"Đã dừng."}[e.code]||("AI chưa viết được: "+(e.message||e.code)+".")}
+
+$("#dTpl").onchange=()=>{const t=templates.find(x=>x.id===$("#dTpl").value);if(t){$("#dStyle").value=t.style;$("#dLen").value=t.len}};
+$("#dGen").onclick=async()=>{
+  const req=$("#dReq").value.trim(); if(!req){$("#dAiErr").textContent="Hãy gõ yêu cầu trước khi bấm Viết bài.";return}
+  $("#dAiErr").textContent="";$("#dGen").disabled=true;$("#dStop").classList.remove("hidden");$("#dThinking").textContent="AI đang viết…";
+  abortCtl=new AbortController();
+  const tpl=templates.find(x=>x.id===$("#dTpl").value);
+  try{
+    const r=await aiJson(buildPrompt(req,tpl,$("#dStyle").value,$("#dLen").value,true));
+    if(r.post) $("#dPost").value=r.post;
+    $("#dHeadline").value=tpl?.headline||r.headline||$("#dHeadline").value;
+    if(r.subline) $("#dSubline").value=r.subline;
+    const sh=normSheet(r); if(sh){sheet=sh;renderSheet()}
+    if(!$("#dTitle").value.trim()&&r.headline)$("#dTitle").value=r.headline;
+    drawImage(); $("#dThinking").textContent="Xong. Kiểm tra lại rồi bấm Lưu.";
+  }catch(e){ $("#dThinking").textContent=""; $("#dAiErr").textContent=aiErrMsg(e);
+  }finally{$("#dGen").disabled=false;$("#dStop").classList.add("hidden");abortCtl=null}};
+
+/* ---------- quick write ---------- */
+let wSheet=null, wCtl=null;
+function wTplHint(){const t=templates.find(x=>x.id===$("#wTpl").value);
+  $("#wTplHint").textContent=templates.length===0?"Chưa có mẫu nào. Vào tab Mẫu bài viết để lưu mẫu đầu tiên.":t?`${t.style} · độ dài ${t.len.split(" ")[0]}${t.sample?" · có bài mẫu":""}`:"";
+  $("#wGen").disabled=templates.length===0||!sample}
+$("#wTpl").onchange=wTplHint;
+function fmtDT(v){if(!v)return"";const[d,t]=v.split("T");return d.split("-").reverse().join("/")+(t?" lúc "+t:"")}
+const W_FIELDS=["#wFrom","#wTo","#wReward"];
+function collectInfo(){const f=$("#wFrom").value,t=$("#wTo").value,r=$("#wReward").value.trim();
+  return [f?"Ngày bắt đầu: "+fmtDT(f):"",t?"Ngày kết thúc: "+fmtDT(t):"",r?"Phần thưởng mới:\n"+r:""].filter(Boolean).join("\n")}
+function quickPrompt(tpl,wantSheet){const f=fmtDT($("#wFrom").value),t=fmtDT($("#wTo").value),r=$("#wReward").value.trim(),vary=$("#wVary").checked;
+  return `Bạn là người viết nội dung fanpage Facebook cho game kiếm hiệp cổ trang "Tam Sinh Duyên" (tiếng Việt).
+Loại bài: ${tpl.name}. Phong cách: ${tpl.style}.
+BÀI MẪU:
+"""${tpl.sample||"(không có bài mẫu)"}"""
+${tpl.fixed?`Các phần PHẢI giữ nguyên nguyên văn: """${tpl.fixed}"""`:""}
+Nhiệm vụ: viết bài đăng mới cho lần tổ chức này, dựa trên NỘI DUNG CHÍNH của bài mẫu (tên sự kiện, cách chơi, điều kiện, thông tin khác giữ như bài mẫu).
+THỜI GIAN: ${t?`thay toàn bộ thời gian trong bài mẫu bằng "từ ${f} đến ${t}".`:`thay toàn bộ thời gian trong bài mẫu bằng ngày bắt đầu ${f}. CHỈ ghi ngày bắt đầu, TUYỆT ĐỐI không ghi ngày kết thúc hay thời hạn kết thúc.`}
+PHẦN THƯỞNG: ${r?`thay phần thưởng trong bài mẫu bằng danh sách mới sau, giữ cách trình bày phần thưởng của bài mẫu:\n"""${r}"""`:"giữ nguyên phần thưởng như bài mẫu, không thêm bớt."}
+FORMAT: ${vary?"giữ đủ các thông tin trên nhưng viết lại với câu mở đầu, cách diễn đạt, bố cục và emoji MỚI, khác rõ rệt bài mẫu; vẫn đúng phong cách "+tpl.style+", vẫn giữ các phần bắt buộc giữ nguyên và kiểu hashtag.":"giữ y hệt bố cục, thứ tự, câu chữ, cách xuống dòng, emoji và hashtag của bài mẫu; chỉ thay thời gian và phần thưởng (nếu có)."}
+Trả về DUY NHẤT một JSON hợp lệ, không kèm chữ nào khác:
+{"post":"bài đăng hoàn chỉnh, dùng \\n để xuống dòng","headline":"tiêu đề ngắn cho ảnh, tối đa 8 chữ","subline":"${t?"khoảng thời gian dạng dd/mm – dd/mm":"ngày bắt đầu, ví dụ Từ dd/mm"}"${wantSheet?`,"sheet":{"columns":["..."],"rows":[["..."]]}`:""}}
+${wantSheet?`"sheet" là bảng kế hoạch triển khai hoạt động (ví dụ cột Hạng mục, Nội dung chi tiết, Thời gian, Phần thưởng/Điều kiện, Ghi chú), 5–12 dòng.`:""}`}
+$("#wClear").onclick=()=>{W_FIELDS.forEach(id=>$(id).value="");$("#wVary").checked=false;$("#wPost").value="";$("#wHead").value="";$("#wSub").value="";wSheet=null;renderWSheet();
+  $("#wThinking").textContent="";$("#wErr").textContent="";drawCard($("#wCanvas"),"","");$("#wFrom").focus()};
+$("#wGen").onclick=async()=>{const tpl=templates.find(x=>x.id===$("#wTpl").value);
+  if(!tpl){$("#wErr").textContent="Hãy chọn một mẫu.";return}
+  if(!$("#wFrom").value){$("#wErr").textContent="Hãy chọn ngày bắt đầu.";return}
+  if($("#wTo").value&&$("#wTo").value<$("#wFrom").value){$("#wErr").textContent="Ngày kết thúc đang sớm hơn ngày bắt đầu.";return}
+  $("#wErr").textContent="";$("#wGen").disabled=true;$("#wStop").classList.remove("hidden");$("#wThinking").textContent="AI đang viết theo mẫu…";
+  wCtl=new AbortController(); const wantSheet=$("#wSheetOn").checked;
+  try{const r=await aiJson(quickPrompt(tpl,wantSheet));
+    $("#wPost").value=r.post||"";$("#wHead").value=tpl.headline||r.headline||"";$("#wSub").value=r.subline||"";
+    wSheet=wantSheet?normSheet(r):null;renderWSheet();drawCard($("#wCanvas"),$("#wHead").value,$("#wSub").value);
+    $("#wThinking").textContent="Xong. Bấm Copy rồi dán lên fanpage.";
+  }catch(e){$("#wThinking").textContent="";$("#wErr").textContent=aiErrMsg(e)}
+  finally{$("#wGen").disabled=false;$("#wStop").classList.add("hidden");wCtl=null}};
+$("#wStop").onclick=()=>{cancelAi();wCtl?.abort()};
+$("#wCopy").onclick=()=>copyText($("#wPost"));
+async function copyText(el){if(!el.value.trim()){toast("Chưa có nội dung để copy");return}
+  try{await navigator.clipboard.writeText(el.value);toast("Đã copy, dán lên Facebook là xong")}catch(e){el.select();toast("Đã bôi đen, nhấn Ctrl+C (hoặc giữ để sao chép)")}}
+$("#wHead").oninput=$("#wSub").oninput=()=>drawCard($("#wCanvas"),$("#wHead").value,$("#wSub").value);
+$("#wPng").onclick=()=>$("#wCanvas").toBlob(b=>save(fname("png",$("#wHead").value),b),"image/png");
+function renderWSheet(){$("#wSheetBox").classList.toggle("hidden",!wSheet);if(!wSheet)return;
+  $("#wSheetWrap").innerHTML=`<table><thead><tr>${wSheet.columns.map(c=>`<th>${esc(c)}</th>`).join("")}</tr></thead><tbody>${wSheet.rows.map((r,i)=>`<tr>${r.map((c,j)=>`<td contenteditable="true" data-r="${i}" data-c="${j}">${esc(c)}</td>`).join("")}</tr>`).join("")}</tbody></table>`}
+$("#wSheetWrap").oninput=e=>{const td=e.target.closest("td");if(td&&wSheet)wSheet.rows[td.dataset.r][td.dataset.c]=td.textContent};
+$("#wXlsx").onclick=()=>exportXlsx(wSheet,$("#wHead").value);
+$("#wToTask").onclick=async()=>{if(!$("#wPost").value.trim()){toast("Chưa có bài để lưu");return}
+  const tpl=templates.find(x=>x.id===$("#wTpl").value);
+  try{await db.collection("tasks").add({title:(tpl?.name?tpl.name+" "+fmtDT($("#wFrom").value).slice(0,5):"")||$("#wHead").value||"Bài đăng",assignee:me.id,due:"",status:"review",request:collectInfo(),
+    style:tpl?.style||STYLES[0],len:tpl?.len||LENS[1][0],post:$("#wPost").value,sheetJson:wSheet?JSON.stringify(wSheet):"",headline:$("#wHead").value,subline:$("#wSub").value,
+    templateId:tpl?.id||"",createdBy:me.id,created:Date.now(),updated:Date.now()});toast("Đã lưu vào cột Chờ duyệt")}catch(e){toast("Không lưu được: "+e.message)}};
+
+/* ---------- templates ---------- */
+let tEditing=null;
+function renderTemplates(){$("#tList").innerHTML=templates.length?templates.map(t=>`<div class="tpl"><div class="n">${esc(t.name)}</div>
+  <div class="m">${esc(t.style)} · ${esc(t.len.split(" ")[0])}</div><pre>${esc(t.sample||"(chưa có bài mẫu)")}</pre>
+  <div class="row"><button class="btn small" data-use="${esc(t.id)}">Viết bài với mẫu này</button><button class="btn ghost small" data-edit="${esc(t.id)}">Sửa</button></div></div>`).join("")
+  :'<div class="empty">Chưa có mẫu nào. Bấm “Thêm mẫu”, đặt tên loại sự kiện và dán một bài bạn ưng ý. Từ lần sau chỉ cần gõ thông tin mới.</div>'}
+$("#tList").onclick=e=>{const u=e.target.dataset.use,ed=e.target.dataset.edit;
+  if(u){$("#wTpl").value=u;wTplHint();show("write");$("#wFrom").focus()}
+  if(ed)openTplForm(templates.find(t=>t.id===ed))};
+$("#tNew").onclick=()=>openTplForm(null);
+function openTplForm(t){tEditing=t?.id||null;$("#tForm").classList.remove("hidden");$("#tErr").textContent="";
+  $("#tFormTitle").textContent=t?"Sửa mẫu":"Mẫu mới";$("#tName").value=t?.name||"";$("#tStyle").value=t?.style||STYLES[0];
+  $("#tLen").value=t?.len||LENS[1][0];$("#tSample").value=t?.sample||"";$("#tFixed").value=t?.fixed||"";$("#tHead").value=t?.headline||"";
+  $("#tDel").classList.toggle("hidden",!t||!can("delete"));$("#tName").focus()}
+$("#tCancel").onclick=()=>$("#tForm").classList.add("hidden");
+$("#tForm").onsubmit=async e=>{e.preventDefault();
+  const data={name:$("#tName").value.trim(),style:$("#tStyle").value,len:$("#tLen").value,sample:$("#tSample").value.trim(),fixed:$("#tFixed").value.trim(),headline:$("#tHead").value.trim(),updated:Date.now(),by:me.id};
+  try{if(tEditing)await db.doc("templates/"+tEditing).set(data);else{const r=await db.collection("templates").add(data);tEditing=r.id}
+    $("#tForm").classList.add("hidden");toast("Đã lưu mẫu “"+data.name+"”")}catch(err){$("#tErr").textContent="Không lưu được: "+err.message}};
+$("#tDel").onclick=async()=>{if(!confirm("Xóa mẫu này?"))return;try{await db.doc("templates/"+tEditing).delete();$("#tForm").classList.add("hidden");toast("Đã xóa mẫu")}catch(e){toast("Không xóa được: "+e.message)}};
+
+$("#dStop").onclick=()=>{cancelAi();abortCtl?.abort()};
+$("#dCopy").onclick=()=>copyText($("#dPost"));
+
+/* ---------- sheet ---------- */
+function renderSheet(){const w=$("#dSheetWrap");
+  if(!sheet){w.innerHTML='<p class="hint" style="padding:10px">Chưa có sheet. Bấm “Viết bài” để AI tạo.</p>';return}
+  w.innerHTML=`<table><thead><tr>${sheet.columns.map(c=>`<th>${esc(c)}</th>`).join("")}</tr></thead><tbody>${sheet.rows.map((r,i)=>`<tr>${r.map((c,j)=>`<td contenteditable="true" data-r="${i}" data-c="${j}">${esc(c)}</td>`).join("")}</tr>`).join("")}</tbody></table>`}
+$("#dSheetWrap").oninput=e=>{const td=e.target.closest("td");if(td&&sheet)sheet.rows[td.dataset.r][td.dataset.c]=td.textContent};
+function fname(ext,base){return (((base??$("#dTitle").value).trim()||"tam-sinh-duyen").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/g,"d").replace(/Đ/g,"D").replace(/[^a-zA-Z0-9]+/g,"-").replace(/^-|-$/g,"").toLowerCase()||"bai-dang")+"."+ext}
+
+$("#dCsv").onclick=()=>{if(!sheet){toast("Chưa có sheet để tải");return}
+  const q=v=>'"'+String(v).replace(/"/g,'""')+'"';
+  save(fname("csv"),"\ufeff"+[sheet.columns,...sheet.rows].map(r=>r.map(q).join(",")).join("\r\n"))};
+function exportXlsx(sh,base){if(!sh){toast("Chưa có sheet để tải");return}
+  if(!window.XLSX){toast("Chưa tải được thư viện Excel, hãy thử lại");return}
+  const ws=XLSX.utils.aoa_to_sheet([sh.columns,...sh.rows]);ws["!cols"]=sh.columns.map(()=>({wch:28}));
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"Hoat dong");
+  save(fname("xlsx",base),new Uint8Array(XLSX.write(wb,{type:"array",bookType:"xlsx"})))}
+$("#dXlsx").onclick=()=>exportXlsx(sheet);
+
+/* ---------- image ---------- */
+function wrap(ctx,text,maxW){const words=text.split(/\s+/);const lines=[];let line="";
+  for(const w of words){const t=line?line+" "+w:w;if(ctx.measureText(t).width>maxW&&line){lines.push(line);line=w}else line=t}
+  if(line)lines.push(line);return lines}
+function drawImage(){drawCard($("#dCanvas"),$("#dHeadline").value,$("#dSubline").value)}
+function drawCard(cv,headIn,subIn){const ctx=cv.getContext("2d");const W=1200,H=630;
+  const draw=()=>{ctx.clearRect(0,0,W,H);
+    const s=Math.max(W/bgImg.width,H/bgImg.height),iw=bgImg.width*s,ih=bgImg.height*s;ctx.drawImage(bgImg,(W-iw)/2,(H-ih)*0.45,iw,ih);
+    const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,"rgba(30,12,28,0)");g.addColorStop(.45,"rgba(30,12,28,.05)");g.addColorStop(1,"rgba(30,12,28,.85)");ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+    ctx.save();ctx.beginPath();ctx.roundRect(W-210,24,180,150,16);ctx.clip();ctx.drawImage(logoImg,W-210,24,180,150);ctx.restore();
+    const head=(headIn||"").trim()||"Tiêu đề bài đăng",sub=(subIn||"").trim();
+    ctx.font='700 64px "Noto Serif", Georgia, serif';ctx.fillStyle="#fff";ctx.shadowColor="rgba(0,0,0,.6)";ctx.shadowBlur=14;
+    const lines=wrap(ctx,head,W-120).slice(0,3);let y=H-60-(sub?54:0)-(lines.length-1)*76;
+    lines.forEach(l=>{ctx.fillText(l,60,y);y+=76});
+    if(sub){ctx.font='600 30px "Be Vietnam Pro", system-ui, sans-serif';ctx.fillStyle="#F9C9D6";ctx.fillText(sub,62,H-56)}
+    ctx.shadowBlur=0;ctx.fillStyle="#C2244A";ctx.fillRect(60,H-30,120,5)};
+  if(bgImg.complete&&logoImg.complete)draw();else{bgImg.addEventListener("load",()=>logoImg.complete&&draw());logoImg.addEventListener("load",()=>bgImg.complete&&draw())}
+  document.fonts?.ready.then(draw)}
+$("#dHeadline").oninput=drawImage;$("#dSubline").oninput=drawImage;
+$("#dPng").onclick=()=>$("#dCanvas").toBlob(b=>save(fname("png"),b),"image/png");
+</script>
+</body>
+</html>
