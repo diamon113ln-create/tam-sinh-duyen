@@ -49,4 +49,6 @@ Làm lần lượt từ trên xuống. Tổng thời gian khoảng 30–45 phút
 - **Màn hình báo "Chưa cấu hình kết nối"**: kiểm tra lại `config.js`.
 - **Đăng nhập báo "chưa được cấp quyền"**: tài khoản có trong Users nhưng chưa chạy lệnh insert ở bước A4.
 - **Viết bài báo lỗi khóa API**: kiểm tra Secret `ANTHROPIC_API_KEY` và credit trong tài khoản Anthropic.
+- **AI trả về sai định dạng / bị cắt giữa chừng**: deploy lại hàm `write-post` bằng file mới nhất trong repo.
+- Muốn AI suy nghĩ kỹ hơn (tốn token hơn): thêm Secret `AI_EFFORT` = `medium` hoặc `high` (mặc định `low`).
 - Muốn đổi model AI: thêm Secret `AI_MODEL` (mặc định `claude-sonnet-5`). Danh sách model: https://docs.claude.com/en/docs/about-claude/models/overview
