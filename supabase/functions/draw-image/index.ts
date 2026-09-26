@@ -10,9 +10,11 @@ const cors = {
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...cors, "Content-Type": "application/json" } });
 
-// Rules added to every picture: the web lays the title, time and logo on top afterwards
-const STYLE = "Style: Chinese wuxia / xianxia mobile game key art, semi-realistic anime illustration, cinematic lighting, rich detail, epic atmosphere, wide 3:2 composition. " +
-  "Absolutely NO text, letters, numbers, logos, watermarks or UI anywhere in the image. Keep the central area slightly calmer so a big title can be placed over it later.";
+// Rules added to every picture
+const BASE = "Style: Chinese wuxia / xianxia mobile game key art, semi-realistic anime illustration, cinematic lighting, rich detail, epic atmosphere. ";
+const NO_TEXT = "Absolutely NO text, letters, numbers, logos, watermarks or UI anywhere in the image. Keep the central area slightly calmer so a big title can be placed over it later.";
+const WITH_TEXT = "Render every quoted Vietnamese text EXACTLY as written, letter by letter with all diacritics correct, crisp and legible; do not add any other text, watermark or UI.";
+const SIZES = ["1536x1024", "1024x1024", "1024x1536"];
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
@@ -28,36 +30,38 @@ Deno.serve(async (req) => {
     const key = Deno.env.get("OPENAI_API_KEY");
     if (!key) return json({ error: "Chưa cài OPENAI_API_KEY trong Secrets của Supabase" }, 500);
 
-    const { prompt, ref, name, tags } = await req.json();
+    const { prompt, ref, refs, name, tags, text, size } = await req.json();
     if (!prompt || typeof prompt !== "string" || prompt.length > 4000) return json({ error: "Đề bài vẽ không hợp lệ" }, 400);
     const model = Deno.env.get("OPENAI_IMAGE_MODEL") || "gpt-image-1";
     const quality = Deno.env.get("OPENAI_IMAGE_QUALITY") || "medium";
-    const fullPrompt = `${prompt}\n\n${STYLE}`;
+    const dim = SIZES.includes(size) ? size : "1536x1024";
+    const fullPrompt = `${prompt}\n\n${BASE}${text ? WITH_TEXT : NO_TEXT}`;
 
-    // With a reference picture the model keeps the game's look (characters, costume, palette)
-    let r: Response;
-    let refBlob: Blob | null = null;
-    if (typeof ref === "string" && /^https:\/\//.test(ref)) {
-      const got = await fetch(ref);
+    // Reference pictures (logo, style sample) are sent along so the model reuses them
+    const urls = (Array.isArray(refs) ? refs : ref ? [ref] : []).filter((u: unknown) => typeof u === "string" && /^https:\/\//.test(u)).slice(0, 3);
+    const blobs: Blob[] = [];
+    for (const u of urls) {
+      const got = await fetch(u);
       const type = got.headers.get("content-type") || "";
       if (got.ok && type.startsWith("image/")) {
         const b = await got.blob();
-        if (b.size <= 8_000_000) refBlob = b;
+        if (b.size <= 8_000_000) blobs.push(b);
       }
     }
-    if (refBlob) {
+    let r: Response;
+    if (blobs.length) {
       const form = new FormData();
       form.append("model", model);
-      form.append("prompt", "Use the reference image only as a guide for drawing style and costume design; follow the colours described below; paint a NEW scene. " + fullPrompt);
-      form.append("size", "1536x1024");
+      form.append("prompt", "The attached image(s) are references: keep the logo exactly as given where the brief asks for it; otherwise paint a NEW scene. " + fullPrompt);
+      form.append("size", dim);
       form.append("quality", quality);
-      form.append("image", new File([refBlob], "ref." + (refBlob.type.split("/")[1] || "png"), { type: refBlob.type }));
+      blobs.forEach((b, i) => form.append("image[]", new File([b], `ref${i}.` + (b.type.split("/")[1] || "png"), { type: b.type })));
       r = await fetch("https://api.openai.com/v1/images/edits", { method: "POST", headers: { Authorization: `Bearer ${key}` }, body: form });
     } else {
       r = await fetch("https://api.openai.com/v1/images/generations", {
         method: "POST",
         headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ model, prompt: fullPrompt, size: "1536x1024", quality, n: 1 }),
+        body: JSON.stringify({ model, prompt: fullPrompt, size: dim, quality, n: 1 }),
       });
     }
     const out = await r.json();
@@ -74,7 +78,7 @@ Deno.serve(async (req) => {
     const data = {
       name: String(name || "Tranh AI vẽ").slice(0, 60), desc: prompt.slice(0, 300),
       tags: ["ai vẽ", ...(Array.isArray(tags) ? tags.map((t: unknown) => String(t).toLowerCase()).slice(0, 10) : [])],
-      mood: "", event: "", focus: { x: 0.5, y: 0.45 }, logo: null, path, url: publicUrl, w: 1536, h: 1024, addedBy: user.id, created: Date.now(), ai: true,
+      mood: "", event: "", focus: { x: 0.5, y: 0.45 }, logo: null, path, url: publicUrl, w: +dim.split("x")[0], h: +dim.split("x")[1], addedBy: user.id, created: Date.now(), ai: true,
     };
     const ins = await admin.from("artworks").insert({ data, created_by: user.id }).select("id").single();
     if (ins.error) return json({ error: "Không ghi được vào kho: " + ins.error.message }, 500);

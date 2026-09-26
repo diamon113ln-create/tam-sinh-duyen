@@ -348,7 +348,23 @@ aside.side .logo{cursor:pointer}
           <label for="wPost" style="margin-top:0">Bài đăng</label>
           <textarea id="wPost" style="min-height:260px" placeholder="Bài viết sẽ hiện ở đây."></textarea>
           <button class="btn copybig" id="wCopy">Copy để đăng Facebook</button>
-          <div class="imgmaker">
+          <div class="imgmaker" id="aiImg">
+            <h4>Ảnh bài đăng (AI vẽ)</h4>
+            <p class="hint" style="margin:0;font-size:13px;color:var(--ink-soft)">AI đọc bài và motip bên dưới để vẽ trọn ảnh như ChatGPT. Ảnh vẽ xong tự lưu vào Kho ảnh.</p>
+            <label for="wMotifSel">Motip đã lưu</label><select id="wMotifSel"></select>
+            <label for="wMotif">Mô tả motip để AI vẽ</label>
+            <textarea id="wMotif" style="min-height:150px" placeholder="Ví dụ:&#10;🎨 Tông xanh rêu – be – đen – ánh vàng&#10;⚔️ 2 nhân vật nam nữ cầm kiếm, tạo hình ngầu&#10;👥 Nền chiến trường cực đông người, làm mờ phía sau&#10;🌫️ Mực loang, khói, ánh sáng vàng, tre/lá&#10;🏔️ Poster kiếm hiệp điện ảnh, bố cục hoành tráng"></textarea>
+            <div class="grid2">
+              <div><label for="wSize">Khổ ảnh</label><select id="wSize"><option value="1536x1024">Ngang (bài đăng, banner)</option><option value="1024x1024">Vuông</option><option value="1024x1536">Dọc (story, poster dọc)</option></select></div>
+              <div style="display:flex;flex-direction:column;justify-content:flex-end;gap:4px">
+                <label style="display:flex;gap:8px;align-items:center;font-weight:500;margin:0"><input type="checkbox" id="wText" style="width:auto" checked> Viết tiêu đề, slogan, thời gian lên ảnh</label>
+                <label style="display:flex;gap:8px;align-items:center;font-weight:500;margin:0"><input type="checkbox" id="wLogo" style="width:auto" checked> Gắn logo Tam Sinh Duyên</label>
+              </div>
+            </div>
+            <div class="row"><button type="button" class="btn" id="wAiDraw">AI vẽ ảnh</button><button type="button" class="btn ghost" id="wMotifSave">Lưu motip này</button></div>
+            <div id="wAiOut" style="margin-top:10px"></div>
+          </div>
+          <div class="imgmaker hidden">
           <h4>Tạo ảnh</h4>
           <p class="hint" style="margin:0;font-size:13px;color:var(--ink-soft)">Chọn ảnh bên dưới: tiêu đề, slogan, thời gian và logo (nếu ảnh chưa có) được gắn tự động. Bấm Viết bài để AI chọn ảnh và viết slogan.</p>
           <div class="picker" id="wPicker"></div>
@@ -382,7 +398,7 @@ aside.side .logo{cursor:pointer}
             <label for="wHi">Điểm nổi bật (mỗi dòng một ý)</label><textarea id="wHi" style="min-height:80px"></textarea>
           </details>
           </div>
-          <div class="row"><button class="btn ghost small" id="wPng">Tải ảnh PNG</button><button class="btn ghost small" id="wToTask">Lưu vào bảng công việc</button></div>
+          <div class="row"><button class="btn ghost small hidden" id="wPng">Tải ảnh PNG</button><button class="btn ghost small" id="wToTask">Lưu vào bảng công việc</button></div>
           <div id="wSheetBox" class="hidden">
             <div class="tablewrap" id="wSheetWrap"></div>
             <div class="row"><button class="btn ghost small" id="wXlsx">Tải file Excel</button></div>
@@ -837,8 +853,7 @@ function quickPrompt(tpl,wantSheet,sh){const f=fmtDT(fromVal()),t=fmtDT($("#wTo"
 """${sheetText(sh)}"""`:"";
   const time=f?(t?`dùng thời gian "từ ${f} đến ${t}".`:`dùng ngày bắt đầu ${f}. CHỈ ghi ngày bắt đầu, TUYỆT ĐỐI không ghi ngày kết thúc hay thời hạn kết thúc.`):"lấy đúng thời gian ghi trong DỮ LIỆU SHEET.";
   const tail=`Trả về DUY NHẤT một JSON hợp lệ, không kèm chữ nào khác:
-{"post":"bài đăng hoàn chỉnh, dùng \\n để xuống dòng","headline":"tiêu đề ngắn cho ảnh, tối đa 8 chữ","subline":"${t?"khoảng thời gian dạng dd/mm – dd/mm":f?"ngày bắt đầu, ví dụ Từ dd/mm":"thời gian ngắn gọn theo sheet, ví dụ 20:00 · 09/09"}",${imgSpecJson($("#wFmt").value)}${wantSheet?`,"sheet":{"columns":["..."],"rows":[["..."]]}`:""}}
-${imgSpecGuide($("#wFmt").value)}
+{"post":"bài đăng hoàn chỉnh, dùng \\n để xuống dòng","headline":"tiêu đề ngắn cho ảnh, tối đa 8 chữ","subline":"${t?"khoảng thời gian dạng dd/mm – dd/mm":f?"ngày bắt đầu, ví dụ Từ dd/mm":"thời gian ngắn gọn theo sheet, ví dụ 20:00 · 09/09"}"${wantSheet?`,"sheet":{"columns":["..."],"rows":[["..."]]}`:""}}
 ${wantSheet?`"sheet" là bảng kế hoạch triển khai hoạt động (ví dụ cột Hạng mục, Nội dung chi tiết, Thời gian, Phần thưởng/Điều kiện, Ghi chú), 5–12 dòng.`:""}`;
   if(!tpl)return `Bạn là người viết nội dung fanpage Facebook cho game kiếm hiệp cổ trang "Tam Sinh Duyên" (tiếng Việt).
 ${data}
@@ -870,7 +885,7 @@ ${artworks.length?`- art: chọn MỘT mã tranh hợp nội dung nhất trong K
 - tone: chỉnh màu tranh cho hợp không khí (none giữ nguyên, warm ấm, cool lạnh, fire rực lửa, night đêm, gold vàng kim). flip: true để lật ngang tranh cho mới lạ. zoom: 1.0–1.4 để phóng vào chủ thể.
 KHO TRANH (mã | tên | nhãn | không khí | sự kiện):
 ${artCatalog()}`:""}`}
-$("#wClear").onclick=()=>{W_FIELDS.forEach(id=>$(id).value="");$("#wTime").value="";$("#wSub").value="";wSubTouched=false;wArtPicked=null;$("#wVary").checked=false;$("#wPost").value="";$("#wHead").value="";$("#wSub").value="";wSheet=null;renderWSheet();
+$("#wClear").onclick=()=>{W_FIELDS.forEach(id=>$(id).value="");$("#wTime").value="";$("#wSub").value="";wSubTouched=false;wArtPicked=null;showAiImg("");$("#wVary").checked=false;$("#wPost").value="";$("#wHead").value="";$("#wSub").value="";wSheet=null;renderWSheet();
   $("#wThinking").textContent="";$("#wErr").textContent="";setWImg(null);$("#wFrom").focus()};
 $("#wGen").onclick=async()=>{const tpl=templates.find(x=>x.id===$("#wTpl").value),sh=savedSheets.find(x=>x.id===$("#wSrc").value);
   if(!tpl&&!sh){$("#wErr").textContent="Hãy chọn một mẫu bài hoặc một sheet.";return}
@@ -928,7 +943,7 @@ $("#stList").onclick=e=>{if(e.target.id==="stSeed"){openStyle(STYLE_EXAMPLE);stE
 $("#stForm").onsubmit=async e=>{e.preventDefault();const data={kind:"artstyle",name:$("#stName").value.trim(),desc:$("#stDesc").value.trim(),format:$("#stFmt").value,accent:$("#stAccent").value,font:$("#stFont").value,updated:Date.now(),by:me.id};
   try{if(stEditing)await db.doc("templates/"+stEditing).set(data);else stEditing=(await db.collection("templates").add(data)).id;$("#stForm").classList.add("hidden");toast("Đã lưu phong cách “"+data.name+"”")}catch(err){toast("Không lưu được: "+errMsg(err))}};
 $("#stDel").onclick=async()=>{if(!stEditing||!confirm("Xóa phong cách này?"))return;try{await db.doc("templates/"+stEditing).delete();$("#stForm").classList.add("hidden");toast("Đã xóa phong cách")}catch(err){toast("Không xóa được: "+errMsg(err))}};
-function fillStyleSel(){const cur=$("#wStyle").value;$("#wStyle").innerHTML='<option value="">Không dùng (AI tự nghĩ theo bài)</option>'+artStyles.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join("");
+function fillStyleSel(){fillMotifSel();const cur=$("#wStyle").value;$("#wStyle").innerHTML='<option value="">Không dùng (AI tự nghĩ theo bài)</option>'+artStyles.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join("");
   if(artStyles.some(x=>x.id===cur))$("#wStyle").value=cur;styleHint()}
 function curStyle(){return artStyles.find(x=>x.id===$("#wStyle").value)||null}
 function styleHint(){const x=curStyle();$("#wStyleHint").textContent=x?x.desc:(artStyles.length?"":"Chưa có phong cách vẽ. Vào Format ảnh → Phong cách vẽ AI để tạo.")}
@@ -937,6 +952,46 @@ function applyStyle(){const x=curStyle();styleHint();if(!x)return;
   if(x.format){$("#wFmt").value=x.format}if(x.font&&TITLE_FONTS[x.font]){$("#wFont").value=x.font}
   if(!wImg)wImg=normImg({format:x.format||"poster"});wImg.format=x.format||wImg.format;if(ACCENTS[x.accent])wImg.accent=x.accent;$("#wAccent").value=wImg.accent;redrawW()}
 $("#wStyle").onchange=applyStyle;
+
+/* ---------- Ảnh bài đăng: AI paints the whole picture from the post + a motif ---------- */
+let wAiUrl="";
+function fillMotifSel(){const cur=$("#wMotifSel").value;$("#wMotifSel").innerHTML='<option value="">Tự nhập / không dùng</option>'+artStyles.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join("");
+  if(artStyles.some(x=>x.id===cur))$("#wMotifSel").value=cur}
+$("#wMotifSel").onchange=()=>{const x=artStyles.find(y=>y.id===$("#wMotifSel").value);if(x)$("#wMotif").value=x.desc||""};
+$("#wMotifSave").onclick=async()=>{const desc=$("#wMotif").value.trim();if(!desc){toast("Nhập mô tả motip trước");return}
+  const name=prompt("Đặt tên cho motip này:",artStyles.find(y=>y.id===$("#wMotifSel").value)?.name||"");if(!name)return;
+  try{const r=await db.collection("templates").add({kind:"artstyle",name:name.trim(),desc,format:"poster",accent:"moss",font:"charm",updated:Date.now(),by:me.id});
+    await refresh("templates");$("#wMotifSel").value=r.id;toast("Đã lưu motip “"+name.trim()+"”")}catch(e){toast("Không lưu được: "+errMsg(e))}};
+function showAiImg(url){wAiUrl=url;$("#wAiOut").innerHTML=url?`<img src="${esc(url)}" alt="Ảnh AI vẽ" style="width:100%;border-radius:12px;border:1px solid var(--line);display:block">
+  <div class="row"><button type="button" class="btn ghost small" id="wAiDl">Tải ảnh</button><a class="btn ghost small" href="${esc(url)}" target="_blank" rel="noopener">Mở ảnh gốc</a></div>`:""}
+$("#wAiOut").onclick=async e=>{if(e.target.id!=="wAiDl"||!wAiUrl)return;
+  try{const b=await (await fetch(wAiUrl)).blob();save(fname("png",$("#wHead").value||"anh-bai-dang"),b)}catch(err){window.open(wAiUrl,"_blank")}};
+$("#wAiDraw").onclick=async()=>{const post=$("#wPost").value.trim(),motif=$("#wMotif").value.trim();
+  if(!post){toast("Bấm Viết bài trước, AI sẽ dựa vào bài để vẽ ảnh");return}
+  if(!artReady){toast("Cần bật Kho ảnh trước (chạy supabase/kho-anh.sql)");return}
+  const withText=$("#wText").checked,withLogo=$("#wLogo").checked,time=timeText(),btn=$("#wAiDraw");
+  btn.disabled=true;$("#wErr").textContent="";$("#wThinking").textContent="AI đang lên ý tưởng ảnh…";
+  try{const r=await aiJson(`Bạn là art director thiết kế ảnh bài đăng Facebook cho game kiếm hiệp cổ trang "Tam Sinh Duyên". Viết đề bài cho mô hình AI vẽ ảnh (GPT Image) để vẽ TRỌN VẸN ảnh bài đăng.
+BÀI ĐĂNG:
+"""${post.slice(0,4000)}"""
+${motif?`MOTIP BẮT BUỘC (theo sát từng ý: màu sắc, nhân vật, nền, hiệu ứng, bố cục, vị trí chữ):
+"""${motif.slice(0,2000)}"""`:"Chưa có motip: tự chọn phong cách poster kiếm hiệp điện ảnh hợp với nội dung bài."}
+${withText?`CHỮ TRÊN ẢNH (tiếng Việt, phải đúng từng chữ và dấu):
+- "title": tiêu đề lớn 2–5 chữ lấy từ tên sự kiện trong bài, font thư pháp/brush nổi bật ở trung tâm.
+- "slogan": slogan ngắn giật gân tối đa 8 chữ.
+- Thời gian: "${time||"lấy thời gian ngắn gọn từ bài"}".
+Trong đề bài tiếng Anh, chép NGUYÊN VĂN các chữ tiếng Việt trong ngoặc kép, mô tả rõ vị trí và kiểu chữ; không thêm chữ nào khác.`:"Ảnh KHÔNG có chữ nào."}
+${withLogo?`LOGO: ảnh tham chiếu đầu tiên là logo Tam Sinh Duyên; yêu cầu đặt đúng logo đó (không vẽ lại, không đổi chữ) ở phía trên chính giữa.`:"Không vẽ logo."}
+Trả về DUY NHẤT một JSON hợp lệ: {"prompt":"đề bài TIẾNG ANH 80–180 từ","title":"tiêu đề","slogan":"slogan","name":"tên ảnh tiếng Việt 2–5 chữ","tags":["4–8 nhãn tiếng Việt viết thường"]}`);
+    if(!r.prompt)throw {code:"bad_json",message:"AI chưa viết được đề bài vẽ, bấm lại để thử"};
+    if(r.title&&!$("#wHead").value.trim())$("#wHead").value=r.title;
+    $("#wThinking").textContent=`AI đang vẽ ảnh${r.title?` “${r.title}”`:""}, thường mất 30–90 giây…`;
+    const refs=withLogo?[new URL(LOGO,location.href).href]:[];
+    const {data,error}=await sb.functions.invoke("draw-image",{body:{prompt:String(r.prompt),refs,text:withText,size:$("#wSize").value,name:r.name||r.title,tags:r.tags}});
+    if(error)throw {code:"ai_error",message:await fnErr(error,"draw-image")};
+    showAiImg(data.url);loadArt();$("#wThinking").textContent="Đã vẽ xong (đã lưu vào Kho ảnh). Chưa ưng thì bấm AI vẽ ảnh lần nữa.";
+  }catch(e){$("#wThinking").textContent="";$("#wErr").textContent=e.code==="bad_json"?e.message:e.code==="ai_error"?"AI chưa vẽ được: "+e.message:aiErrMsg(e)}
+  finally{btn.disabled=false}};
 
 /* AI paints a new background: Claude writes the English brief, the draw-image function paints it (OpenAI) and files it in Kho ảnh */
 $("#wDraw").onclick=async()=>{const post=$("#wPost").value.trim(),head=$("#wHead").value.trim();
@@ -995,7 +1050,7 @@ $("#wXlsx").onclick=()=>exportXlsx(wSheet,$("#wHead").value);
 $("#wToTask").onclick=async()=>{if(!$("#wPost").value.trim()){toast("Chưa có bài để lưu");return}
   const tpl=templates.find(x=>x.id===$("#wTpl").value);
   try{await db.collection("tasks").add({title:(tpl?.name?tpl.name+" "+fmtDT(fromVal()).slice(0,5):"")||$("#wHead").value||"Bài đăng",assignee:me.id,due:"",status:"review",request:collectInfo(),
-    style:tpl?.style||STYLES[0],len:tpl?.len||LENS[1][0],post:$("#wPost").value,sheetJson:wSheet?JSON.stringify(wSheet):"",headline:$("#wHead").value,subline:$("#wSub").value,
+    style:tpl?.style||STYLES[0],len:tpl?.len||LENS[1][0],post:$("#wPost").value,sheetJson:wSheet?JSON.stringify(wSheet):"",headline:$("#wHead").value,subline:$("#wSub").value,imageUrl:wAiUrl,
     templateId:tpl?.id||"",createdBy:me.id,created:Date.now(),updated:Date.now()});toast("Đã lưu vào cột Chờ duyệt")}catch(e){toast("Không lưu được: "+e.message)}};
 
 /* ---------- templates ---------- */
