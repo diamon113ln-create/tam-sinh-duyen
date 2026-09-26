@@ -815,9 +815,9 @@ function imgSpecGuide(fmt){return `"image" là thiết kế ảnh bìa 1200×630
 - slogan: một câu slogan cổ phong, gây hứng thú, tối đa 10 chữ, không lặp lại tiêu đề (ví dụ "Tứ Linh thức tỉnh – anh hùng tụ hội").
 - tag: 1–3 chữ IN HOA gợi không khí (ví dụ SĂN BOSS, QUÀ HOT, BẢO TRÌ).
 - highlights: 2–4 ý rất ngắn (tối đa 6 chữ), lấy từ phần thưởng hoặc điểm hấp dẫn CÓ TRONG bài, không bịa.
-- badge.big: tối đa 5 ký tự nổi bật (ví dụ x2, TOP1, 50%, 21:15); badge.small: tối đa 2 chữ giải thích.
+- badge.big: tối đa 5 ký tự nổi bật (ví dụ x2, TOP1, 50%, 21:15); badge.small: tối đa 2 chữ giải thích. Riêng format poster: badge.small là nhãn (ví dụ "Máy chủ"), badge.big là giá trị ngắn (ví dụ "Thánh Long").
 - accent (màu nhấn), focus (vùng tranh nền: nam = nhân vật nam, nu = nhân vật nữ, canh = phong cảnh, doi = cả đôi), motif (hiệu ứng: hoa đào, mây, sao lấp lánh, lửa) chọn hợp không khí hoạt động: chiến đấu/Boss hợp ember + lua, lễ hội/tình duyên hợp crimson hoặc violet + hoa, khuyến mãi hợp gold + sao, bảo trì/thông báo hợp azure + may. Được phá lệ nếu thấy hợp hơn.
-${fmt==="auto"?`- format: classic (thông báo chung), reward (nhiều phần thưởng), badge (có con số nổi bật), ribbon (nhấn mạnh mốc thời gian), minimal (trang trọng). Chọn cái hợp nhất.`:""}
+${fmt==="auto"?`- format: classic (thông báo chung), reward (nhiều phần thưởng), badge (có con số nổi bật), ribbon (nhấn mạnh mốc thời gian), minimal (trang trọng), poster (sự kiện lớn: tiêu đề thư pháp vàng giữa ảnh như banner game; highlights thành dải khẩu hiệu, badge.small + badge.big thành khung nhỏ kiểu "Máy chủ: Thánh Long"). Chọn cái hợp nhất.`:""}
 ${artworks.length?`- art: chọn MỘT mã tranh hợp nội dung nhất trong KHO TRANH dưới đây (ưu tiên tranh có sự kiện trùng tên; nếu không có tranh hợp thì để ""); khi đó bỏ qua focus.
 - tone: chỉnh màu tranh cho hợp không khí (none giữ nguyên, warm ấm, cool lạnh, fire rực lửa, night đêm, gold vàng kim). flip: true để lật ngang tranh cho mới lạ. zoom: 1.0–1.4 để phóng vào chủ thể.
 KHO TRANH (mã | tên | nhãn | không khí | sự kiện):
@@ -1010,6 +1010,7 @@ const IMG_FORMATS=[
   {id:"reward",name:"Bảng thưởng",desc:"Tranh bên trái, khung phần thưởng bên phải. Hợp sự kiện có quà."},
   {id:"badge",name:"Huy hiệu",desc:"Huy hiệu tròn nổi bật con số (x2, TOP 1, 50%). Hợp khuyến mãi, đua top."},
   {id:"ribbon",name:"Dải lụa",desc:"Dải màu ngang giữa ảnh kèm ô ngày giờ. Hợp mốc thời gian, bảo trì, server mới."},
+  {id:"poster",name:"Áp phích",desc:"Tiêu đề thư pháp vàng lớn giữa ảnh trên nền vệt bút lông, dải khẩu hiệu, khung thời gian và máy chủ. Hợp sự kiện lớn."},
   {id:"minimal",name:"Tối giản",desc:"Nền mờ, chữ căn giữa, viền vàng mảnh. Hợp tin trang trọng."}];
 const ACCENTS={crimson:["Đỏ son","#C2244A","#F9C9D6"],gold:["Vàng kim","#C9973F","#FBE3B0"],jade:["Ngọc bích","#2E8B6E","#BFEBDC"],
   violet:["Tím","#6A55B8","#DCD3FA"],azure:["Lam","#2F6FB0","#CFE3F7"],ember:["Cam lửa","#D2582A","#FBD2BF"]};
@@ -1019,7 +1020,7 @@ function rng(seed){let a=seed>>>0||1;return()=>{a+=0x6D2B79F5;let t=a;t=Math.imu
 function normImg(x,fmt){x=x||{};const pick=(v,list,d)=>list.includes(v)?v:d;
   return {format:pick(x.format,IMG_FORMATS.map(f=>f.id),fmt||"classic"),tag:String(x.tag||"").slice(0,24),slogan:String(x.slogan||"").slice(0,80),font:pick(x.font,Object.keys(TITLE_FONTS),defFont()),
     highlights:(Array.isArray(x.highlights)?x.highlights:[]).map(String).filter(Boolean).slice(0,4),
-    badge:{big:String(x.badge?.big||"").slice(0,6),small:String(x.badge?.small||"").slice(0,18)},
+    badge:{big:String(x.badge?.big||"").slice(0,16),small:String(x.badge?.small||"").slice(0,18)},
     accent:pick(x.accent,Object.keys(ACCENTS),"crimson"),focus:pick(x.focus,Object.keys(FOCUS),"doi"),
     motif:pick(x.motif,MOTIFS,"hoa"),seed:x.seed||Math.floor(Math.random()*1e9),
     art:artById(x.art)?.id||"",tone:pick(x.tone,Object.keys(TONES),"none"),flip:x.flip===true,zoom:Math.min(1.4,Math.max(1,Number(x.zoom)||1))}}
@@ -1071,6 +1072,63 @@ function shade(ctx,x,y,w,h,stops,vertical){const g=vertical===false?ctx.createLi
   stops.forEach(([o,c])=>g.addColorStop(o,c));ctx.fillStyle=g;ctx.fillRect(x,y,w,h)}
 function slogan(ctx,text,x,y,maxW,size,color){if(!text)return;const t=fitText(ctx,"“"+text+"”",maxW,Math.round(size*TS*1.05),Math.round(size*.7),TW===700?400:TW,TF);
   ctx.save();ctx.shadowColor="rgba(0,0,0,.55)";ctx.shadowBlur=10;ctx.fillStyle=color;ctx.fillText(t,x,y);ctx.restore()}
+/* Event poster: gold calligraphy title on a brush-stroke band, tagline ribbon, time and server plaques */
+function shadeHex(hex,k){const n=parseInt(hex.slice(1),16),c=[n>>16,n>>8&255,n&255].map(v=>Math.round(v*k));return `rgb(${c.join(",")})`}
+function plaque(ctx,x,y,w,h,fill){const c=Math.min(18,h/2.5);ctx.save();ctx.beginPath();
+  ctx.moveTo(x+c,y);ctx.lineTo(x+w-c,y);ctx.lineTo(x+w,y+h/2);ctx.lineTo(x+w-c,y+h);ctx.lineTo(x+c,y+h);ctx.lineTo(x,y+h/2);ctx.closePath();
+  ctx.fillStyle=fill;ctx.shadowColor="rgba(0,0,0,.6)";ctx.shadowBlur=16;ctx.fill();ctx.shadowBlur=0;
+  const g=ctx.createLinearGradient(x,y,x,y+h);g.addColorStop(0,"#FFE9A8");g.addColorStop(.5,"#D9A441");g.addColorStop(1,"#8C5A14");ctx.strokeStyle=g;ctx.lineWidth=3;ctx.stroke();
+  ctx.beginPath();ctx.moveTo(x+c+6,y+5);ctx.lineTo(x+w-c-6,y+5);ctx.lineTo(x+w-7,y+h/2);ctx.lineTo(x+w-c-6,y+h-5);ctx.lineTo(x+c+6,y+h-5);ctx.lineTo(x+7,y+h/2);ctx.closePath();
+  ctx.strokeStyle="rgba(255,225,150,.35)";ctx.lineWidth=1;ctx.stroke();ctx.restore()}
+function goldText(ctx,text,x,y,size){const g=ctx.createLinearGradient(0,y-size,0,y+size*.15);g.addColorStop(0,"#FFF6CF");g.addColorStop(.45,"#F2C65A");g.addColorStop(.75,"#C98A25");g.addColorStop(1,"#FFE08A");
+  ctx.save();ctx.lineJoin="round";ctx.shadowColor="rgba(255,190,70,.55)";ctx.shadowBlur=22;ctx.strokeStyle="#2B1805";ctx.lineWidth=Math.max(6,size*.09);ctx.strokeText(text,x,y);
+  ctx.shadowBlur=0;ctx.fillStyle=g;ctx.fillText(text,x,y);ctx.restore()}
+/* ragged ink band: jittered top/bottom edges, tapered tips, dry-brush streaks */
+function brushBand(ctx,w,h,color,rand){
+  /* three overlapping ink passes with rough edges and frayed ends */
+  for(let k=0;k<3;k++){const hh=h*(k?.62+rand()*.2:1),oy=k?(rand()-.5)*h*.35:0,x0=-w/2-(k?rand()*50:20),x1=w/2+(k?rand()*60:30),n=28;
+    ctx.beginPath();ctx.moveTo(x0,oy-hh/2);
+    for(let i=1;i<=n;i++)ctx.lineTo(x0+(x1-x0)*i/n,oy-hh/2+(rand()-.5)*8);
+    for(let j=0;j<6;j++){const yy=oy-hh/2+hh*(j+.5)/6;ctx.lineTo(x1+rand()*55,yy-hh/14);ctx.lineTo(x1-rand()*10,yy+hh/12)}
+    for(let i=n;i>=0;i--)ctx.lineTo(x0+(x1-x0)*i/n,oy+hh/2+(rand()-.5)*8);
+    for(let j=5;j>=0;j--){const yy=oy-hh/2+hh*(j+.5)/6;ctx.lineTo(x0-rand()*45,yy+hh/14);ctx.lineTo(x0+rand()*10,yy-hh/12)}
+    ctx.closePath();ctx.globalAlpha=k?.8:.95;ctx.fillStyle=k===1?"rgba(0,0,0,.85)":color;ctx.shadowColor="rgba(0,0,0,.5)";ctx.shadowBlur=k?0:24;ctx.fill()}
+  ctx.globalAlpha=1;ctx.shadowBlur=0;
+  for(let i=0;i<50;i++){const y=(rand()-.5)*h*.95,xa=-w/2+rand()*w*.5,xb=xa+w*(.2+rand()*.6);ctx.strokeStyle=rand()<.55?"rgba(0,0,0,.35)":"rgba(255,255,255,.08)";
+    ctx.lineWidth=1+rand()*2.5;ctx.beginPath();ctx.moveTo(xa,y);ctx.bezierCurveTo(xa+(xb-xa)*.3,y+(rand()-.5)*5,xa+(xb-xa)*.7,y+(rand()-.5)*5,xb,y+(rand()-.5)*4);ctx.stroke()}
+  for(let i=0;i<14;i++){const x=(rand()<.5?-1:1)*(w/2+20+rand()*80),y=(rand()-.5)*h*.8;ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,y,1.5+rand()*4.5,0,Math.PI*2);ctx.fill()}}
+/* two lines split where they come out closest in width */
+function balance2(ctx,text){const w=text.split(/\s+/);if(w.length<2)return [text];let best=null;
+  for(let i=1;i<w.length;i++){const a=w.slice(0,i).join(" "),b=w.slice(i).join(" "),m=Math.max(ctx.measureText(a).width,ctx.measureText(b).width);if(!best||m<best[0])best=[m,[a,b]]}
+  return best[1]}
+function drawPoster(ctx,W,H,d,artLogo,ac,acl,rand,head,sub){
+  ctx.save();ctx.globalCompositeOperation="soft-light";ctx.fillStyle="rgba(255,200,90,.35)";ctx.fillRect(0,0,W,H);ctx.restore();
+  const v=ctx.createRadialGradient(W/2,H/2,H*.35,W/2,H/2,W*.62);v.addColorStop(0,"rgba(0,0,0,0)");v.addColorStop(1,"rgba(10,5,0,.72)");ctx.fillStyle=v;ctx.fillRect(0,0,W,H);
+  motif(ctx,W,H,"lua",rand);motif(ctx,W,H,"sao",rand,[W*.2,H*.15,W*.8,H*.7]);
+  logo(ctx,W/2-58,12,116);const logoBottom=12+116*logoImg.height/logoImg.width;
+  /* measure the plaques first so the title gets whatever height is left */
+  const tagline=(d.highlights.length?d.highlights.join(" – "):d.slogan).toUpperCase();
+  const small=d.badge.small&&d.badge.big?`${d.badge.small.toUpperCase()}: ${d.badge.big.toUpperCase()}`:(d.tag||"");
+  const plH=(tagline?52:0)+(sub?88:0)+(small?48:0),avail=H-18-plH-logoBottom-24;
+  ctx.textAlign="center";const cap=Math.min(118*TS,avail/2.15);
+  let t=fitLines(ctx,head,W*.72,2,Math.round(cap),Math.round(Math.min(cap,58*TS)),TW,TF);
+  if(t.lines.length===1){const c1=Math.min(128*TS,avail/1.25);t=fitLines(ctx,head,W*.8,1,Math.round(c1),Math.round(Math.min(c1,58*TS)),TW,TF)}
+  if(t.lines.length===2&&!t.lines[1].endsWith("…")){ctx.font=`${TW} ${t.size}px ${TF}`;t.lines=balance2(ctx,head)}
+  const lh=t.size*.98,blockH=t.lines.length*lh,top=logoBottom+14+(avail-blockH)/2;
+  ctx.save();ctx.translate(W/2,top+blockH/2);ctx.rotate(-.035);
+  const bandW=Math.min(W*.9,Math.max(...t.lines.map(l=>ctx.measureText(l).width))+120);
+  brushBand(ctx,bandW,blockH+36,shadeHex(ac,.3),rand);
+  let y=-blockH/2+lh*.8;ctx.font=`${TW} ${t.size}px ${TF}`;t.lines.forEach(l=>{goldText(ctx,l,0,y,t.size);y+=lh});ctx.restore();
+  let py=top+blockH+26;
+  if(tagline){ctx.font=`700 22px ${SANS}`;const tx=fitText(ctx,tagline,W*.62,22,15,700,SANS),tw=ctx.measureText(tx).width+70;
+    plaque(ctx,W/2-tw/2,py,tw,40,"rgba(12,18,14,.9)");ctx.fillStyle="#F6E7C1";ctx.fillText(tx,W/2,py+27);py+=52}
+  if(sub){const tx=fitText(ctx,sub.toUpperCase(),W*.46,36,22,700,SANS),tf=ctx.font,tw=Math.max(ctx.measureText(tx).width+150,300),x=W/2-tw/2;
+    plaque(ctx,x,py,tw,76,"rgba(12,18,14,.92)");const ix=x+44,iy=py+22;ctx.strokeStyle="#F2C65A";ctx.lineWidth=3;ctx.strokeRect(ix,iy+4,30,28);ctx.beginPath();ctx.moveTo(ix,iy+13);ctx.lineTo(ix+30,iy+13);
+    ctx.moveTo(ix+8,iy);ctx.lineTo(ix+8,iy+8);ctx.moveTo(ix+22,iy);ctx.lineTo(ix+22,iy+8);ctx.stroke();ctx.fillStyle="#F2C65A";for(let r=0;r<2;r++)for(let c=0;c<3;c++)ctx.fillRect(ix+5+c*8,iy+17+r*7,5,4);
+    ctx.textAlign="left";ctx.font=`700 17px ${SANS}`;ctx.fillStyle="#F6E7C1";ctx.fillText("THỜI GIAN:",ix+46,py+27);
+    ctx.font=tf;ctx.fillStyle="#fff";ctx.fillText(tx,ix+46,py+63);ctx.textAlign="center";py+=88}
+  if(small){ctx.font=`700 22px ${SANS}`;const tx=fitText(ctx,small,W*.4,22,15,700,SANS),tw=ctx.measureText(tx).width+90;plaque(ctx,W/2-tw/2,py,tw,40,"rgba(12,18,14,.9)");ctx.fillStyle="#F2C65A";ctx.fillText(tx,W/2,py+28)}
+  ctx.textAlign="left"}
 function renderDesign(ctx,W,H,d){titleFont(d.font);const [ ,ac,acl]=ACCENTS[d.accent],rand=rng(d.seed);const head=d.headline||"Tiêu đề bài đăng",sub=d.subline||"";
   ctx.clearRect(0,0,W,H);ctx.textAlign="left";ctx.shadowBlur=0;
   const glow=()=>{ctx.shadowColor="rgba(0,0,0,.6)";ctx.shadowBlur=14},noglow=()=>{ctx.shadowBlur=0};
@@ -1119,6 +1177,7 @@ function renderDesign(ctx,W,H,d){titleFont(d.font);const [ ,ac,acl]=ACCENTS[d.ac
     const t=fitLines(ctx,head,W-360,2,Math.round(50*TS),Math.round(32*TS),TW,TF);glow();ctx.fillStyle="#fff";let y=by+(t.lines.length>1?2:40);t.lines.forEach(l=>{y+=t.size;ctx.fillText(l,300,y);y+=2});noglow();
     if(sub){const tx=fitText(ctx,sub,W-340,24,18,600,SANS);ctx.fillStyle="#fff";ctx.fillText(tx,300,by+bh-16)}
     if(d.highlights.length){ctx.font=`600 24px ${SANS}`;glow();ctx.fillStyle="#fff";ctx.fillText(joinFit(ctx,d.highlights,"  ✦  ",W-120),60,H-30);noglow()}return}
+  if(d.format==="poster"){drawPoster(ctx,W,H,d,artLogo,ac,acl,rand,head,sub);return}
   /* classic */
   shade(ctx,0,0,W,H,[[0,"rgba(30,12,28,0)"],[.45,"rgba(30,12,28,.05)"],[1,"rgba(30,12,28,.88)"]]);if(!artLogo)logo(ctx,W-210,24,180);
   if(d.tag)pill(ctx,d.tag,60,40,ac);
@@ -1196,8 +1255,8 @@ $("#artForm").onsubmit=async e=>{if(e.submitter?.value!=="save"||!artEditing)ret
 /* ---------- image formats tab ---------- */
 const FMT_KEY="tsd.imgfmt";
 function defFmt(){try{return localStorage.getItem(FMT_KEY)||"auto"}catch(e){return "auto"}}
-const FMT_SAMPLE={headline:"Săn Boss Tứ Linh",subline:"21:15 · 09/09/2026",tag:"SỰ KIỆN",highlights:["Hộp Quà Tứ Linh","Nguyên bảo x500","Danh hiệu Đồ Long"],badge:{big:"x2",small:"Phần thưởng"}};
-const FMT_DEMO={classic:["crimson","doi","hoa"],reward:["gold","nam","sao"],badge:["ember","nu","lua"],ribbon:["azure","canh","may"],minimal:["violet","doi","sao"]};
+const FMT_SAMPLE={headline:"Tống Liêu Đại Chiến",subline:"21:15 · 09/09/2026",tag:"SỰ KIỆN",highlights:["Hộp Quà Tứ Linh","Nguyên bảo x500","Danh hiệu Đồ Long"],badge:{big:"x2",small:"Phần thưởng"}};
+const FMT_DEMO={classic:["crimson","doi","hoa"],reward:["gold","nam","sao"],badge:["ember","nu","lua"],ribbon:["azure","canh","may"],minimal:["violet","doi","sao"],poster:["jade","doi","lua"]};
 function renderFormats(){const cur=defFmt();
   $("#fmtGrid").innerHTML=`<div class="fmt" data-fmt="auto" aria-current="${cur==="auto"}"><div class="auto-art">✦ AI tự chọn format ✦<br><span style="font:500 14px var(--sans)">phù hợp nhất với từng bài</span></div><div class="b"><h4>AI tự chọn${cur==="auto"?'<span class="cur">Mặc định</span>':""}</h4><p>Mỗi bài AI chọn một trong các format bên cạnh cho hợp nội dung.</p><div class="row" style="margin:0"><button class="btn small" data-set="auto">Đặt làm mặc định</button></div></div></div>`+
     IMG_FORMATS.map(f=>`<div class="fmt" data-fmt="${f.id}" aria-current="${cur===f.id}"><canvas width="1200" height="630" data-prev="${f.id}"></canvas><div class="b"><h4>${f.name}${cur===f.id?'<span class="cur">Mặc định</span>':""}</h4><p>${f.desc}</p><div class="row" style="margin:0"><button class="btn small" data-set="${f.id}">Đặt làm mặc định</button><button class="btn ghost small" data-try="${f.id}">Viết bài với format này</button></div></div></div>`).join("");
