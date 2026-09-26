@@ -160,6 +160,20 @@ details.imgmore summary{cursor:pointer;font-weight:600;font-size:13px;color:var(
 .picker button[aria-pressed="true"]{border-color:var(--crimson)}
 .picker .add{display:grid;place-items:center;aspect-ratio:auto;font-size:13px;font-weight:600;color:var(--ink-soft);border:2px dashed var(--line)}
 
+/* Image viewer */
+#imgView{width:min(1200px,96vw);max-height:94vh;background:#140b16;color:#F3E9F1;padding:0}
+#imgView::backdrop{background:rgba(10,5,12,.82)}
+#imgView .v-body{position:relative;display:grid;place-items:center;padding:10px;min-height:200px}
+#imgView .v-body img{max-width:100%;max-height:74vh;object-fit:contain;display:block;border-radius:8px;cursor:zoom-out;user-select:auto;-webkit-user-drag:auto}
+#imgView .v-nav{position:absolute;top:50%;transform:translateY(-50%);border:0;border-radius:50%;width:44px;height:44px;background:rgba(255,255,255,.14);color:#fff;font-size:24px;cursor:pointer}
+#imgView .v-nav:hover{background:rgba(255,255,255,.28)}
+#imgView .v-prev{left:14px}#imgView .v-next{right:14px}
+#imgView .v-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 16px 14px;border-top:1px solid rgba(255,255,255,.1)}
+#imgView .v-bar b{flex:1;min-width:140px;font:700 18px var(--callig)}
+#imgView .v-bar .hint{font-size:12px;color:#BBADC4;width:100%}
+#imgView .btn.ghost{color:#F3E9F1;border-color:rgba(255,255,255,.25)}
+.art img{cursor:zoom-in}
+
 /* Saved sheets */
 .saved{display:grid;gap:8px;margin-top:8px}
 .saved .it{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-left:4px solid var(--crimson);border-radius:10px;padding:8px 10px;background:var(--mist)}
@@ -576,6 +590,12 @@ aside.side .logo{cursor:pointer}
       <button class="btn" id="dSave">Lưu</button>
     </div>
   </div>
+</dialog>
+
+<dialog id="imgView" aria-label="Xem ảnh">
+  <div class="v-body"><button class="v-nav v-prev" id="vPrev" aria-label="Ảnh trước">‹</button><img id="vImg" alt=""><button class="v-nav v-next" id="vNext" aria-label="Ảnh sau">›</button></div>
+  <div class="v-bar"><b id="vName"></b><button class="btn small" id="vCopy">Copy ảnh</button><button class="btn ghost small" id="vDl">Tải</button><a class="btn ghost small" id="vOpen" target="_blank" rel="noopener">Mở tab mới</a><button class="btn ghost small" id="vClose">Đóng</button>
+    <span class="hint">Mẹo: chuột phải vào ảnh → Sao chép hình ảnh. Phím ← → để chuyển ảnh, Esc để đóng.</span></div>
 </dialog>
 
 <dialog id="artDlg">
@@ -1410,6 +1430,17 @@ function drawCard(cv,headIn,subIn,spec){const ctx=cv.getContext("2d");const d={.
   Promise.all([w,400].map(x=>document.fonts?.load(`${x} 40px "${f}"`,txt).catch(()=>{}))).then(draw);document.fonts?.ready.then(draw)}
 function defFont(){try{return localStorage.getItem("tsd.font")||"charm"}catch(e){return "charm"}}
 
+/* ---------- image viewer (Kho ảnh, Ảnh hoạt động) ---------- */
+let vList=[],vIdx=0;
+function viewImages(list,i){vList=list;vIdx=i;showV();if(!$("#imgView").open)$("#imgView").showModal()}
+function showV(){const a=vList[vIdx];if(!a)return;$("#vImg").src=a.url;$("#vImg").alt=a.name||"";$("#vName").textContent=`${a.name||"Ảnh"}  (${vIdx+1}/${vList.length})`;
+  $("#vOpen").href=a.url;$("#vPrev").style.visibility=$("#vNext").style.visibility=vList.length>1?"visible":"hidden"}
+function stepV(d){if(vList.length<2)return;vIdx=(vIdx+d+vList.length)%vList.length;showV()}
+$("#vPrev").onclick=()=>stepV(-1);$("#vNext").onclick=()=>stepV(1);$("#vClose").onclick=$("#vImg").onclick=()=>$("#imgView").close();
+$("#vCopy").onclick=()=>copyImage(vList[vIdx].url);$("#vDl").onclick=()=>downloadImage(vList[vIdx].url,vList[vIdx].name);
+$("#imgView").addEventListener("click",e=>{if(e.target.id==="imgView")$("#imgView").close()});
+$("#imgView").addEventListener("keydown",e=>{if(e.key==="ArrowLeft")stepV(-1);if(e.key==="ArrowRight")stepV(1)});
+
 /* ---------- Kho ảnh (artwork library) ---------- */
 let artworks=[],actImgs=[],artReady=true;const artCache=new Map();
 function artById(id){if(!id)return null;id=String(id);return artworks.find(a=>a.id===id||a.id.startsWith(id))||null}
@@ -1438,7 +1469,8 @@ $("#actFile").onchange=e=>{uploadActs(e.target.files);e.target.value=""};
 ["dragenter","dragover"].forEach(ev=>$("#actDrop").addEventListener(ev,e=>{e.preventDefault();$("#actDrop").classList.add("over")}));
 ["dragleave","drop"].forEach(ev=>$("#actDrop").addEventListener(ev,e=>{e.preventDefault();$("#actDrop").classList.remove("over")}));
 $("#actDrop").addEventListener("drop",e=>uploadActs(e.dataTransfer.files));
-$("#actGrid").onclick=async e=>{const t=e.target.dataset,a=actImgs.find(x=>x.id===(t.acopy||t.adl||t.aname||t.axdel));if(!a)return;
+$("#actGrid").onclick=async e=>{if(e.target.tagName==="IMG"){const i=[...$("#actGrid").querySelectorAll(".art img")].indexOf(e.target);if(i>=0)viewImages(actImgs,i);return}
+  const t=e.target.dataset,a=actImgs.find(x=>x.id===(t.acopy||t.adl||t.aname||t.axdel));if(!a)return;
   if(t.acopy)copyImage(a.url);if(t.adl)downloadImage(a.url,a.name);
   if(t.aname){const n=prompt("Tên mới:",a.name||"");if(!n)return;try{await db.doc("artworks/"+a.id).update({name:n.trim()});loadArt()}catch(err){toast("Không đổi được: "+errMsg(err))}}
   if(t.axdel){if(!confirm(`Xóa ảnh “${a.name||""}”?`))return;
@@ -1478,7 +1510,8 @@ $("#artFile").onchange=e=>{uploadArt(e.target.files);e.target.value=""};
 ["dragleave","drop"].forEach(ev=>$("#artDrop").addEventListener(ev,e=>{e.preventDefault();$("#artDrop").classList.remove("over")}));
 $("#artDrop").addEventListener("drop",e=>uploadArt(e.dataTransfer.files));
 let artEditing=null;
-$("#artGrid").onclick=async e=>{const t=e.target.dataset,a=artById(t.aedit||t.aretag||t.adel);if(!a)return;
+$("#artGrid").onclick=async e=>{if(e.target.tagName==="IMG"){const i=[...$("#artGrid").querySelectorAll(".art img")].indexOf(e.target);if(i>=0)viewImages(artworks,i);return}
+  const t=e.target.dataset,a=artById(t.aedit||t.aretag||t.adel);if(!a)return;
   if(t.aedit){artEditing=a.id;$("#aeName").value=a.name||"";$("#aeEvent").value=a.event||"";$("#aeTags").value=(a.tags||[]).join(", ");$("#aeDesc").value=a.desc||"";$("#artDlg").showModal()}
   if(t.aretag){e.target.disabled=true;e.target.textContent="AI đang xem…";
     try{const im=await loadFile(await (await fetch(a.url)).blob());const small=await shrink(im,768,.8);const meta=await tagArt(small.data,a.name);
