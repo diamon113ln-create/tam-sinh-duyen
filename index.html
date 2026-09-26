@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Noto+Serif:ital,wght@0,500;0,700;1,500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Noto+Serif:ital,wght@0,500;0,700;1,500&family=Charm:wght@400;700&family=Dancing+Script:wght@700&family=Pattaya&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
@@ -21,6 +21,7 @@
   --shadow:0 8px 24px rgba(42,26,44,.12);
   --sans:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   --serif:"Noto Serif",Georgia,"Times New Roman",serif;
+  --callig:"Charm","Noto Serif",Georgia,serif;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
 }
@@ -58,7 +59,7 @@ textarea{resize:vertical;min-height:90px}
 .login-card{width:min(400px,100%);background:rgba(255,255,255,.9);backdrop-filter:blur(8px);color:#2A1A2C;
   border-radius:20px;padding:28px;box-shadow:0 20px 50px rgba(0,0,0,.3)}
 .login-card input{background:#fff;color:#2A1A2C;border-color:#E6DCE6}
-.login-card h1{font:700 26px/1.25 var(--serif);margin:10px 0 4px}
+.login-card h1{font:700 30px/1.25 var(--callig);margin:10px 0 4px}
 .login-card p{margin:0 0 8px;color:#5E5170}
 .logo{width:120px;border-radius:14px;display:block}
 
@@ -94,7 +95,7 @@ main{padding:22px;max-width:1300px;width:100%}
 /* Banner strip from the artwork */
 .strip{height:120px;border-radius:16px;margin-bottom:18px;background:url(assets/bg.jpg) center 40%/cover;position:relative;overflow:hidden;display:flex;align-items:flex-end;padding:16px 20px}
 .strip::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(42,26,44,.75),rgba(42,26,44,0) 70%)}
-.strip h2{position:relative;z-index:1;margin:0;color:#fff;font:700 24px/1.2 var(--serif)}
+.strip h2{position:relative;z-index:1;margin:0;color:#fff;font:700 30px/1.2 var(--callig)}
 .strip .btn{position:relative;z-index:1;margin-left:auto}
 
 /* Board */
@@ -203,7 +204,7 @@ details.imgmore summary{cursor:pointer;font-weight:600;font-size:13px;color:var(
 .hero .art{position:absolute;inset:0;z-index:-2;background:url(assets/bg.jpg) center top/cover;transform-origin:78% 0;animation:kenburns 26s ease-in-out infinite alternate}
 .hero::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(0deg,rgba(26,12,28,.92) 0%,rgba(26,12,28,.35) 45%,rgba(26,12,28,0) 70%)}
 .hero .kicker{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:#F2B8C6;opacity:0;animation:rise .8s .15s ease-out forwards}
-.hero h1{margin:6px 0 8px;font:700 clamp(28px,4.2vw,46px)/1.15 var(--serif);text-shadow:0 4px 18px rgba(0,0,0,.5);opacity:0;animation:rise .8s .3s ease-out forwards}
+.hero h1{margin:6px 0 8px;font:700 clamp(32px,4.8vw,54px)/1.15 var(--callig);text-shadow:0 4px 18px rgba(0,0,0,.5);opacity:0;animation:rise .8s .3s ease-out forwards}
 .hero p{margin:0;max-width:560px;color:#EBDDE6;opacity:0;animation:rise .8s .45s ease-out forwards}
 .petals{position:absolute;inset:0;pointer-events:none;z-index:0}
 .petals i{position:absolute;top:-24px;width:12px;height:10px;border-radius:12px 0 12px 0;background:linear-gradient(135deg,#FFD6E0,#F28AA7);opacity:.85;
@@ -226,7 +227,7 @@ details.imgmore summary{cursor:pointer;font-weight:600;font-size:13px;color:var(
 .portal:hover::after{transform:translateX(120%)}
 .portal .txt{position:absolute;left:0;right:0;bottom:0;z-index:3;padding:18px}
 .portal .num{font:700 34px/1 var(--serif);color:#F2C882;text-shadow:0 2px 10px rgba(0,0,0,.5)}
-.portal h3{margin:6px 0 2px;font:700 20px/1.25 var(--serif)}
+.portal h3{margin:6px 0 2px;font:700 23px/1.25 var(--callig)}
 .portal .sub{font-size:13px;color:#E3D3DE}
 .portal .go{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font-size:13px;font-weight:600;color:#F2B8C6}
 .portal:hover .go{color:#fff}
@@ -240,9 +241,9 @@ aside.side .logo{cursor:pointer}
 @media (max-width:860px){
   .hero{min-height:0;aspect-ratio:1400/933;padding:16px;border-radius:16px}
   .hero .art{background-size:100% auto}
-  .hero .kicker{font-size:11px}.hero h1{font-size:24px;margin:2px 0 0}.hero p{display:none}
+  .hero .kicker{font-size:11px}.hero h1{font-size:28px;margin:2px 0 0}.hero p{display:none}
   .portals{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-  .portal h3{font-size:17px}.portal .num{font-size:28px}.portal .txt{padding:14px}
+  .portal h3{font-size:20px}.portal .num{font-size:28px}.portal .txt{padding:14px}
   #app{grid-template-columns:minmax(0,1fr)}
   aside.side{position:fixed;top:auto;bottom:0;left:0;right:0;height:auto;z-index:20;flex-direction:row;align-items:center;
     padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));background:rgba(42,26,44,.97)}
@@ -261,7 +262,7 @@ aside.side .logo{cursor:pointer}
   .board .col.active{display:block}
   .grid2{grid-template-columns:1fr}
   .strip{height:96px}
-  .strip h2{font-size:19px}
+  .strip h2{font-size:23px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
@@ -344,8 +345,9 @@ aside.side .logo{cursor:pointer}
           <input type="file" id="wArtFile" accept="image/jpeg,image/png,image/webp" hidden>
           <div class="grid2">
             <div><label for="wFmt">Format ảnh</label><select id="wFmt"></select></div>
-            <div style="display:flex;align-items:flex-end"><button type="button" class="btn ghost" id="wReimg" style="width:100%">AI tạo ảnh khác</button></div>
+            <div><label for="wFont">Kiểu chữ</label><select id="wFont"></select></div>
           </div>
+          <div class="row"><button type="button" class="btn ghost" id="wReimg" style="width:100%">AI tạo ảnh khác</button></div>
           <canvas id="wCanvas" width="1200" height="630"></canvas>
           <div class="grid2">
             <div><label for="wHead">Tiêu đề trên ảnh</label><input id="wHead"></div>
@@ -841,7 +843,7 @@ function setWImg(spec){wImg=spec?normImg(spec,fmtChoice()||spec.format):null;if(
   $("#wTag").value=wImg?.tag||"";$("#wHi").value=(wImg?.highlights||[]).join("\n");$("#wBadgeBig").value=wImg?.badge.big||"";$("#wBadgeSmall").value=wImg?.badge.small||"";
   $("#wAccent").value=wImg?.accent||"crimson";fillArtSelect();renderPicker();$("#wArt").value=wImg?.art||"";$("#wTone").value=wImg?.tone||"none";$("#wFlip").checked=!!wImg?.flip;redrawW()}
 function fillArtSelect(){const cur=$("#wArt").value;$("#wArt").innerHTML='<option value="">Tranh mặc định</option>'+artworks.map(a=>`<option value="${a.id}">${esc(a.name||a.id.slice(0,8))}</option>`).join("");$("#wArt").value=artById(cur)?.id||""}
-function redrawW(){drawCard($("#wCanvas"),$("#wHead").value,$("#wSub").value,wImg||{format:fmtChoice()||"classic",seed:7})}
+function redrawW(){if(wImg)wImg.font=$("#wFont").value;drawCard($("#wCanvas"),$("#wHead").value,$("#wSub").value,wImg||{format:fmtChoice()||"classic",seed:7,font:$("#wFont").value})}
 function syncWImg(){if(!wImg)wImg=normImg({format:fmtChoice()||"classic"});
   Object.assign(wImg,{tag:$("#wTag").value.trim(),highlights:$("#wHi").value.split("\n").map(x=>x.trim()).filter(Boolean).slice(0,4),
     badge:{big:$("#wBadgeBig").value.trim(),small:$("#wBadgeSmall").value.trim()},accent:$("#wAccent").value,
@@ -1012,7 +1014,7 @@ const FOCUS={nam:[430,300],nu:[600,420],canh:[1050,430],doi:[520,380]};
 const MOTIFS=["hoa","may","sao","lua"];
 function rng(seed){let a=seed>>>0||1;return()=>{a+=0x6D2B79F5;let t=a;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296}}
 function normImg(x,fmt){x=x||{};const pick=(v,list,d)=>list.includes(v)?v:d;
-  return {format:pick(x.format,IMG_FORMATS.map(f=>f.id),fmt||"classic"),tag:String(x.tag||"").slice(0,24),slogan:String(x.slogan||"").slice(0,80),
+  return {format:pick(x.format,IMG_FORMATS.map(f=>f.id),fmt||"classic"),tag:String(x.tag||"").slice(0,24),slogan:String(x.slogan||"").slice(0,80),font:pick(x.font,Object.keys(TITLE_FONTS),defFont()),
     highlights:(Array.isArray(x.highlights)?x.highlights:[]).map(String).filter(Boolean).slice(0,4),
     badge:{big:String(x.badge?.big||"").slice(0,6),small:String(x.badge?.small||"").slice(0,18)},
     accent:pick(x.accent,Object.keys(ACCENTS),"crimson"),focus:pick(x.focus,Object.keys(FOCUS),"doi"),
@@ -1044,6 +1046,11 @@ function fitLines(ctx,text,maxW,maxLines,size,min,weight,family){let sz=size,lin
   do{ctx.font=`${weight} ${sz}px ${family}`;lines=wrap(ctx,text,maxW);sz-=4}while(lines.length>maxLines&&sz>=min);
   const out=lines.slice(0,maxLines);if(lines.length>maxLines){let l=out[maxLines-1];while(l.length>1&&ctx.measureText(l+"…").width>maxW)l=l.slice(0,-1);out[maxLines-1]=l.trimEnd()+"…"}
   return {lines:out,size:sz+4}}
+/* Title/slogan lettering on the image; scale evens out the different x-heights */
+const TITLE_FONTS={charm:["Charm",700,1.05,"Thư pháp (Charm)"],dancing:["Dancing Script",700,1.08,"Bay bổng (Dancing Script)"],pattaya:["Pattaya",400,1,"Bút lông đậm (Pattaya)"],
+  serif:["Noto Serif",700,1,"Có chân (kiểu cũ)"]};
+let TF='"Charm", "Noto Serif", Georgia, serif',TW=700,TS=1.05;
+function titleFont(k){const [f,w,sc]=TITLE_FONTS[k]||TITLE_FONTS.charm;TF=`"${f}", "Noto Serif", Georgia, serif`;TW=w;TS=sc}
 const SERIF='"Noto Serif", Georgia, serif',SANS='"Be Vietnam Pro", system-ui, sans-serif';
 function motif(ctx,W,H,kind,rand,area){const [x0,y0,x1,y1]=area||[0,0,W,H];ctx.save();
   for(let i=0;i<(kind==="may"?7:26);i++){const x=x0+rand()*(x1-x0),y=y0+rand()*(y1-y0),r=rand();
@@ -1059,16 +1066,16 @@ function logo(ctx,x,y,w){const h=w*logoImg.height/logoImg.width;ctx.save();ctx.s
   ctx.beginPath();ctx.roundRect(x,y,w,h,14);ctx.fillStyle="#fff";ctx.fill();ctx.shadowBlur=0;ctx.clip();ctx.drawImage(logoImg,x,y,w,h);ctx.restore()}
 function shade(ctx,x,y,w,h,stops,vertical){const g=vertical===false?ctx.createLinearGradient(x,0,x+w,0):ctx.createLinearGradient(0,y,0,y+h);
   stops.forEach(([o,c])=>g.addColorStop(o,c));ctx.fillStyle=g;ctx.fillRect(x,y,w,h)}
-function slogan(ctx,text,x,y,maxW,size,color){if(!text)return;const t=fitText(ctx,"“"+text+"”",maxW,size,Math.round(size*.7),"italic 500",SERIF);
+function slogan(ctx,text,x,y,maxW,size,color){if(!text)return;const t=fitText(ctx,"“"+text+"”",maxW,Math.round(size*TS*1.05),Math.round(size*.7),TW===700?400:TW,TF);
   ctx.save();ctx.shadowColor="rgba(0,0,0,.55)";ctx.shadowBlur=10;ctx.fillStyle=color;ctx.fillText(t,x,y);ctx.restore()}
-function renderDesign(ctx,W,H,d){const [ ,ac,acl]=ACCENTS[d.accent],rand=rng(d.seed);const head=d.headline||"Tiêu đề bài đăng",sub=d.subline||"";
+function renderDesign(ctx,W,H,d){titleFont(d.font);const [ ,ac,acl]=ACCENTS[d.accent],rand=rng(d.seed);const head=d.headline||"Tiêu đề bài đăng",sub=d.subline||"";
   ctx.clearRect(0,0,W,H);ctx.textAlign="left";ctx.shadowBlur=0;
   const glow=()=>{ctx.shadowColor="rgba(0,0,0,.6)";ctx.shadowBlur=14},noglow=()=>{ctx.shadowBlur=0};
   if(d.format==="reward"){const artLogo=cover(ctx,0,0,606,H,d,1.05);motif(ctx,W,H,d.motif,rand,[0,0,600,H]);
     ctx.fillStyle="rgba(24,10,26,.93)";ctx.beginPath();ctx.moveTo(610,0);ctx.lineTo(W,0);ctx.lineTo(W,H);ctx.lineTo(540,H);ctx.closePath();ctx.fill();
     ctx.fillStyle=ac;ctx.beginPath();ctx.moveTo(604,0);ctx.lineTo(616,0);ctx.lineTo(546,H);ctx.lineTo(534,H);ctx.closePath();ctx.fill();
     if(!artLogo)logo(ctx,W-160,26,130);let y=48;if(d.tag){pill(ctx,d.tag,640,y,ac);y+=66}else y+=20;
-    const t=fitLines(ctx,head,W-640-180,d.slogan?2:3,50,34,700,SERIF);ctx.fillStyle="#fff";t.lines.forEach(l=>{y+=t.size;ctx.fillText(l,640,y);y+=10});
+    const t=fitLines(ctx,head,W-640-180,d.slogan?2:3,Math.round(50*TS),Math.round(34*TS),TW,TF);ctx.fillStyle="#fff";t.lines.forEach(l=>{y+=t.size;ctx.fillText(l,640,y);y+=10});
     if(d.slogan){y+=34;slogan(ctx,d.slogan,640,y,W-680,26,"#F6E3EA")}
     if(sub){const tx=fitText(ctx,sub,W-680,26,18,600,SANS);ctx.fillStyle=acl;y+=40;ctx.fillText(tx,640,y)}
     y+=26;ctx.font=`500 26px ${SANS}`;
@@ -1079,7 +1086,7 @@ function renderDesign(ctx,W,H,d){const [ ,ac,acl]=ACCENTS[d.accent],rand=rng(d.s
     ctx.fillStyle="rgba(22,10,24,.62)";ctx.fillRect(0,0,W,H);motif(ctx,W,H,d.motif,rand);
     ctx.strokeStyle=ACCENTS.gold[1];ctx.lineWidth=2;ctx.strokeRect(28,28,W-56,H-56);logo(ctx,W/2-60,52,120);ctx.textAlign="center";
     let y=250;if(d.tag){ctx.font=`600 22px ${SANS}`;ctx.fillStyle=acl;ctx.fillText(d.tag.split("").join(" "),W/2,y);y+=16}
-    const t=fitLines(ctx,head,W-200,2,68,44,700,SERIF);glow();ctx.fillStyle="#fff";t.lines.forEach(l=>{y+=t.size+6;ctx.fillText(l,W/2,y)});noglow();
+    const t=fitLines(ctx,head,W-200,2,Math.round(68*TS),Math.round(44*TS),TW,TF);glow();ctx.fillStyle="#fff";t.lines.forEach(l=>{y+=t.size+6;ctx.fillText(l,W/2,y)});noglow();
     if(d.slogan){y+=42;slogan(ctx,d.slogan,W/2,y,W-240,28,"#F3E9F1")}
     y+=44;if(sub){const tx=fitText(ctx,sub,W-380,28,20,600,SANS);const w=ctx.measureText(tx).width;ctx.fillStyle=acl;ctx.fillText(tx,W/2,y);
       ctx.fillStyle=ACCENTS.gold[1];ctx.fillRect(W/2-w/2-110,y-10,80,2);ctx.fillRect(W/2+w/2+30,y-10,80,2);y+=48}
@@ -1093,7 +1100,7 @@ function renderDesign(ctx,W,H,d){const [ ,ac,acl]=ACCENTS[d.accent],rand=rng(d.s
     ctx.textAlign="center";ctx.fillStyle="#fff";const big=d.badge.big||"HOT";const b=fitLines(ctx,big,R*1.6,1,110,50,800,SERIF);ctx.fillText(b.lines[0],cx,cy+(d.badge.small?20:b.size/3));
     if(d.badge.small){ctx.font=`700 24px ${SANS}`;ctx.fillStyle=acl;ctx.fillText(d.badge.small.toUpperCase(),cx,cy+62)}ctx.textAlign="left";
     if(!artLogo)logo(ctx,W-170,24,140);let y=150;if(d.tag){pill(ctx,d.tag,500,y,ac);y+=62}
-    const t=fitLines(ctx,head,W-560,d.slogan?2:3,58,38,700,SERIF);glow();ctx.fillStyle="#fff";t.lines.forEach(l=>{y+=t.size;ctx.fillText(l,500,y);y+=8});noglow();
+    const t=fitLines(ctx,head,W-560,d.slogan?2:3,Math.round(58*TS),Math.round(38*TS),TW,TF);glow();ctx.fillStyle="#fff";t.lines.forEach(l=>{y+=t.size;ctx.fillText(l,500,y);y+=8});noglow();
     if(d.slogan){y+=36;slogan(ctx,d.slogan,500,y,W-540,28,"#F6E3EA")}
     if(sub){const tx=fitText(ctx,sub,W-540,28,20,600,SANS);ctx.fillStyle=acl;y+=40;ctx.fillText(tx,500,y)}
     y+=24;let x=500;ctx.font=`600 21px ${SANS}`;d.highlights.forEach(h=>{const w=ctx.measureText(h).width+28;if(x+w>W-40){x=500;y+=46}if(y>H-60)return;
@@ -1106,8 +1113,8 @@ function renderDesign(ctx,W,H,d){const [ ,ac,acl]=ACCENTS[d.accent],rand=rng(d.s
     const bb=fitLines(ctx,d.badge.big||(sub.match(/\d{1,2}\/\d{1,2}/)||["NEW"])[0],170,1,72,34,800,SERIF);ctx.fillStyle="#2A1A2C";ctx.fillText(bb.lines[0],156,by+100);ctx.textAlign="left";
     if(!artLogo)logo(ctx,W-170,24,140);const tw=d.tag?pill(ctx,d.tag,300,by-60,"rgba(22,10,24,.75)"):0;
     if(d.slogan){const sx=300+(tw?tw+16:0);slogan(ctx,d.slogan,sx,by-28,W-sx-40,28,"#fff")}
-    const t=fitLines(ctx,head,W-360,2,56,36,700,SERIF);glow();ctx.fillStyle="#fff";let y=by+(t.lines.length>1?10:40);t.lines.forEach(l=>{y+=t.size;ctx.fillText(l,300,y);y+=6});noglow();
-    if(sub){const tx=fitText(ctx,sub,W-340,26,18,600,SANS);ctx.fillStyle="#fff";ctx.fillText(tx,300,by+bh-24)}
+    const t=fitLines(ctx,head,W-360,2,Math.round(50*TS),Math.round(32*TS),TW,TF);glow();ctx.fillStyle="#fff";let y=by+(t.lines.length>1?2:40);t.lines.forEach(l=>{y+=t.size;ctx.fillText(l,300,y);y+=2});noglow();
+    if(sub){const tx=fitText(ctx,sub,W-340,24,18,600,SANS);ctx.fillStyle="#fff";ctx.fillText(tx,300,by+bh-16)}
     if(d.highlights.length){ctx.font=`600 24px ${SANS}`;glow();ctx.fillStyle="#fff";ctx.fillText(joinFit(ctx,d.highlights,"  ✦  ",W-120),60,H-30);noglow()}return}
   /* classic */
   shade(ctx,0,0,W,H,[[0,"rgba(30,12,28,0)"],[.45,"rgba(30,12,28,.05)"],[1,"rgba(30,12,28,.88)"]]);if(!artLogo)logo(ctx,W-210,24,180);
@@ -1116,15 +1123,20 @@ function renderDesign(ctx,W,H,d){const [ ,ac,acl]=ACCENTS[d.accent],rand=rng(d.s
   let yb=H-56-(d.highlights.length?52:0);
   if(sub){const tx=fitText(ctx,sub,W-140,30,20,600,SANS);ctx.fillStyle=acl;ctx.fillText(tx,62,yb);yb-=50}
   if(d.slogan){slogan(ctx,d.slogan,62,yb,W-140,30,"#F6E3EA");yb-=50}
-  const t=fitLines(ctx,head,W-120,d.slogan?2:3,66,44,700,SERIF);let y=yb-6-(t.lines.length-1)*(t.size+12);
-  glow();ctx.fillStyle="#fff";ctx.font=`700 ${t.size}px ${SERIF}`;t.lines.forEach(l=>{ctx.fillText(l,60,y);y+=t.size+12});noglow();
+  const t=fitLines(ctx,head,W-120,d.slogan?2:3,Math.round(66*TS),Math.round(44*TS),TW,TF);let y=yb-6-(t.lines.length-1)*(t.size+12);
+  glow();ctx.fillStyle="#fff";ctx.font=`${TW} ${t.size}px ${TF}`;t.lines.forEach(l=>{ctx.fillText(l,60,y);y+=t.size+12});noglow();
   if(d.highlights.length){ctx.font=`600 22px ${SANS}`;let x=60;d.highlights.forEach(h=>{const w=ctx.measureText(h).width+28;if(x+w>W-40)return;
     ctx.fillStyle="rgba(255,255,255,.16)";ctx.beginPath();ctx.roundRect(x,H-92,w,36,18);ctx.fill();ctx.fillStyle="#fff";ctx.fillText(h,x+14,H-67);x+=w+10})}
   ctx.fillStyle=ac;ctx.fillRect(60,H-30,120,5)}
 function drawCard(cv,headIn,subIn,spec){const ctx=cv.getContext("2d");const d={...normImg(spec||{seed:7}),headline:(headIn||"").trim(),subline:(subIn||"").trim()};
   const a=artById(d.art),ai=a?artImg(a.url):null;
   const draw=()=>{if(bgImg.complete&&bgImg.naturalWidth&&logoImg.complete&&logoImg.naturalWidth)renderDesign(ctx,cv.width,cv.height,d)};
-  draw();bgImg.addEventListener("load",draw,{once:true});logoImg.addEventListener("load",draw,{once:true});ai?.addEventListener("load",draw,{once:true});document.fonts?.ready.then(draw)}
+  draw();bgImg.addEventListener("load",draw,{once:true});logoImg.addEventListener("load",draw,{once:true});ai?.addEventListener("load",draw,{once:true});
+  /* canvas text does not trigger web-font downloads by itself */
+  /* pass the actual text so the Vietnamese subset of the font is fetched too */
+  const [f,w]=TITLE_FONTS[d.font]||TITLE_FONTS.charm,txt=(d.headline+d.slogan+"“”Đđ")||"Đđ";
+  Promise.all([w,400].map(x=>document.fonts?.load(`${x} 40px "${f}"`,txt).catch(()=>{}))).then(draw);document.fonts?.ready.then(draw)}
+function defFont(){try{return localStorage.getItem("tsd.font")||"charm"}catch(e){return "charm"}}
 
 /* ---------- Kho ảnh (artwork library) ---------- */
 let artworks=[],artReady=true;const artCache=new Map();
@@ -1193,6 +1205,8 @@ $("#fmtGrid").onclick=e=>{const set=e.target.dataset.set,tr=e.target.dataset.try
   if(tr){$("#wFmt").value=tr;if(wImg){wImg.format=tr;redrawW()}show("write")}};
 $("#wFmt").innerHTML='<option value="auto">AI tự chọn</option>'+IMG_FORMATS.map(f=>`<option value="${f.id}">${f.name}</option>`).join("");
 $("#wFmt").value=defFmt();
+$("#wFont").innerHTML=Object.entries(TITLE_FONTS).map(([k,v])=>`<option value="${k}">${v[3]}</option>`).join("");$("#wFont").value=defFont();
+$("#wFont").onchange=()=>{try{localStorage.setItem("tsd.font",$("#wFont").value)}catch(_){};if(wImg)wImg.font=$("#wFont").value;redrawW();renderFormats()};
 $("#wAccent").innerHTML=Object.entries(ACCENTS).map(([k,[n]])=>`<option value="${k}">${n}</option>`).join("");
 renderFormats();
 
