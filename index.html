@@ -435,11 +435,15 @@ const db={
     async update(patch){const {data:row,error:e1}=await sb.from(name).select("data").eq("id",id).single();if(e1)throw e1;
       const {error}=await sb.from(name).update({data:{...row.data,...patch}}).eq("id",id);if(error)throw error;refresh(name)},
     async delete(){const {error}=await sb.from(name).delete().eq("id",id);if(error)throw error;refresh(name)}}}};
+/* Edge Function errors: a fetch failure usually means the function isn't deployed under that name */
+async function fnErr(error,name){
+  if(error.name==="FunctionsFetchError")return `Không kết nối được hàm "${name}" trên Supabase. Kiểm tra trong Supabase → Edge Functions đã có hàm tên đúng "${name}" và đã Deploy chưa.`;
+  try{const j=await error.context.json();return j.error||error.message}catch(_){return error.message}}
 let aiToken=0;
 async function aiJson(prompt){const my=++aiToken;
   const {data,error}=await sb.functions.invoke("write-post",{body:{prompt}});
   if(my!==aiToken)throw {code:"cancelled"};
-  if(error){let m=error.message;try{const j=await error.context.json();m=j.error||m}catch(_){}throw {code:"ai_error",message:m}}
+  if(error)throw {code:"ai_error",message:await fnErr(error,"write-post")}
   const txt=String(data?.text||"").replace(/```json|```/g,"").trim();const i=txt.indexOf("{"),j=txt.lastIndexOf("}");
   try{return JSON.parse(txt.slice(i,j+1))}catch(e){throw {code:"bad_json",message:"AI trả về sai định dạng, bấm Viết bài để thử lại"}}}
 function cancelAi(){aiToken++}
@@ -513,7 +517,7 @@ function fillTplSelects(){
 
 /* ---------- accounts (admin) ---------- */
 async function adminCall(body){const {data,error}=await sb.functions.invoke("admin-users",{body});
-  if(error){let m=error.message;try{const j=await error.context.json();m=j.error||m}catch(_){}throw new Error(m)}return data}
+  if(error)throw new Error(await fnErr(error,"admin-users"));return data}
 function renderAccounts(){$("#accRows").innerHTML=[...accounts].sort((a,b)=>a.name.localeCompare(b.name,"vi")).map(a=>
   `<tr><td>${esc(a.name)}</td><td>${esc(a.username)}</td><td>${ROLE_NAME[a.role]}</td><td style="text-align:right;white-space:nowrap">${a.id===me.id?'<span class="hint">Bạn</span>':`<button class="btn ghost small" data-reset="${esc(a.id)}">Đặt lại mật khẩu</button> <button class="btn ghost small" data-del="${esc(a.id)}">Xóa</button>`}</td></tr>`).join("")}
 $("#accRows").onclick=async e=>{const del=e.target.dataset.del,rs=e.target.dataset.reset;const a=accounts.find(x=>x.id===(del||rs));if(!a)return;
