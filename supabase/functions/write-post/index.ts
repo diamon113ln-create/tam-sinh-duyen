@@ -29,12 +29,12 @@ Deno.serve(async (req) => {
     // max_tokens covers the model's thinking as well as the answer; too small cuts the JSON off mid-way.
     // Effort (not supported on Haiku) keeps thinking short for these formatting tasks; override with Secret AI_EFFORT.
     const model = Deno.env.get("AI_MODEL") || "claude-sonnet-5";
-    const req: Record<string, unknown> = { model, max_tokens: 16000, messages: [{ role: "user", content: prompt }] };
-    if (!model.includes("haiku")) req.output_config = { effort: Deno.env.get("AI_EFFORT") || "low" };
+    const payload: Record<string, unknown> = { model, max_tokens: 16000, messages: [{ role: "user", content: prompt }] };
+    if (!model.includes("haiku")) payload.output_config = { effort: Deno.env.get("AI_EFFORT") || "low" };
     const r = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: { "x-api-key": key, "anthropic-version": "2023-06-01", "content-type": "application/json" },
-      body: JSON.stringify(req),
+      body: JSON.stringify(payload),
     });
     const data = await r.json();
     if (!r.ok) return json({ error: data?.error?.message || "Lỗi gọi AI" }, 502);
