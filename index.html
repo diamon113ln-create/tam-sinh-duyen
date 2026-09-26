@@ -335,7 +335,7 @@ aside.side .logo{cursor:pointer}
               <div><label for="wTo">Ngày kết thúc (không bắt buộc)</label><input id="wTo" type="date"></div>
             </div>
             <label for="wReward">Phần thưởng mới (không bắt buộc)</label>
-            <textarea id="wReward" style="min-height:90px" placeholder="Để trống thì giữ nguyên phần thưởng như bài mẫu."></textarea>
+            <textarea id="wReward" style="min-height:220px;max-height:520px" placeholder="Để trống thì giữ nguyên phần thưởng như bài mẫu."></textarea>
             <label style="display:flex;gap:8px;align-items:flex-start;font-weight:500;margin-top:14px;color:var(--ink)">
               <input type="checkbox" id="wVary" style="width:auto;margin-top:4px">
               <span>Viết format khác bài mẫu<br><span style="font-size:12px;color:var(--ink-soft)">Không tích: giữ y bố cục, câu chữ, emoji của bài mẫu, chỉ thay thời gian và thưởng. Tích: giữ nội dung chính nhưng trình bày và diễn đạt mới.</span></span>
@@ -857,6 +857,9 @@ function fromVal(){const d=$("#wFrom").value,t=$("#wTime").value;return d&&t?d+"
 function timeText(){const f=$("#wFrom").value,t=$("#wTo").value,h=$("#wTime").value;if(!f)return "";
   const dm=v=>v.split("-").reverse().slice(0,2).join("/"),full=v=>v.split("-").reverse().join("/");
   const range=t&&t!==f?`${dm(f)} – ${full(t)}`:full(f);return h?`${h} · ${range}`:(t&&t!==f?range:"Từ "+range)}
+/* the rewards box grows with its content (up to 520px) instead of scrolling inside a small box */
+function autoGrow(el){el.style.height="auto";el.style.height=Math.min(Math.max(el.scrollHeight+2,220),520)+"px"}
+$("#wReward").addEventListener("input",e=>autoGrow(e.target));
 let wSubTouched=false,wArtPicked=null;/* a picture the user chose by hand survives "Viết bài" */
 /* A saved sheet as plain text for the AI: one line per row, "column: value" */
 function sheetText(sh){return [`Tên: ${sh.name||""}`,sh.summary?`Tóm tắt: ${sh.summary}`:"",...(sh.sections||[]).map(x=>`[${x.name}]\n`+x.rows.map(r=>"- "+r.map((v,i)=>v?`${x.columns[i]}: ${v}`:"").filter(Boolean).join("; ")).join("\n"))].filter(Boolean).join("\n").slice(0,9000)}
@@ -897,7 +900,7 @@ ${artworks.length?`- art: chọn MỘT mã tranh hợp nội dung nhất trong K
 - tone: chỉnh màu tranh cho hợp không khí (none giữ nguyên, warm ấm, cool lạnh, fire rực lửa, night đêm, gold vàng kim). flip: true để lật ngang tranh cho mới lạ. zoom: 1.0–1.4 để phóng vào chủ thể.
 KHO TRANH (mã | tên | nhãn | không khí | sự kiện):
 ${artCatalog()}`:""}`}
-$("#wClear").onclick=()=>{W_FIELDS.forEach(id=>$(id).value="");$("#wTime").value="";$("#wSub").value="";wSubTouched=false;wArtPicked=null;showAiImg("");$("#wVary").checked=false;$("#wPost").value="";$("#wHead").value="";$("#wSub").value="";wSheet=null;renderWSheet();
+$("#wClear").onclick=()=>{W_FIELDS.forEach(id=>$(id).value="");autoGrow($("#wReward"));$("#wTime").value="";$("#wSub").value="";wSubTouched=false;wArtPicked=null;showAiImg("");$("#wVary").checked=false;$("#wPost").value="";$("#wHead").value="";$("#wSub").value="";wSheet=null;renderWSheet();
   $("#wThinking").textContent="";$("#wErr").textContent="";setWImg(null);$("#wFrom").focus()};
 $("#wGen").onclick=async()=>{const tpl=templates.find(x=>x.id===$("#wTpl").value),sh=savedSheets.find(x=>x.id===$("#wSrc").value);
   if(!tpl&&!sh){$("#wErr").textContent="Hãy chọn một mẫu bài hoặc một sheet.";return}
