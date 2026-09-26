@@ -484,7 +484,19 @@ async function aiJson(prompt){const my=++aiToken;
   if(my!==aiToken)throw {code:"cancelled"};
   if(error)throw {code:"ai_error",message:await fnErr(error,"write-post")}
   const txt=String(data?.text||"").replace(/```json|```/g,"").trim();const i=txt.indexOf("{"),j=txt.lastIndexOf("}");
-  try{return JSON.parse(txt.slice(i,j+1))}catch(e){throw {code:"bad_json",message:"AI trả về sai định dạng, bấm Viết bài để thử lại"}}}
+  const raw=txt.slice(i,j+1);
+  try{return JSON.parse(raw)}catch(e){}
+  try{return JSON.parse(repairJson(raw))}catch(e){throw {code:"bad_json",message:"AI trả về sai định dạng, bấm lại để thử lần nữa"}}}
+/* Models sometimes put raw line breaks/tabs inside JSON strings or leave trailing commas */
+function repairJson(s){let out="",inStr=false,esc=false;
+  for(const ch of s){
+    if(inStr){if(esc){esc=false;out+=ch;continue}
+      if(ch==="\\"){esc=true;out+=ch;continue}
+      if(ch==='"'){inStr=false;out+=ch;continue}
+      if(ch==="\n"){out+="\\n";continue}if(ch==="\r")continue;if(ch==="\t"){out+="\\t";continue}
+      out+=ch;continue}
+    if(ch==='"')inStr=true;out+=ch}
+  return out.replace(/,\s*([}\]])/g,"$1")}
 function cancelAi(){aiToken++}
 async function save(filename,data){const blob=data instanceof Blob?data:new Blob([data]);const url=URL.createObjectURL(blob);
   const a=document.createElement("a");a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000)}
