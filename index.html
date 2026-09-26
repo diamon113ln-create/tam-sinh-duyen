@@ -149,6 +149,16 @@ canvas{width:100%;height:auto;border-radius:10px;border:1px solid var(--line);ma
 details.imgmore{margin-top:10px;border:1px solid var(--line);border-radius:10px;padding:6px 12px}
 details.imgmore summary{cursor:pointer;font-weight:600;font-size:13px;color:var(--ink-soft);padding:4px 0}
 
+/* Image maker in Viết bài nhanh */
+.imgmaker{margin-top:18px;border-top:1px solid var(--line);padding-top:6px}
+.imgmaker h4{margin:10px 0 2px;font:700 17px var(--serif)}
+.picker{display:flex;gap:8px;overflow-x:auto;padding:8px 2px 10px;scroll-snap-type:x mandatory}
+.picker button{flex:none;width:112px;border:2px solid transparent;border-radius:10px;padding:0;overflow:hidden;cursor:pointer;background:var(--mist);scroll-snap-align:start;position:relative}
+.picker button img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block}
+.picker button span{display:block;font-size:11px;padding:3px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink-soft);text-align:left}
+.picker button[aria-pressed="true"]{border-color:var(--crimson)}
+.picker .add{display:grid;place-items:center;aspect-ratio:auto;font-size:13px;font-weight:600;color:var(--ink-soft);border:2px dashed var(--line)}
+
 /* Artwork library */
 .art-drop{border:2px dashed var(--line);border-radius:14px;padding:22px;text-align:center;color:var(--ink-soft);margin-bottom:14px;cursor:pointer;transition:border-color .2s,background .2s}
 .art-drop.over{border-color:var(--crimson);background:var(--blossom-soft)}
@@ -309,6 +319,7 @@ aside.side .logo{cursor:pointer}
           <div id="wFields">
             <div class="grid2">
               <div><label for="wFrom">Ngày bắt đầu</label><input id="wFrom" type="date" required></div>
+              <div><label for="wTime">Giờ bắt đầu (không bắt buộc)</label><input id="wTime" type="time"></div>
               <div><label for="wTo">Ngày kết thúc (không bắt buộc)</label><input id="wTo" type="date"></div>
             </div>
             <label for="wReward">Phần thưởng mới (không bắt buộc)</label>
@@ -326,6 +337,11 @@ aside.side .logo{cursor:pointer}
           <label for="wPost" style="margin-top:0">Bài đăng</label>
           <textarea id="wPost" style="min-height:260px" placeholder="Bài viết sẽ hiện ở đây."></textarea>
           <button class="btn copybig" id="wCopy">Copy để đăng Facebook</button>
+          <div class="imgmaker">
+          <h4>Tạo ảnh</h4>
+          <p class="hint" style="margin:0;font-size:13px;color:var(--ink-soft)">Chọn ảnh bên dưới: tiêu đề, slogan, thời gian và logo (nếu ảnh chưa có) được gắn tự động. Bấm Viết bài để AI chọn ảnh và viết slogan.</p>
+          <div class="picker" id="wPicker"></div>
+          <input type="file" id="wArtFile" accept="image/jpeg,image/png,image/webp" hidden>
           <div class="grid2">
             <div><label for="wFmt">Format ảnh</label><select id="wFmt"></select></div>
             <div style="display:flex;align-items:flex-end"><button type="button" class="btn ghost" id="wReimg" style="width:100%">AI tạo ảnh khác</button></div>
@@ -333,8 +349,9 @@ aside.side .logo{cursor:pointer}
           <canvas id="wCanvas" width="1200" height="630"></canvas>
           <div class="grid2">
             <div><label for="wHead">Tiêu đề trên ảnh</label><input id="wHead"></div>
-            <div><label for="wSub">Dòng phụ</label><input id="wSub"></div>
+            <div><label for="wSub">Thời gian</label><input id="wSub" placeholder="Tự lấy từ ngày giờ bên trái"></div>
           </div>
+          <label for="wSlogan">Slogan</label><input id="wSlogan" placeholder="AI tự viết khi bấm Viết bài">
           <details class="imgmore"><summary>Chỉnh chi tiết ảnh</summary>
             <div class="grid2">
               <div><label for="wArt">Tranh nền</label><select id="wArt"></select></div>
@@ -347,6 +364,7 @@ aside.side .logo{cursor:pointer}
             <label style="display:flex;gap:8px;align-items:center;font-weight:500"><input type="checkbox" id="wFlip" style="width:auto"> Lật ngang tranh</label>
             <label for="wHi">Điểm nổi bật (mỗi dòng một ý)</label><textarea id="wHi" style="min-height:80px"></textarea>
           </details>
+          </div>
           <div class="row"><button class="btn ghost small" id="wPng">Tải ảnh PNG</button><button class="btn ghost small" id="wToTask">Lưu vào bảng công việc</button></div>
           <div id="wSheetBox" class="hidden">
             <div class="tablewrap" id="wSheetWrap"></div>
@@ -764,9 +782,15 @@ function wTplHint(){const t=templates.find(x=>x.id===$("#wTpl").value);
 $("#wTpl").onchange=wTplHint;
 function fmtDT(v){if(!v)return"";const[d,t]=v.split("T");return d.split("-").reverse().join("/")+(t?" lúc "+t:"")}
 const W_FIELDS=["#wFrom","#wTo","#wReward"];
-function collectInfo(){const f=$("#wFrom").value,t=$("#wTo").value,r=$("#wReward").value.trim();
+function collectInfo(){const f=fromVal(),t=$("#wTo").value,r=$("#wReward").value.trim();
   return [f?"Ngày bắt đầu: "+fmtDT(f):"",t?"Ngày kết thúc: "+fmtDT(t):"",r?"Phần thưởng mới:\n"+r:""].filter(Boolean).join("\n")}
-function quickPrompt(tpl,wantSheet){const f=fmtDT($("#wFrom").value),t=fmtDT($("#wTo").value),r=$("#wReward").value.trim(),vary=$("#wVary").checked;
+function fromVal(){const d=$("#wFrom").value,t=$("#wTime").value;return d&&t?d+"T"+t:d}
+/* Time line on the image, straight from the form: "21:15 · 09/09/2026", "09/09 – 15/09/2026" */
+function timeText(){const f=$("#wFrom").value,t=$("#wTo").value,h=$("#wTime").value;if(!f)return "";
+  const dm=v=>v.split("-").reverse().slice(0,2).join("/"),full=v=>v.split("-").reverse().join("/");
+  const range=t&&t!==f?`${dm(f)} – ${full(t)}`:full(f);return h?`${h} · ${range}`:(t&&t!==f?range:"Từ "+range)}
+let wSubTouched=false,wArtPicked=null;/* a picture the user chose by hand survives "Viết bài" */
+function quickPrompt(tpl,wantSheet){const f=fmtDT(fromVal()),t=fmtDT($("#wTo").value),r=$("#wReward").value.trim(),vary=$("#wVary").checked;
   return `Bạn là người viết nội dung fanpage Facebook cho game kiếm hiệp cổ trang "Tam Sinh Duyên" (tiếng Việt).
 Loại bài: ${tpl.name}. Phong cách: ${tpl.style}.
 BÀI MẪU:
@@ -781,8 +805,9 @@ Trả về DUY NHẤT một JSON hợp lệ, không kèm chữ nào khác:
 ${imgSpecGuide($("#wFmt").value)}
 ${wantSheet?`"sheet" là bảng kế hoạch triển khai hoạt động (ví dụ cột Hạng mục, Nội dung chi tiết, Thời gian, Phần thưởng/Điều kiện, Ghi chú), 5–12 dòng.`:""}`}
 /* The AI designs the cover image as data; renderDesign draws it into the chosen format */
-function imgSpecJson(fmt){return `"image":{"format":"${fmt==="auto"?"một trong: "+IMG_FORMATS.map(f=>f.id).join(", "):fmt}","tag":"nhãn","highlights":["ý nổi bật"],"badge":{"big":"chữ lớn","small":"chữ nhỏ"},"accent":"${Object.keys(ACCENTS).join("|")}","focus":"nam|nu|canh|doi","motif":"hoa|may|sao|lua"${artworks.length?`,"art":"mã tranh trong KHO TRANH","tone":"${Object.keys(TONES).join("|")}","flip":false,"zoom":1.0`:""}}`}
+function imgSpecJson(fmt){return `"image":{"format":"${fmt==="auto"?"một trong: "+IMG_FORMATS.map(f=>f.id).join(", "):fmt}","slogan":"slogan","tag":"nhãn","highlights":["ý nổi bật"],"badge":{"big":"chữ lớn","small":"chữ nhỏ"},"accent":"${Object.keys(ACCENTS).join("|")}","focus":"nam|nu|canh|doi","motif":"hoa|may|sao|lua"${artworks.length?`,"art":"mã tranh trong KHO TRANH","tone":"${Object.keys(TONES).join("|")}","flip":false,"zoom":1.0`:""}}`}
 function imgSpecGuide(fmt){return `"image" là thiết kế ảnh bìa 1200×630 cho bài, hãy SÁNG TẠO mới mỗi lần (mã ngẫu nhiên ${Math.random().toString(36).slice(2,8)}):
+- slogan: một câu slogan cổ phong, gây hứng thú, tối đa 10 chữ, không lặp lại tiêu đề (ví dụ "Tứ Linh thức tỉnh – anh hùng tụ hội").
 - tag: 1–3 chữ IN HOA gợi không khí (ví dụ SĂN BOSS, QUÀ HOT, BẢO TRÌ).
 - highlights: 2–4 ý rất ngắn (tối đa 6 chữ), lấy từ phần thưởng hoặc điểm hấp dẫn CÓ TRONG bài, không bịa.
 - badge.big: tối đa 5 ký tự nổi bật (ví dụ x2, TOP1, 50%, 21:15); badge.small: tối đa 2 chữ giải thích.
@@ -792,7 +817,7 @@ ${artworks.length?`- art: chọn MỘT mã tranh hợp nội dung nhất trong K
 - tone: chỉnh màu tranh cho hợp không khí (none giữ nguyên, warm ấm, cool lạnh, fire rực lửa, night đêm, gold vàng kim). flip: true để lật ngang tranh cho mới lạ. zoom: 1.0–1.4 để phóng vào chủ thể.
 KHO TRANH (mã | tên | nhãn | không khí | sự kiện):
 ${artCatalog()}`:""}`}
-$("#wClear").onclick=()=>{W_FIELDS.forEach(id=>$(id).value="");$("#wVary").checked=false;$("#wPost").value="";$("#wHead").value="";$("#wSub").value="";wSheet=null;renderWSheet();
+$("#wClear").onclick=()=>{W_FIELDS.forEach(id=>$(id).value="");$("#wTime").value="";$("#wSub").value="";wSubTouched=false;wArtPicked=null;$("#wVary").checked=false;$("#wPost").value="";$("#wHead").value="";$("#wSub").value="";wSheet=null;renderWSheet();
   $("#wThinking").textContent="";$("#wErr").textContent="";setWImg(null);$("#wFrom").focus()};
 $("#wGen").onclick=async()=>{const tpl=templates.find(x=>x.id===$("#wTpl").value);
   if(!tpl){$("#wErr").textContent="Hãy chọn một mẫu.";return}
@@ -801,8 +826,8 @@ $("#wGen").onclick=async()=>{const tpl=templates.find(x=>x.id===$("#wTpl").value
   $("#wErr").textContent="";$("#wGen").disabled=true;$("#wStop").classList.remove("hidden");$("#wThinking").textContent="AI đang viết theo mẫu…";
   wCtl=new AbortController(); const wantSheet=$("#wSheetOn").checked;
   try{const r=await aiJson(quickPrompt(tpl,wantSheet));
-    $("#wPost").value=r.post||"";$("#wHead").value=tpl.headline||r.headline||"";$("#wSub").value=r.subline||"";
-    wSheet=wantSheet?normSheet(r):null;renderWSheet();setWImg(r.image);
+    $("#wPost").value=r.post||"";$("#wHead").value=tpl.headline||r.headline||"";$("#wSub").value=timeText()||r.subline||"";wSubTouched=false;
+    wSheet=wantSheet?normSheet(r):null;renderWSheet();setWImg(wArtPicked!==null?{...r.image,art:wArtPicked}:r.image);
     $("#wThinking").textContent="Xong. Bấm Copy rồi dán lên fanpage.";
   }catch(e){$("#wThinking").textContent="";$("#wErr").textContent=aiErrMsg(e)}
   finally{$("#wGen").disabled=false;$("#wStop").classList.add("hidden");wCtl=null}};
@@ -812,17 +837,33 @@ async function copyText(el){if(!el.value.trim()){toast("Chưa có nội dung đ�
   try{await navigator.clipboard.writeText(el.value);toast("Đã copy, dán lên Facebook là xong")}catch(e){el.select();toast("Đã bôi đen, nhấn Ctrl+C (hoặc giữ để sao chép)")}}
 let wImg=null;
 function fmtChoice(){const v=$("#wFmt").value;return v==="auto"?null:v}
-function setWImg(spec){wImg=spec?normImg(spec,fmtChoice()||spec.format):null;if(wImg&&fmtChoice())wImg.format=fmtChoice();
+function setWImg(spec){wImg=spec?normImg(spec,fmtChoice()||spec.format):null;if(wImg&&fmtChoice())wImg.format=fmtChoice();$("#wSlogan").value=wImg?.slogan||"";
   $("#wTag").value=wImg?.tag||"";$("#wHi").value=(wImg?.highlights||[]).join("\n");$("#wBadgeBig").value=wImg?.badge.big||"";$("#wBadgeSmall").value=wImg?.badge.small||"";
-  $("#wAccent").value=wImg?.accent||"crimson";fillArtSelect();$("#wArt").value=wImg?.art||"";$("#wTone").value=wImg?.tone||"none";$("#wFlip").checked=!!wImg?.flip;redrawW()}
+  $("#wAccent").value=wImg?.accent||"crimson";fillArtSelect();renderPicker();$("#wArt").value=wImg?.art||"";$("#wTone").value=wImg?.tone||"none";$("#wFlip").checked=!!wImg?.flip;redrawW()}
 function fillArtSelect(){const cur=$("#wArt").value;$("#wArt").innerHTML='<option value="">Tranh mặc định</option>'+artworks.map(a=>`<option value="${a.id}">${esc(a.name||a.id.slice(0,8))}</option>`).join("");$("#wArt").value=artById(cur)?.id||""}
 function redrawW(){drawCard($("#wCanvas"),$("#wHead").value,$("#wSub").value,wImg||{format:fmtChoice()||"classic",seed:7})}
 function syncWImg(){if(!wImg)wImg=normImg({format:fmtChoice()||"classic"});
   Object.assign(wImg,{tag:$("#wTag").value.trim(),highlights:$("#wHi").value.split("\n").map(x=>x.trim()).filter(Boolean).slice(0,4),
     badge:{big:$("#wBadgeBig").value.trim(),small:$("#wBadgeSmall").value.trim()},accent:$("#wAccent").value,
-    art:$("#wArt").value,tone:$("#wTone").value,flip:$("#wFlip").checked});redrawW()}
+    art:$("#wArt").value,tone:$("#wTone").value,flip:$("#wFlip").checked,slogan:$("#wSlogan").value.trim()});redrawW()}
 $("#wHead").oninput=$("#wSub").oninput=redrawW;
-["#wTag","#wHi","#wBadgeBig","#wBadgeSmall"].forEach(id=>$(id).oninput=syncWImg);$("#wAccent").onchange=$("#wArt").onchange=$("#wTone").onchange=$("#wFlip").onchange=syncWImg;
+["#wTag","#wHi","#wBadgeBig","#wBadgeSmall","#wSlogan"].forEach(id=>$(id).oninput=syncWImg);
+$("#wSub").addEventListener("input",()=>{wSubTouched=true});
+["#wFrom","#wTo","#wTime"].forEach(id=>$(id).addEventListener("change",()=>{if(!wSubTouched){$("#wSub").value=timeText();redrawW()}}));
+/* Picking a picture: everything else (title, slogan, time, logo) is laid on automatically */
+function renderPicker(){const cur=wImg?.art||"";
+  $("#wPicker").innerHTML=`<button type="button" data-pick="" aria-pressed="${!cur}"><img src="${BG}" alt=""><span>Tranh mặc định</span></button>`+
+    artworks.map(a=>`<button type="button" data-pick="${a.id}" aria-pressed="${cur===a.id}" title="${esc(a.desc||a.name||"")}"><img src="${esc(a.url)}" alt="" loading="lazy"><span>${esc(a.name||"Ảnh")}</span></button>`).join("")+
+    (artReady?'<button type="button" class="add" data-pick="+">+ Tải ảnh mới</button>':"")}
+$("#wPicker").onclick=e=>{const b=e.target.closest("button[data-pick]");if(!b)return;
+  if(b.dataset.pick==="+"){$("#wArtFile").click();return}
+  if(!wImg)wImg=normImg({format:fmtChoice()||"classic"});wImg.art=b.dataset.pick;wArtPicked=b.dataset.pick;
+  if(!$("#wHead").value.trim()){const tpl=templates.find(x=>x.id===$("#wTpl").value);$("#wHead").value=tpl?.headline||tpl?.name||""}
+  if(!wSubTouched&&!$("#wSub").value)$("#wSub").value=timeText();
+  $("#wArt").value=wImg.art;renderPicker();redrawW()};
+$("#wArtFile").onchange=async e=>{const f=e.target.files;e.target.value="";$("#wThinking").textContent="Đang tải ảnh lên kho và cho AI xem ảnh…";
+  const id=await uploadArt(f);$("#wThinking").textContent=id?"Đã thêm ảnh vào kho và gắn lên ảnh bìa.":"";
+  if(id){if(!wImg)wImg=normImg({format:fmtChoice()||"classic"});wImg.art=id;wArtPicked=id;$("#wArt").value=id;renderPicker();redrawW()}};$("#wAccent").onchange=$("#wTone").onchange=$("#wFlip").onchange=syncWImg;$("#wArt").onchange=()=>{wArtPicked=$("#wArt").value;syncWImg();renderPicker()};
 $("#wFmt").onchange=()=>{if(wImg&&fmtChoice())wImg.format=fmtChoice();redrawW()};
 $("#wReimg").onclick=async()=>{const post=$("#wPost").value.trim();if(!post){toast("Viết bài trước, AI sẽ dựa vào bài để thiết kế ảnh");return}
   const tpl=templates.find(x=>x.id===$("#wTpl").value),fmt=$("#wFmt").value;
@@ -832,7 +873,7 @@ $("#wReimg").onclick=async()=>{const post=$("#wPost").value.trim();if(!post){toa
 Tạo một thiết kế KHÁC với lần trước${wImg?` (lần trước: format ${wImg.format}, màu ${wImg.accent}, nền ${wImg.focus}${wImg.art?`, tranh ${wImg.art.slice(0,8)}`:""}, hiệu ứng ${wImg.motif}, nhãn "${wImg.tag}"; nếu kho có tranh khác hợp thì đổi tranh)`:""}.
 Trả về DUY NHẤT một JSON hợp lệ: {"headline":"tiêu đề ngắn cho ảnh, tối đa 8 chữ",${imgSpecJson(fmt)}}
 ${imgSpecGuide(fmt)}`);
-    if(!tpl?.headline&&r.headline)$("#wHead").value=r.headline;setWImg(r.image);$("#wThinking").textContent="Đã tạo ảnh mới. Bấm lần nữa để có phương án khác.";
+    if(!tpl?.headline&&r.headline)$("#wHead").value=r.headline;wArtPicked=null;setWImg(r.image);$("#wThinking").textContent="Đã tạo ảnh mới. Bấm lần nữa để có phương án khác.";
   }catch(e){$("#wThinking").textContent="";$("#wErr").textContent=e.code==="bad_json"?e.message:aiErrMsg(e)}
   finally{$("#wReimg").disabled=false}};
 $("#wPng").onclick=()=>$("#wCanvas").toBlob(b=>save(fname("png",$("#wHead").value),b),"image/png");
@@ -842,7 +883,7 @@ $("#wSheetWrap").oninput=e=>{const td=e.target.closest("td");if(td&&wSheet)wShee
 $("#wXlsx").onclick=()=>exportXlsx(wSheet,$("#wHead").value);
 $("#wToTask").onclick=async()=>{if(!$("#wPost").value.trim()){toast("Chưa có bài để lưu");return}
   const tpl=templates.find(x=>x.id===$("#wTpl").value);
-  try{await db.collection("tasks").add({title:(tpl?.name?tpl.name+" "+fmtDT($("#wFrom").value).slice(0,5):"")||$("#wHead").value||"Bài đăng",assignee:me.id,due:"",status:"review",request:collectInfo(),
+  try{await db.collection("tasks").add({title:(tpl?.name?tpl.name+" "+fmtDT(fromVal()).slice(0,5):"")||$("#wHead").value||"Bài đăng",assignee:me.id,due:"",status:"review",request:collectInfo(),
     style:tpl?.style||STYLES[0],len:tpl?.len||LENS[1][0],post:$("#wPost").value,sheetJson:wSheet?JSON.stringify(wSheet):"",headline:$("#wHead").value,subline:$("#wSub").value,
     templateId:tpl?.id||"",createdBy:me.id,created:Date.now(),updated:Date.now()});toast("Đã lưu vào cột Chờ duyệt")}catch(e){toast("Không lưu được: "+e.message)}};
 
@@ -971,7 +1012,7 @@ const FOCUS={nam:[430,300],nu:[600,420],canh:[1050,430],doi:[520,380]};
 const MOTIFS=["hoa","may","sao","lua"];
 function rng(seed){let a=seed>>>0||1;return()=>{a+=0x6D2B79F5;let t=a;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296}}
 function normImg(x,fmt){x=x||{};const pick=(v,list,d)=>list.includes(v)?v:d;
-  return {format:pick(x.format,IMG_FORMATS.map(f=>f.id),fmt||"classic"),tag:String(x.tag||"").slice(0,24),
+  return {format:pick(x.format,IMG_FORMATS.map(f=>f.id),fmt||"classic"),tag:String(x.tag||"").slice(0,24),slogan:String(x.slogan||"").slice(0,80),
     highlights:(Array.isArray(x.highlights)?x.highlights:[]).map(String).filter(Boolean).slice(0,4),
     badge:{big:String(x.badge?.big||"").slice(0,6),small:String(x.badge?.small||"").slice(0,18)},
     accent:pick(x.accent,Object.keys(ACCENTS),"crimson"),focus:pick(x.focus,Object.keys(FOCUS),"doi"),
@@ -1001,7 +1042,8 @@ function fitText(ctx,text,maxW,size,min,weight,family){let sz=size;
 function joinFit(ctx,items,sep,maxW){let out="";for(const it of items){const t=out?out+sep+it:it;if(ctx.measureText(t).width>maxW)break;out=t}return out}
 function fitLines(ctx,text,maxW,maxLines,size,min,weight,family){let sz=size,lines;
   do{ctx.font=`${weight} ${sz}px ${family}`;lines=wrap(ctx,text,maxW);sz-=4}while(lines.length>maxLines&&sz>=min);
-  return {lines:lines.slice(0,maxLines),size:sz+4}}
+  const out=lines.slice(0,maxLines);if(lines.length>maxLines){let l=out[maxLines-1];while(l.length>1&&ctx.measureText(l+"…").width>maxW)l=l.slice(0,-1);out[maxLines-1]=l.trimEnd()+"…"}
+  return {lines:out,size:sz+4}}
 const SERIF='"Noto Serif", Georgia, serif',SANS='"Be Vietnam Pro", system-ui, sans-serif';
 function motif(ctx,W,H,kind,rand,area){const [x0,y0,x1,y1]=area||[0,0,W,H];ctx.save();
   for(let i=0;i<(kind==="may"?7:26);i++){const x=x0+rand()*(x1-x0),y=y0+rand()*(y1-y0),r=rand();
@@ -1017,6 +1059,8 @@ function logo(ctx,x,y,w){const h=w*logoImg.height/logoImg.width;ctx.save();ctx.s
   ctx.beginPath();ctx.roundRect(x,y,w,h,14);ctx.fillStyle="#fff";ctx.fill();ctx.shadowBlur=0;ctx.clip();ctx.drawImage(logoImg,x,y,w,h);ctx.restore()}
 function shade(ctx,x,y,w,h,stops,vertical){const g=vertical===false?ctx.createLinearGradient(x,0,x+w,0):ctx.createLinearGradient(0,y,0,y+h);
   stops.forEach(([o,c])=>g.addColorStop(o,c));ctx.fillStyle=g;ctx.fillRect(x,y,w,h)}
+function slogan(ctx,text,x,y,maxW,size,color){if(!text)return;const t=fitText(ctx,"“"+text+"”",maxW,size,Math.round(size*.7),"italic 500",SERIF);
+  ctx.save();ctx.shadowColor="rgba(0,0,0,.55)";ctx.shadowBlur=10;ctx.fillStyle=color;ctx.fillText(t,x,y);ctx.restore()}
 function renderDesign(ctx,W,H,d){const [ ,ac,acl]=ACCENTS[d.accent],rand=rng(d.seed);const head=d.headline||"Tiêu đề bài đăng",sub=d.subline||"";
   ctx.clearRect(0,0,W,H);ctx.textAlign="left";ctx.shadowBlur=0;
   const glow=()=>{ctx.shadowColor="rgba(0,0,0,.6)";ctx.shadowBlur=14},noglow=()=>{ctx.shadowBlur=0};
@@ -1024,7 +1068,8 @@ function renderDesign(ctx,W,H,d){const [ ,ac,acl]=ACCENTS[d.accent],rand=rng(d.s
     ctx.fillStyle="rgba(24,10,26,.93)";ctx.beginPath();ctx.moveTo(610,0);ctx.lineTo(W,0);ctx.lineTo(W,H);ctx.lineTo(540,H);ctx.closePath();ctx.fill();
     ctx.fillStyle=ac;ctx.beginPath();ctx.moveTo(604,0);ctx.lineTo(616,0);ctx.lineTo(546,H);ctx.lineTo(534,H);ctx.closePath();ctx.fill();
     if(!artLogo)logo(ctx,W-160,26,130);let y=48;if(d.tag){pill(ctx,d.tag,640,y,ac);y+=66}else y+=20;
-    const t=fitLines(ctx,head,W-640-180,3,50,34,700,SERIF);ctx.fillStyle="#fff";t.lines.forEach(l=>{y+=t.size;ctx.fillText(l,640,y);y+=10});
+    const t=fitLines(ctx,head,W-640-180,d.slogan?2:3,50,34,700,SERIF);ctx.fillStyle="#fff";t.lines.forEach(l=>{y+=t.size;ctx.fillText(l,640,y);y+=10});
+    if(d.slogan){y+=34;slogan(ctx,d.slogan,640,y,W-680,26,"#F6E3EA")}
     if(sub){const tx=fitText(ctx,sub,W-680,26,18,600,SANS);ctx.fillStyle=acl;y+=40;ctx.fillText(tx,640,y)}
     y+=26;ctx.font=`500 26px ${SANS}`;
     d.highlights.forEach(h=>{y+=48;if(y>H-40)return;ctx.fillStyle=ac;ctx.save();ctx.translate(652,y-9);ctx.rotate(Math.PI/4);ctx.fillRect(-7,-7,14,14);ctx.restore();
@@ -1035,6 +1080,7 @@ function renderDesign(ctx,W,H,d){const [ ,ac,acl]=ACCENTS[d.accent],rand=rng(d.s
     ctx.strokeStyle=ACCENTS.gold[1];ctx.lineWidth=2;ctx.strokeRect(28,28,W-56,H-56);logo(ctx,W/2-60,52,120);ctx.textAlign="center";
     let y=250;if(d.tag){ctx.font=`600 22px ${SANS}`;ctx.fillStyle=acl;ctx.fillText(d.tag.split("").join(" "),W/2,y);y+=16}
     const t=fitLines(ctx,head,W-200,2,68,44,700,SERIF);glow();ctx.fillStyle="#fff";t.lines.forEach(l=>{y+=t.size+6;ctx.fillText(l,W/2,y)});noglow();
+    if(d.slogan){y+=42;slogan(ctx,d.slogan,W/2,y,W-240,28,"#F3E9F1")}
     y+=44;if(sub){const tx=fitText(ctx,sub,W-380,28,20,600,SANS);const w=ctx.measureText(tx).width;ctx.fillStyle=acl;ctx.fillText(tx,W/2,y);
       ctx.fillStyle=ACCENTS.gold[1];ctx.fillRect(W/2-w/2-110,y-10,80,2);ctx.fillRect(W/2+w/2+30,y-10,80,2);y+=48}
     if(d.highlights.length){ctx.font=`500 24px ${SANS}`;ctx.fillStyle="#EADCE6";ctx.fillText(joinFit(ctx,d.highlights,"  ·  ",W-200),W/2,y)}
@@ -1047,7 +1093,8 @@ function renderDesign(ctx,W,H,d){const [ ,ac,acl]=ACCENTS[d.accent],rand=rng(d.s
     ctx.textAlign="center";ctx.fillStyle="#fff";const big=d.badge.big||"HOT";const b=fitLines(ctx,big,R*1.6,1,110,50,800,SERIF);ctx.fillText(b.lines[0],cx,cy+(d.badge.small?20:b.size/3));
     if(d.badge.small){ctx.font=`700 24px ${SANS}`;ctx.fillStyle=acl;ctx.fillText(d.badge.small.toUpperCase(),cx,cy+62)}ctx.textAlign="left";
     if(!artLogo)logo(ctx,W-170,24,140);let y=150;if(d.tag){pill(ctx,d.tag,500,y,ac);y+=62}
-    const t=fitLines(ctx,head,W-560,3,58,38,700,SERIF);glow();ctx.fillStyle="#fff";t.lines.forEach(l=>{y+=t.size;ctx.fillText(l,500,y);y+=8});noglow();
+    const t=fitLines(ctx,head,W-560,d.slogan?2:3,58,38,700,SERIF);glow();ctx.fillStyle="#fff";t.lines.forEach(l=>{y+=t.size;ctx.fillText(l,500,y);y+=8});noglow();
+    if(d.slogan){y+=36;slogan(ctx,d.slogan,500,y,W-540,28,"#F6E3EA")}
     if(sub){const tx=fitText(ctx,sub,W-540,28,20,600,SANS);ctx.fillStyle=acl;y+=40;ctx.fillText(tx,500,y)}
     y+=24;let x=500;ctx.font=`600 21px ${SANS}`;d.highlights.forEach(h=>{const w=ctx.measureText(h).width+28;if(x+w>W-40){x=500;y+=46}if(y>H-60)return;
       ctx.fillStyle="rgba(255,255,255,.14)";ctx.beginPath();ctx.roundRect(x,y+14,w,36,18);ctx.fill();ctx.fillStyle="#fff";ctx.fillText(h,x+14,y+39);x+=w+10});return}
@@ -1057,16 +1104,20 @@ function renderDesign(ctx,W,H,d){const [ ,ac,acl]=ACCENTS[d.accent],rand=rng(d.s
     ctx.fillStyle="#fff";ctx.beginPath();ctx.roundRect(56,by-30,200,200,18);ctx.fill();ctx.fillStyle=ac;ctx.fillRect(56,by-30,200,44);
     ctx.textAlign="center";ctx.font=`700 22px ${SANS}`;ctx.fillStyle="#fff";ctx.fillText((d.badge.small||d.tag||"THÔNG BÁO").toUpperCase().slice(0,14),156,by);
     const bb=fitLines(ctx,d.badge.big||(sub.match(/\d{1,2}\/\d{1,2}/)||["NEW"])[0],170,1,72,34,800,SERIF);ctx.fillStyle="#2A1A2C";ctx.fillText(bb.lines[0],156,by+100);ctx.textAlign="left";
-    if(!artLogo)logo(ctx,W-170,24,140);if(d.tag)pill(ctx,d.tag,300,by-60,"rgba(22,10,24,.75)");
+    if(!artLogo)logo(ctx,W-170,24,140);const tw=d.tag?pill(ctx,d.tag,300,by-60,"rgba(22,10,24,.75)"):0;
+    if(d.slogan){const sx=300+(tw?tw+16:0);slogan(ctx,d.slogan,sx,by-28,W-sx-40,28,"#fff")}
     const t=fitLines(ctx,head,W-360,2,56,36,700,SERIF);glow();ctx.fillStyle="#fff";let y=by+(t.lines.length>1?10:40);t.lines.forEach(l=>{y+=t.size;ctx.fillText(l,300,y);y+=6});noglow();
     if(sub){const tx=fitText(ctx,sub,W-340,26,18,600,SANS);ctx.fillStyle="#fff";ctx.fillText(tx,300,by+bh-24)}
     if(d.highlights.length){ctx.font=`600 24px ${SANS}`;glow();ctx.fillStyle="#fff";ctx.fillText(joinFit(ctx,d.highlights,"  ✦  ",W-120),60,H-30);noglow()}return}
   /* classic */
   shade(ctx,0,0,W,H,[[0,"rgba(30,12,28,0)"],[.45,"rgba(30,12,28,.05)"],[1,"rgba(30,12,28,.88)"]]);if(!artLogo)logo(ctx,W-210,24,180);
   if(d.tag)pill(ctx,d.tag,60,40,ac);
-  const t=fitLines(ctx,head,W-120,3,66,44,700,SERIF);let y=H-60-(sub?54:0)-(d.highlights.length?52:0)-(t.lines.length-1)*(t.size+12);
-  glow();ctx.fillStyle="#fff";t.lines.forEach(l=>{ctx.fillText(l,60,y);y+=t.size+12});noglow();
-  if(sub){const tx=fitText(ctx,sub,W-140,30,20,600,SANS);ctx.fillStyle=acl;ctx.fillText(tx,62,H-56-(d.highlights.length?52:0))}
+  /* stack from the bottom: chips, time, slogan, title */
+  let yb=H-56-(d.highlights.length?52:0);
+  if(sub){const tx=fitText(ctx,sub,W-140,30,20,600,SANS);ctx.fillStyle=acl;ctx.fillText(tx,62,yb);yb-=50}
+  if(d.slogan){slogan(ctx,d.slogan,62,yb,W-140,30,"#F6E3EA");yb-=50}
+  const t=fitLines(ctx,head,W-120,d.slogan?2:3,66,44,700,SERIF);let y=yb-6-(t.lines.length-1)*(t.size+12);
+  glow();ctx.fillStyle="#fff";ctx.font=`700 ${t.size}px ${SERIF}`;t.lines.forEach(l=>{ctx.fillText(l,60,y);y+=t.size+12});noglow();
   if(d.highlights.length){ctx.font=`600 22px ${SANS}`;let x=60;d.highlights.forEach(h=>{const w=ctx.measureText(h).width+28;if(x+w>W-40)return;
     ctx.fillStyle="rgba(255,255,255,.16)";ctx.beginPath();ctx.roundRect(x,H-92,w,36,18);ctx.fill();ctx.fillStyle="#fff";ctx.fillText(h,x+14,H-67);x+=w+10})}
   ctx.fillStyle=ac;ctx.fillRect(60,H-30,120,5)}
@@ -1081,7 +1132,7 @@ function artById(id){if(!id)return null;id=String(id);return artworks.find(a=>a.
 function artImg(url){let im=artCache.get(url);if(!im){im=new Image();im.crossOrigin="anonymous";im.src=url;artCache.set(url,im)}return im}
 function artCatalog(){return artworks.slice(0,80).map(a=>[a.id.slice(0,8),a.name||"",(a.tags||[]).join(", "),a.mood||"",a.event||""].join(" | ")).join("\n")}
 async function loadArt(){if(!sb)return;const {data,error}=await sb.from("artworks").select("id,data,created_by").order("created_at",{ascending:false});
-  artReady=!error;artworks=error?[]:data.map(r=>({id:r.id,...(r.data||{}),createdBy:r.created_by}));if(me){renderArt();renderHome();fillArtSelect()}}
+  artReady=!error;artworks=error?[]:data.map(r=>({id:r.id,...(r.data||{}),createdBy:r.created_by}));if(me){renderArt();renderHome();fillArtSelect();renderPicker()}}
 function renderArt(){$("#artSetup").classList.toggle("hidden",artReady);$("#artDrop").classList.toggle("hidden",!artReady);$("#artPick").disabled=!artReady;
   $("#artGrid").innerHTML=artworks.length?artworks.map(a=>`<div class="art"><img src="${esc(a.url)}" alt="${esc(a.name||"")}" loading="lazy">
     <div class="b"><div class="n">${esc(a.name||"Ảnh chưa đặt tên")}</div>${a.desc?`<div class="d">${esc(a.desc)}</div>`:""}
@@ -1100,15 +1151,15 @@ focus: vị trí chủ thể chính (tỉ lệ 0–1 theo chiều ngang, dọc).
   return {name:String(r.name||"").slice(0,60),desc:String(r.desc||"").slice(0,300),tags:(Array.isArray(r.tags)?r.tags:[]).map(t=>String(t).toLowerCase().trim()).filter(Boolean).slice(0,12),
     mood:String(r.mood||""),focus:{x:n(r.focus?.x??.5),y:n(r.focus?.y??.45)},logo:L&&L.x1>L.x0&&L.y1>L.y0?{x0:n(L.x0),y0:n(L.y0),x1:n(L.x1),y1:n(L.y1)}:null}}
 async function uploadArt(files){files=[...files].filter(f=>/^image\/(jpeg|png|webp)$/.test(f.type));if(!files.length){toast("Chỉ nhận ảnh JPG, PNG hoặc WEBP");return}
-  let ok=0;for(const [i,f] of files.entries()){$("#artProg").textContent=`Đang xử lý ảnh ${i+1}/${files.length}: ${f.name}…`;
+  let ok=0,lastId=null;for(const [i,f] of files.entries()){$("#artProg").textContent=`Đang xử lý ảnh ${i+1}/${files.length}: ${f.name}…`;
     try{const im=await loadFile(f);const big=await shrink(im,1600,.86),small=await shrink(im,768,.8);
       const path=`${Date.now().toString(36)}-${Math.random().toString(36).slice(2,10)}.jpg`;const up=await sb.storage.from("artworks").upload(path,big.blob,{contentType:"image/jpeg"});if(up.error)throw up.error;
       const url=sb.storage.from("artworks").getPublicUrl(path).data.publicUrl;
       let meta={name:f.name.replace(/\.[^.]+$/,""),desc:"",tags:[],mood:"",focus:{x:.5,y:.45},logo:null};
       try{meta={...meta,...await tagArt(small.data,f.name)}}catch(e){toast("AI chưa gắn nhãn được "+f.name+", bạn có thể bấm AI nhận diện lại sau")}
-      await db.collection("artworks").add({...meta,event:"",path,url,w:big.w,h:big.h,addedBy:me.id,created:Date.now()});ok++}
+      lastId=(await db.collection("artworks").add({...meta,event:"",path,url,w:big.w,h:big.h,addedBy:me.id,created:Date.now()})).id;ok++}
     catch(e){toast("Không tải được "+f.name+": "+errMsg(e))}}
-  $("#artProg").textContent=ok?`Đã thêm ${ok}/${files.length} ảnh vào kho.`:"";loadArt()}
+  $("#artProg").textContent=ok?`Đã thêm ${ok}/${files.length} ảnh vào kho.`:"";await loadArt();return lastId}
 $("#artPick").onclick=()=>$("#artFile").click();$("#artDrop").onclick=()=>$("#artFile").click();
 $("#artFile").onchange=e=>{uploadArt(e.target.files);e.target.value=""};
 ["dragenter","dragover"].forEach(ev=>$("#artDrop").addEventListener(ev,e=>{e.preventDefault();$("#artDrop").classList.add("over")}));
