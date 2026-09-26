@@ -160,6 +160,8 @@ details.imgmore summary{cursor:pointer;font-weight:600;font-size:13px;color:var(
 .picker button[aria-pressed="true"]{border-color:var(--crimson)}
 .picker .add{display:grid;place-items:center;aspect-ratio:auto;font-size:13px;font-weight:600;color:var(--ink-soft);border:2px dashed var(--line)}
 
+#wCopyAll.pulse{background:var(--gold);animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 6px rgba(217,178,106,.35)}}
 /* Image viewer */
 #imgView{width:min(1200px,96vw);max-height:94vh;background:#140b16;color:#F3E9F1;padding:0}
 #imgView::backdrop{background:rgba(10,5,12,.82)}
@@ -1001,7 +1003,7 @@ $("#wMotifSave").onclick=async()=>{const desc=$("#wMotif").value.trim();if(!desc
   try{const r=await db.collection("templates").add({kind:"artstyle",name:name.trim(),desc,format:"poster",accent:"moss",font:"charm",updated:Date.now(),by:me.id});
     await refresh("templates");$("#wMotifSel").value=r.id;toast("Đã lưu motip “"+name.trim()+"”")}catch(e){toast("Không lưu được: "+errMsg(e))}};
 /* the picture that goes with the post: AI-drawn or a saved activity picture */
-function showAiImg(url,fromActs){wAiUrl=url;const saved=fromActs||actImgs.some(a=>a.url===url);
+function showAiImg(url,fromActs){wAiUrl=url;if(typeof setCopyStep==="function")setCopyStep(0);const saved=fromActs||actImgs.some(a=>a.url===url);
   $("#wAiOut").innerHTML=url?`<img src="${esc(url)}" alt="Ảnh bài đăng" style="width:100%;border-radius:12px;border:1px solid var(--line);display:block">
   <div class="row"><button type="button" class="btn small" id="wAiCopy">Copy ảnh</button><button type="button" class="btn ghost small" id="wAiDl">Tải ảnh</button>${saved?"":'<button type="button" class="btn ghost small" id="wAiKeep">Lưu vào Ảnh hoạt động</button>'}<a class="btn ghost small" href="${esc(url)}" target="_blank" rel="noopener">Mở ảnh gốc</a></div>`:"";renderActPicker()}
 $("#wAiOut").onclick=async e=>{if(!wAiUrl)return;const id=e.target.id;
@@ -1011,18 +1013,19 @@ $("#wAiOut").onclick=async e=>{if(!wAiUrl)return;const id=e.target.id;
     try{await db.collection("artworks").add({kind:"activity",name:name.trim()||"Ảnh hoạt động",url:wAiUrl,path:src?.path||"",w:src?.w||0,h:src?.h||0,addedBy:me.id,created:Date.now()});await loadArt();showAiImg(wAiUrl,true);toast("Đã lưu vào Ảnh hoạt động")}
     catch(err){toast("Không lưu được: "+errMsg(err))}}};
 /* Clipboard images must be PNG; the promise form keeps Safari's user-gesture rule happy */
-/* one clipboard item with the post as text + HTML and the chosen picture as PNG */
-function pngOf(url){return new Promise((res,rej)=>{const im=new Image();im.crossOrigin="anonymous";im.onload=()=>{const c=document.createElement("canvas");c.width=im.naturalWidth;c.height=im.naturalHeight;
-  c.getContext("2d").drawImage(im,0,0);c.toBlob(b=>b?res(b):rej(new Error("png")),"image/png")};im.onerror=()=>rej(new Error("load"));im.src=url})}
-function copyAll(){const text=$("#wPost").value.trim();if(!text){toast("Chưa có nội dung để copy");return}
-  if(!wAiUrl){copyText($("#wPost"));return}
-  if(!navigator.clipboard?.write||!window.ClipboardItem){copyText($("#wPost"));toast("Trình duyệt chỉ copy được chữ, hãy bấm Copy ảnh riêng");return}
-  const png=pngOf(wAiUrl);
-  const html=png.then(b=>new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(new Blob([`<div>${esc(text).replace(/\n/g,"<br>")}</div><img src="${fr.result}">`],{type:"text/html"}));fr.readAsDataURL(b)}));
-  navigator.clipboard.write([new ClipboardItem({"text/plain":new Blob([text],{type:"text/plain"}),"text/html":html,"image/png":png})])
-    .then(()=>toast("Đã copy bài + ảnh. Dán (Ctrl+V) vào ô tạo bài Facebook; nếu ảnh chưa vào, bấm Copy ảnh rồi dán thêm"),
-      ()=>{copyText($("#wPost"));toast("Chỉ copy được chữ, hãy bấm Copy ảnh để copy ảnh riêng")})}
+/* Facebook keeps only the text when text and picture are pasted together, so copy in two steps on the same button */
+let copyStep=0,copyStepTimer=null;
+function setCopyStep(n){copyStep=n;clearTimeout(copyStepTimer);const b=$("#wCopyAll");
+  b.textContent=n===1?"Bước 2: Copy ảnh":"Copy toàn bộ (bài + ảnh)";b.classList.toggle("pulse",n===1);
+  if(n===1)copyStepTimer=setTimeout(()=>setCopyStep(0),120000)}
+async function copyAll(){const text=$("#wPost").value.trim();
+  if(copyStep===1&&wAiUrl){copyImage(wAiUrl);setCopyStep(0);return}
+  if(!text){if(wAiUrl){copyImage(wAiUrl);return}toast("Chưa có nội dung để copy");return}
+  try{await navigator.clipboard.writeText($("#wPost").value)}catch(e){$("#wPost").select();document.execCommand("copy")}
+  if(wAiUrl){setCopyStep(1);toast("Bước 1: đã copy nội dung. Dán (Ctrl+V) vào Facebook, rồi bấm “Bước 2: Copy ảnh” và dán tiếp")}
+  else toast("Đã copy nội dung (chưa chọn ảnh)")}
 $("#wCopyAll").onclick=copyAll;
+$("#wPost").addEventListener("input",()=>setCopyStep(0));
 function copyImage(url){if(!navigator.clipboard?.write||!window.ClipboardItem){toast("Trình duyệt chưa hỗ trợ copy ảnh, hãy dùng Tải ảnh");return}
   const png=new Promise((res,rej)=>{const im=new Image();im.crossOrigin="anonymous";im.onload=()=>{const c=document.createElement("canvas");c.width=im.naturalWidth;c.height=im.naturalHeight;
     c.getContext("2d").drawImage(im,0,0);c.toBlob(b=>b?res(b):rej(new Error("png")),"image/png")};im.onerror=()=>rej(new Error("load"));im.src=url});
