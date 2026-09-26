@@ -135,6 +135,24 @@ canvas{width:100%;height:auto;border-radius:10px;border:1px solid var(--line);ma
 .status-flow button[aria-pressed="true"]{background:var(--crimson);border-color:var(--crimson);color:#fff}
 .thinking{font-size:13px;color:var(--ink-soft);font-style:italic}
 
+/* Sheet builder */
+.sh-empty{display:grid;place-items:center;text-align:center;min-height:320px;color:var(--ink-soft);border:1px dashed var(--line);border-radius:14px;padding:24px}
+.sh-empty svg{width:48px;height:48px;color:var(--blossom);margin-bottom:8px}
+.sh-head{border-radius:14px;padding:16px 18px;margin-bottom:14px;color:#fff;background:linear-gradient(120deg,#7A1230,#9E1B3A 45%,#6A55B8)}
+.sh-head h3{margin:0;font:700 21px/1.3 var(--serif);outline:none}
+.sh-head p{margin:4px 0 10px;color:#F6E3EA;font-size:14px}
+.sh-head .chips{display:flex;gap:6px;flex-wrap:wrap}
+.sh-head .chips span{font-size:12px;padding:2px 10px;border-radius:999px;background:rgba(255,255,255,.18)}
+.sh-sec{margin-bottom:14px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--paper);opacity:0;animation:rise .5s ease-out forwards}
+.sh-sec h4{margin:0;padding:10px 14px;display:flex;align-items:center;gap:8px;font:700 15px var(--sans);border-left:4px solid var(--c);background:color-mix(in srgb,var(--c) 12%,var(--paper))}
+.sh-sec h4 .n{margin-left:auto;font-weight:500;font-size:12px;color:var(--ink-soft)}
+.sh-sec .tablewrap{border:0;border-radius:0;margin:0}
+.sh-sec th{background:color-mix(in srgb,var(--c) 22%,var(--paper));white-space:nowrap}
+.sh-sec tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--c) 5%,var(--paper))}
+.sh-sec td:first-child{font-weight:600}
+.skel{height:14px;border-radius:7px;margin:10px 0;background:linear-gradient(90deg,var(--line) 25%,var(--blossom-soft) 50%,var(--line) 75%);background-size:200% 100%;animation:shimmer 1.2s linear infinite}
+@keyframes shimmer{from{background-position:200% 0}to{background-position:-200% 0}}
+
 /* Accounts */
 .acc{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;max-width:760px}
 .acc table td,.acc table th{padding:10px}
@@ -155,11 +173,11 @@ canvas{width:100%;height:auto;border-radius:10px;border:1px solid var(--line);ma
 @keyframes portalin{from{opacity:0;translate:0 18px}to{opacity:1;translate:0 0}}
 @keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 @keyframes fall{0%{transform:translate(0,0) rotate(0)}100%{transform:translate(var(--dx,60px),520px) rotate(540deg)}}
-.portals{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;margin-top:22px;perspective:1000px}
+.portals{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:18px;margin-top:22px;perspective:1000px}
 .portal{position:relative;aspect-ratio:3/4;border:0;padding:0;border-radius:18px;overflow:hidden;cursor:pointer;text-align:left;color:#fff;background:#1a0f1c;
   box-shadow:0 10px 26px rgba(20,10,22,.35),inset 0 0 0 1px rgba(217,178,106,.55);transform-style:preserve-3d;
   transition:transform .35s cubic-bezier(.2,.8,.2,1),box-shadow .35s;opacity:0;animation:portalin .7s ease-out forwards}
-.portal:nth-child(1){animation-delay:.35s}.portal:nth-child(2){animation-delay:.45s}.portal:nth-child(3){animation-delay:.55s}.portal:nth-child(4){animation-delay:.65s}
+.portal:nth-child(1){animation-delay:.35s}.portal:nth-child(2){animation-delay:.45s}.portal:nth-child(3){animation-delay:.55s}.portal:nth-child(4){animation-delay:.65s}.portal:nth-child(5){animation-delay:.75s}
 .portal .art{position:absolute;inset:0;background:url(assets/bg.jpg) var(--pos,center)/auto 170% no-repeat;transition:transform .6s cubic-bezier(.2,.8,.2,1)}
 .portal::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(0deg,rgba(26,12,28,.95) 0%,rgba(26,12,28,.25) 55%,rgba(26,12,28,0) 80%)}
 .portal::after{content:"";position:absolute;inset:0;z-index:2;background:linear-gradient(115deg,transparent 30%,rgba(255,236,200,.35) 48%,transparent 62%);
@@ -234,6 +252,7 @@ aside.side .logo{cursor:pointer}
       <button data-view="write"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/></svg><span>Viết bài nhanh</span></button>
       <button data-view="board"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="5" height="16" rx="1"/><rect x="10" y="4" width="5" height="10" rx="1"/><rect x="17" y="4" width="4" height="13" rx="1"/></svg><span>Công việc</span></button>
       <button data-view="templates"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/></svg><span>Mẫu bài viết</span></button>
+      <button data-view="sheet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M3 14.5h18M9 4v16"/></svg><span>Tạo sheet</span></button>
       <button data-view="accounts" id="tabAcc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M17 8v6M14 11h6"/></svg><span>Tài khoản</span></button>
     </nav>
     <div class="me"><b id="meName"></b><span class="role" id="meRole"></span><button class="btn ghost small" id="chgPass">Đổi mật khẩu</button><button class="btn ghost small" id="logout">Đăng xuất</button></div>
@@ -245,7 +264,7 @@ aside.side .logo{cursor:pointer}
         <div class="petals" id="petals" aria-hidden="true"></div>
         <div class="kicker">Tam Sinh Duyên · Fanpage</div>
         <h1 id="homeHi">Chào mừng trở lại</h1>
-        <p>Chọn một thẻ bên dưới để bắt đầu: viết bài, theo dõi công việc hoặc quản lý mẫu bài.</p>
+        <p>Chọn một thẻ bên dưới để bắt đầu: viết bài, theo dõi công việc, quản lý mẫu bài hoặc tạo sheet.</p>
       </div>
       <div class="portals" id="portals"></div>
     </div>
@@ -286,6 +305,26 @@ aside.side .logo{cursor:pointer}
             <div class="tablewrap" id="wSheetWrap"></div>
             <div class="row"><button class="btn ghost small" id="wXlsx">Tải file Excel</button></div>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="viewSheet" class="hidden">
+      <div class="strip"><h2>Tạo sheet từ bài viết</h2></div>
+      <div class="two">
+        <div class="panel">
+          <label for="sPost" style="margin-top:0">Dán bài viết</label>
+          <textarea id="sPost" style="min-height:280px" maxlength="12000" placeholder="Copy bài đăng (sự kiện, giftcode, đua top…) rồi dán vào đây."></textarea>
+          <div class="grid2">
+            <div><label for="sKind">Kiểu sheet</label><select id="sKind"></select></div>
+            <div><label for="sNote">Ghi chú thêm cho AI (không bắt buộc)</label><input id="sNote" placeholder="Ví dụ: thêm cột Người phụ trách"></div>
+          </div>
+          <div class="row"><button class="btn" id="sGen">Tạo sheet</button><button type="button" class="btn ghost" id="sClear">Làm lại</button><button class="btn ghost hidden" id="sStop">Dừng</button><span class="thinking" id="sThinking"></span></div>
+          <div class="err" id="sErr"></div>
+        </div>
+        <div class="panel">
+          <div id="sOut"></div>
+          <div class="row hidden" id="sActions"><button class="btn" id="sCopy">Copy dán Google Sheets</button><button class="btn ghost" id="sXlsx">Tải file Excel</button></div>
         </div>
       </div>
     </div>
@@ -480,7 +519,7 @@ function renderShell(){$("#meName").textContent=me.name;$("#meRole").textContent
   $("#tabAcc").classList.toggle("hidden",me.role!=="admin");if(me.role==="admin")renderAccounts()}
 $("#tabs").onclick=e=>{const b=e.target.closest("button");if(b)show(b.dataset.view)};
 $("aside.side .logo").onclick=()=>show("home");
-const VIEWS={home:"#viewHome",write:"#viewWrite",board:"#viewBoard",templates:"#viewTemplates",accounts:"#viewAccounts"};
+const VIEWS={home:"#viewHome",write:"#viewWrite",board:"#viewBoard",templates:"#viewTemplates",sheet:"#viewSheet",accounts:"#viewAccounts"};
 function show(v){if(v==="accounts"&&me.role!=="admin")v="home";
   document.querySelectorAll("#tabs button").forEach(b=>b.setAttribute("aria-current",b.dataset.view===v));
   for(const k in VIEWS)$(VIEWS[k]).classList.toggle("hidden",k!==v);scrollTo(0,0)}
@@ -490,6 +529,7 @@ const PORTALS=[
   {v:"write",t:"Viết bài nhanh",s:"Viết bài theo mẫu, copy đăng Facebook",pos:"20% 40%",n:()=>""},
   {v:"board",t:"Công việc",s:"việc đang chờ xử lý",pos:"42% 70%",n:()=>tasks.filter(t=>t.status!=="done").length},
   {v:"templates",t:"Mẫu bài viết",s:"mẫu đã lưu",pos:"78% 55%",n:()=>templates.length},
+  {v:"sheet",t:"Tạo sheet",s:"Dán bài viết, AI lập bảng phân loại",pos:"60% 35%",n:()=>""},
   {v:"accounts",t:"Tài khoản",s:"thành viên trong nhóm",pos:"92% 20%",n:()=>accounts.length,admin:true}];
 function renderHome(){if(!me)return;
   $("#homeHi").textContent="Chào "+me.name;
@@ -700,6 +740,72 @@ $("#tDel").onclick=async()=>{if(!confirm("Xóa mẫu này?"))return;try{await db
 
 $("#dStop").onclick=()=>{cancelAi();abortCtl?.abort()};
 $("#dCopy").onclick=()=>copyText($("#dPost"));
+
+/* ---------- sheet builder: paste a post, AI splits it into categorized tables ---------- */
+const S_KINDS=[["auto","Tự động (AI tự chia nhóm)"],["plan","Kế hoạch triển khai"],["reward","Danh sách phần thưởng"],["timeline","Lịch trình theo thời gian"]];
+const S_KIND_HINT={auto:"Tự chọn cách chia nhóm hợp lý nhất với nội dung bài.",
+  plan:"Ưu tiên nhóm Kế hoạch triển khai với cột Hạng mục, Việc cần làm, Thời gian, Người phụ trách (để trống), Trạng thái (Chưa làm).",
+  reward:"Ưu tiên tách phần thưởng thật chi tiết: mỗi vật phẩm một dòng, có cột Hạng/Mốc, Vật phẩm, Số lượng, Điều kiện nhận.",
+  timeline:"Ưu tiên nhóm Lịch trình: mỗi mốc thời gian một dòng, có cột Thời gian, Hoạt động, Ghi chú."};
+const S_COLORS=["#9E1B3A","#B8904A","#6A55B8","#2F7D5B","#B4661C","#3F6FA8"];
+const S_LIGHT=["#F6DDE3","#F3EAD8","#E6E1F5","#DCEFE5","#F5E4D2","#DDE6F3"];
+let sData=null, sCtl=null;
+$("#sKind").innerHTML=S_KINDS.map(([v,l])=>`<option value="${v}">${l}</option>`).join("");
+function sheetPrompt(post,kind,note){return `Bạn là trợ lý vận hành fanpage game kiếm hiệp cổ trang "Tam Sinh Duyên". Đọc bài đăng dưới đây và chuyển thành bảng tính rõ ràng, phân loại theo nhóm để đội vận hành theo dõi.
+BÀI ĐĂNG:
+"""${post}"""
+Yêu cầu:
+- Chia thành 2–6 nhóm hợp lý với nội dung, ví dụ: Thông tin chung, Thời gian, Cách tham gia / Điều kiện, Phần thưởng, Lưu ý. Bỏ nhóm không có thông tin.
+- ${S_KIND_HINT[kind]}
+- Mỗi nhóm có cột riêng phù hợp (2–5 cột). Ô ngắn gọn, bỏ emoji và hashtag.
+- Giữ nguyên tên vật phẩm, số liệu, ngày giờ như trong bài. KHÔNG bịa thông tin không có trong bài; thiếu thì để ô trống.
+${note?`- Ghi chú thêm: ${note}`:""}
+Trả về DUY NHẤT một JSON hợp lệ, không kèm chữ nào khác:
+{"title":"tên sheet ngắn","summary":"1 câu tóm tắt bài","sections":[{"name":"tên nhóm","columns":["..."],"rows":[["..."]]}]}`}
+function normSections(r){const secs=(Array.isArray(r?.sections)?r.sections:[]).filter(x=>Array.isArray(x?.columns)&&x.columns.length)
+  .map(x=>({name:String(x.name||"Nhóm"),columns:x.columns.map(String),rows:(x.rows||[]).map(row=>x.columns.map((_,i)=>String((row||[])[i]??"")))}));
+  return secs.length?{title:String(r.title||"Sheet hoạt động"),summary:String(r.summary||""),sections:secs}:null}
+function renderSheetOut(loading){const o=$("#sOut");$("#sActions").classList.toggle("hidden",!sData||loading);
+  if(loading){o.innerHTML='<div class="skel" style="width:60%;height:22px"></div>'+'<div class="skel"></div><div class="skel" style="width:85%"></div><div class="skel" style="width:70%"></div>'.repeat(3);return}
+  if(!sData){o.innerHTML='<div class="sh-empty"><div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M3 14.5h18M9 4v16"/></svg><div>Dán bài viết bên trái rồi bấm <b>Tạo sheet</b>.<br>AI sẽ tách thành các bảng theo nhóm: thời gian, điều kiện, phần thưởng…</div></div></div>';return}
+  const total=sData.sections.reduce((a,x)=>a+x.rows.length,0);
+  o.innerHTML=`<div class="sh-head"><h3 contenteditable="true" id="sTitle">${esc(sData.title)}</h3>${sData.summary?`<p>${esc(sData.summary)}</p>`:""}<div class="chips"><span>${sData.sections.length} nhóm</span><span>${total} dòng</span><span>Bấm vào ô để sửa</span></div></div>`+
+    sData.sections.map((x,si)=>`<section class="sh-sec" style="--c:${S_COLORS[si%S_COLORS.length]};animation-delay:${si*.08}s"><h4>${esc(x.name)}<span class="n">${x.rows.length} dòng</span></h4><div class="tablewrap"><table><thead><tr>${x.columns.map(c=>`<th>${esc(c)}</th>`).join("")}</tr></thead><tbody>${x.rows.map((r,ri)=>`<tr>${r.map((c,ci)=>`<td contenteditable="true" data-s="${si}" data-r="${ri}" data-c="${ci}">${esc(c)}</td>`).join("")}</tr>`).join("")}</tbody></table></div></section>`).join("")}
+$("#sOut").oninput=e=>{if(!sData)return;if(e.target.id==="sTitle"){sData.title=e.target.textContent;return}
+  const td=e.target.closest("td[data-s]");if(td)sData.sections[td.dataset.s].rows[td.dataset.r][td.dataset.c]=td.textContent};
+$("#sGen").onclick=async()=>{const post=$("#sPost").value.trim();
+  if(!post){$("#sErr").textContent="Hãy dán bài viết vào trước.";return}
+  $("#sErr").textContent="";$("#sGen").disabled=true;$("#sStop").classList.remove("hidden");$("#sThinking").textContent="AI đang đọc bài và lập sheet…";renderSheetOut(true);
+  sCtl=new AbortController();
+  try{const r=normSections(await aiJson(sheetPrompt(post,$("#sKind").value,$("#sNote").value.trim())));
+    if(!r)throw {code:"bad_json",message:"AI chưa tách được bảng, bấm Tạo sheet để thử lại"};
+    sData=r;$("#sThinking").textContent="Xong. Sửa trực tiếp trong bảng nếu cần.";
+  }catch(e){$("#sThinking").textContent="";$("#sErr").textContent=e.code==="bad_json"?e.message:aiErrMsg(e)}
+  finally{renderSheetOut(false);if(sData&&innerWidth<=860)$("#sOut").scrollIntoView({behavior:"smooth"});$("#sGen").disabled=false;$("#sStop").classList.add("hidden");sCtl=null}};
+$("#sStop").onclick=()=>{cancelAi();sCtl?.abort()};
+$("#sClear").onclick=()=>{$("#sPost").value="";$("#sNote").value="";sData=null;$("#sErr").textContent="";$("#sThinking").textContent="";renderSheetOut(false);$("#sPost").focus()};
+/* Google Sheets keeps colors when pasting an HTML table; plain TSV is the fallback */
+$("#sCopy").onclick=async()=>{if(!sData)return;const width=Math.max(...sData.sections.map(x=>x.columns.length));
+  const cell=(v,st)=>`<td style="border:1px solid #D9CCD6;padding:4px 8px;${st||""}">${esc(v)}</td>`;
+  let html=`<table style="border-collapse:collapse;font-family:Arial"><tr><td colspan="${width}" style="font-size:16px;font-weight:bold;color:#ffffff;background:#7A1230;padding:6px 8px">${esc(sData.title)}</td></tr>`;
+  const tsv=[[sData.title]];
+  sData.sections.forEach((x,si)=>{const c=S_COLORS[si%S_COLORS.length];
+    html+=`<tr><td colspan="${width}"></td></tr><tr><td colspan="${width}" style="font-weight:bold;color:#ffffff;background:${c};padding:4px 8px">${esc(x.name)}</td></tr>`;
+    html+="<tr>"+x.columns.map(h=>cell(h,`font-weight:bold;background:${S_LIGHT[si%S_LIGHT.length]}`)).join("")+"</tr>";
+    html+=x.rows.map(r=>"<tr>"+r.map(v=>cell(v)).join("")+"</tr>").join("");
+    tsv.push([],[x.name],x.columns,...x.rows)});
+  html+="</table>";const text=tsv.map(r=>r.map(v=>String(v).replace(/[\t\n]+/g," ")).join("\t")).join("\n");
+  try{await navigator.clipboard.write([new ClipboardItem({"text/html":new Blob([html],{type:"text/html"}),"text/plain":new Blob([text],{type:"text/plain"})})]);toast("Đã copy, mở Google Sheets rồi dán (Ctrl+V)")}
+  catch(e){try{await navigator.clipboard.writeText(text);toast("Đã copy, mở Google Sheets rồi dán (Ctrl+V)")}catch(_){toast("Trình duyệt chặn copy, hãy dùng nút Tải file Excel")}}};
+$("#sXlsx").onclick=()=>{if(!sData)return;if(!window.XLSX){toast("Chưa tải được thư viện Excel, hãy thử lại");return}
+  const wb=XLSX.utils.book_new(),used=new Set();
+  const widths=aoa=>{const w=[];aoa.forEach(r=>r.forEach((v,i)=>{w[i]=Math.min(60,Math.max(w[i]||10,String(v).length+2))}));return w.map(wch=>({wch}))};
+  const add=(name,aoa)=>{let n=name.replace(/[\\/?*[\]:]/g," ").slice(0,28).trim()||"Sheet",k=n,i=2;while(used.has(k.toLowerCase()))k=n+" "+i++;used.add(k.toLowerCase());
+    const ws=XLSX.utils.aoa_to_sheet(aoa);ws["!cols"]=widths(aoa);XLSX.utils.book_append_sheet(wb,ws,k)};
+  const all=[[sData.title],...(sData.summary?[[sData.summary]]:[])];sData.sections.forEach(x=>all.push([],[x.name.toUpperCase()],x.columns,...x.rows));
+  add("Tổng hợp",all);sData.sections.forEach(x=>add(x.name,[x.columns,...x.rows]));
+  save(fname("xlsx",sData.title),new Uint8Array(XLSX.write(wb,{type:"array",bookType:"xlsx"})))};
+renderSheetOut(false);
 
 /* ---------- sheet ---------- */
 function renderSheet(){const w=$("#dSheetWrap");
