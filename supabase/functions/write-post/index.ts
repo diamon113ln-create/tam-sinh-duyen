@@ -20,8 +20,14 @@ Deno.serve(async (req) => {
     const { data: prof } = await admin.from("profiles").select("id").eq("id", user.id).single();
     if (!prof) return json({ error: "Tài khoản không thuộc app" }, 403);
 
-    const { prompt } = await req.json();
+    const { prompt, image } = await req.json();
     if (!prompt || typeof prompt !== "string" || prompt.length > 20000) return json({ error: "Nội dung yêu cầu không hợp lệ" }, 400);
+    // Optional picture for the AI to look at (used by Kho ảnh to label uploaded artwork)
+    if (image && (!["image/jpeg", "image/png", "image/webp"].includes(image.media_type) || typeof image.data !== "string" || image.data.length > 1_500_000))
+      return json({ error: "Ảnh gửi cho AI không hợp lệ hoặc quá lớn" }, 400);
+    const content = image
+      ? [{ type: "image", source: { type: "base64", media_type: image.media_type, data: image.data } }, { type: "text", text: prompt }]
+      : prompt;
 
     const key = Deno.env.get("ANTHROPIC_API_KEY");
     if (!key) return json({ error: "Chưa cài ANTHROPIC_API_KEY trong Secrets" }, 500);
@@ -29,7 +35,7 @@ Deno.serve(async (req) => {
     // max_tokens covers the model's thinking as well as the answer; too small cuts the JSON off mid-way.
     // Effort (not supported on Haiku) keeps thinking short for these formatting tasks; override with Secret AI_EFFORT.
     const model = Deno.env.get("AI_MODEL") || "claude-sonnet-5";
-    const payload: Record<string, unknown> = { model, max_tokens: 16000, messages: [{ role: "user", content: prompt }] };
+    const payload: Record<string, unknown> = { model, max_tokens: 16000, messages: [{ role: "user", content }] };
     if (!model.includes("haiku")) payload.output_config = { effort: Deno.env.get("AI_EFFORT") || "low" };
     const r = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",

@@ -38,6 +38,12 @@ Làm lần lượt từ trên xuống. Tổng thời gian khoảng 30–45 phút
    `https://tentaikhoan.github.io/tam-sinh-duyen/`
 5. Mở địa chỉ đó, đăng nhập bằng tên `admin` và mật khẩu ở bước A4. Vào tab **Tài khoản** để cấp tài khoản cho nhóm.
 
+## Bật Kho ảnh (làm 1 lần)
+
+1. Supabase → **SQL Editor → New query**, dán toàn bộ file `supabase/kho-anh.sql` → **Run**.
+2. Deploy lại hàm `write-post` bằng file mới nhất `supabase/functions/write-post/index.ts` (để AI xem được ảnh và tự gắn nhãn).
+3. Vào web → **Kho ảnh** → tải ảnh lên. Mỗi ảnh AI gắn nhãn tốn khoảng 100đ.
+
 ## Sửa code sau này
 
 - Mở kho code trên GitHub, bấm phím **.** (dấu chấm) → hiện trình soạn thảo giống VS Code ngay trên trình duyệt.
