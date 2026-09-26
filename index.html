@@ -160,6 +160,13 @@ details.imgmore summary{cursor:pointer;font-weight:600;font-size:13px;color:var(
 .picker button[aria-pressed="true"]{border-color:var(--crimson)}
 .picker .add{display:grid;place-items:center;aspect-ratio:auto;font-size:13px;font-weight:600;color:var(--ink-soft);border:2px dashed var(--line)}
 
+/* Saved sheets */
+.saved{display:grid;gap:8px;margin-top:8px}
+.saved .it{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-left:4px solid var(--crimson);border-radius:10px;padding:8px 10px;background:var(--mist)}
+.saved .it div{flex:1;min-width:0}
+.saved .it b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.saved .it span{font-size:12px;color:var(--ink-soft)}
+
 /* Artwork library */
 .art-drop{border:2px dashed var(--line);border-radius:14px;padding:22px;text-align:center;color:var(--ink-soft);margin-bottom:14px;cursor:pointer;transition:border-color .2s,background .2s}
 .art-drop.over{border-color:var(--crimson);background:var(--blossom-soft)}
@@ -317,6 +324,9 @@ aside.side .logo{cursor:pointer}
           <label for="wTpl" style="margin-top:0">Mẫu bài viết</label>
           <select id="wTpl"></select>
           <p class="hint" id="wTplHint" style="font-size:13px;color:var(--ink-soft);margin:6px 0 0"></p>
+          <label for="wSrc">Dựa theo sheet (không bắt buộc)</label>
+          <select id="wSrc"></select>
+          <p class="hint" id="wSrcHint" style="font-size:13px;color:var(--ink-soft);margin:6px 0 0"></p>
           <div id="wFields">
             <div class="grid2">
               <div><label for="wFrom">Ngày bắt đầu</label><input id="wFrom" type="date" required></div>
@@ -405,10 +415,11 @@ aside.side .logo{cursor:pointer}
           </div>
           <div class="row"><button class="btn" id="sGen">Tạo sheet</button><button type="button" class="btn ghost" id="sClear">Làm lại</button><button class="btn ghost hidden" id="sStop">Dừng</button><span class="thinking" id="sThinking"></span></div>
           <div class="err" id="sErr"></div>
+          <div class="section" style="margin-top:14px"><h4>Sheet đã lưu</h4><p class="hint">Dùng lại ở mục Viết bài nhanh → Dựa theo sheet.</p><div class="saved" id="sSaved"></div></div>
         </div>
         <div class="panel">
           <div id="sOut"></div>
-          <div class="row hidden" id="sActions"><button class="btn" id="sCopy">Copy dán Google Sheets</button><button class="btn ghost" id="sXlsx">Tải file Excel</button></div>
+          <div class="row hidden" id="sActions"><button class="btn" id="sSave">Lưu sheet</button><button class="btn ghost" id="sCopy">Copy dán Google Sheets</button><button class="btn ghost" id="sXlsx">Tải file Excel</button></div>
         </div>
       </div>
     </div>
@@ -539,7 +550,7 @@ const STATUSES=[["todo","Chưa làm","#9A8FA8"],["doing","Đang làm","#B4661C"]
 const ROLE_NAME={admin:"Admin",lead:"Trưởng nhóm",member:"Thành viên"};
 const $=s=>document.querySelector(s);
 const sample=true, downloads=true;
-let templates=[];
+let templates=[],savedSheets=[];
 const STYLES=["Ngắn gọn, rõ ý","Kiếm hiệp mạnh mẽ","Cổ phong lãng mạn","Hài hước, gần gũi","Thông báo trang trọng"];
 const LENS=[["ngắn (80–120 chữ)","Ngắn"],["vừa (150–220 chữ)","Vừa"],["dài (250–350 chữ)","Dài"]];
 let accounts=[], tasks=[], me=null, editing=null, sheet=null, abortCtl=null, mobileCol="todo";
@@ -563,7 +574,10 @@ async function refresh(name){try{
     if(me){const u=accounts.find(a=>a.id===me.id);if(u){me=u;renderShell()}}renderHome()}
   if(name==="tasks"){tasks=await loadTable("tasks");if(me){renderBoard();renderHome()}}
   if(name==="artworks"){await loadArt();return}
-  if(name==="templates"){templates=(await loadTable("templates")).sort((a,b)=>(a.name||"").localeCompare(b.name||"","vi"));if(me){renderTemplates();fillTplSelects();renderHome()}}
+  if(name==="templates"){const all=await loadTable("templates");
+    /* saved sheets live in the templates table, marked kind:"sheet" (no extra table needed) */
+    savedSheets=all.filter(x=>x.kind==="sheet").sort((a,b)=>(b.updated||0)-(a.updated||0));
+    templates=all.filter(x=>x.kind!=="sheet").sort((a,b)=>(a.name||"").localeCompare(b.name||"","vi"));if(me){renderTemplates();fillTplSelects();renderHome();renderSaved();fillSrcSelect()}}
 }catch(e){toast("Lỗi tải dữ liệu: "+errMsg(e))}}
 const db={
   collection:name=>({async add(obj){const {data,error}=await sb.from(name).insert({data:obj}).select("id").single();if(error)throw error;refresh(name);return{id:data.id}}}),
@@ -665,9 +679,9 @@ function fillStyleSelect(sel){sel.innerHTML=STYLES.map(x=>`<option>${esc(x)}</op
 function fillLenSelect(sel){sel.innerHTML=LENS.map(([v,l])=>`<option value="${v}">${l}</option>`).join("");sel.value=LENS[1][0]}
 ["#dStyle","#tStyle"].forEach(x=>fillStyleSelect($(x)));["#dLen","#tLen"].forEach(x=>fillLenSelect($(x)));
 function fillTplSelects(){
-  for(const id of ["#wTpl","#dTpl"]){const sel=$(id),cur=sel.value;
-    sel.innerHTML=(id==="#dTpl"?'<option value="">Không dùng mẫu</option>':"")+templates.map(t=>`<option value="${esc(t.id)}">${esc(t.name)}</option>`).join("");
-    if([...sel.options].some(o=>o.value===cur))sel.value=cur}
+  for(const id of ["#wTpl","#dTpl"]){const sel=$(id),cur=sel.value,first=!sel.options.length;
+    sel.innerHTML=(id==="#dTpl"?'<option value="">Không dùng mẫu</option>':id==="#wTpl"&&savedSheets.length?'<option value="">Không dùng mẫu (viết theo sheet)</option>':"")+templates.map(t=>`<option value="${esc(t.id)}">${esc(t.name)}</option>`).join("");
+    if(first&&id==="#wTpl"&&templates[0])sel.value=templates[0].id;else if([...sel.options].some(o=>o.value===cur))sel.value=cur}
   wTplHint()}
 
 /* ---------- accounts (admin) ---------- */
@@ -783,7 +797,7 @@ $("#dGen").onclick=async()=>{
 let wSheet=null, wCtl=null;
 function wTplHint(){const t=templates.find(x=>x.id===$("#wTpl").value);
   $("#wTplHint").textContent=templates.length===0?"Chưa có mẫu nào. Vào tab Mẫu bài viết để lưu mẫu đầu tiên.":t?`${t.style} · độ dài ${t.len.split(" ")[0]}${t.sample?" · có bài mẫu":""}`:"";
-  $("#wGen").disabled=templates.length===0||!sample}
+  $("#wGen").disabled=(templates.length===0&&!savedSheets.length)||!sample}
 $("#wTpl").onchange=wTplHint;
 function fmtDT(v){if(!v)return"";const[d,t]=v.split("T");return d.split("-").reverse().join("/")+(t?" lúc "+t:"")}
 const W_FIELDS=["#wFrom","#wTo","#wReward"];
@@ -795,20 +809,33 @@ function timeText(){const f=$("#wFrom").value,t=$("#wTo").value,h=$("#wTime").va
   const dm=v=>v.split("-").reverse().slice(0,2).join("/"),full=v=>v.split("-").reverse().join("/");
   const range=t&&t!==f?`${dm(f)} – ${full(t)}`:full(f);return h?`${h} · ${range}`:(t&&t!==f?range:"Từ "+range)}
 let wSubTouched=false,wArtPicked=null;/* a picture the user chose by hand survives "Viết bài" */
-function quickPrompt(tpl,wantSheet){const f=fmtDT(fromVal()),t=fmtDT($("#wTo").value),r=$("#wReward").value.trim(),vary=$("#wVary").checked;
+/* A saved sheet as plain text for the AI: one line per row, "column: value" */
+function sheetText(sh){return [`Tên: ${sh.name||""}`,sh.summary?`Tóm tắt: ${sh.summary}`:"",...(sh.sections||[]).map(x=>`[${x.name}]\n`+x.rows.map(r=>"- "+r.map((v,i)=>v?`${x.columns[i]}: ${v}`:"").filter(Boolean).join("; ")).join("\n"))].filter(Boolean).join("\n").slice(0,9000)}
+function quickPrompt(tpl,wantSheet,sh){const f=fmtDT(fromVal()),t=fmtDT($("#wTo").value),r=$("#wReward").value.trim(),vary=$("#wVary").checked;
+  const data=sh?`DỮ LIỆU SHEET "${sh.name||""}" (nguồn thông tin CHÍNH cho lần tổ chức này: thời gian, cách tham gia, điều kiện, phần thưởng, lưu ý; KHÔNG bịa thêm thông tin ngoài sheet):
+"""${sheetText(sh)}"""`:"";
+  const time=f?(t?`dùng thời gian "từ ${f} đến ${t}".`:`dùng ngày bắt đầu ${f}. CHỈ ghi ngày bắt đầu, TUYỆT ĐỐI không ghi ngày kết thúc hay thời hạn kết thúc.`):"lấy đúng thời gian ghi trong DỮ LIỆU SHEET.";
+  const tail=`Trả về DUY NHẤT một JSON hợp lệ, không kèm chữ nào khác:
+{"post":"bài đăng hoàn chỉnh, dùng \\n để xuống dòng","headline":"tiêu đề ngắn cho ảnh, tối đa 8 chữ","subline":"${t?"khoảng thời gian dạng dd/mm – dd/mm":f?"ngày bắt đầu, ví dụ Từ dd/mm":"thời gian ngắn gọn theo sheet, ví dụ 20:00 · 09/09"}",${imgSpecJson($("#wFmt").value)}${wantSheet?`,"sheet":{"columns":["..."],"rows":[["..."]]}`:""}}
+${imgSpecGuide($("#wFmt").value)}
+${wantSheet?`"sheet" là bảng kế hoạch triển khai hoạt động (ví dụ cột Hạng mục, Nội dung chi tiết, Thời gian, Phần thưởng/Điều kiện, Ghi chú), 5–12 dòng.`:""}`;
+  if(!tpl)return `Bạn là người viết nội dung fanpage Facebook cho game kiếm hiệp cổ trang "Tam Sinh Duyên" (tiếng Việt).
+${data}
+Nhiệm vụ: viết một bài đăng Facebook hoàn chỉnh cho hoạt động trên, CHỈ dựa vào DỮ LIỆU SHEET. Phong cách cổ phong kiếm hiệp, hấp dẫn, emoji vừa phải; chia đoạn rõ ràng: mở đầu gây chú ý, thời gian, cách tham gia/điều kiện, phần thưởng (liệt kê từng dòng), lưu ý; kết thúc bằng lời kêu gọi và hashtag #TamSinhDuyen.
+THỜI GIAN: ${time}
+${r?`PHẦN THƯỞNG: dùng danh sách sau thay cho phần thưởng trong sheet:\n"""${r}"""`:""}
+${tail}`;
   return `Bạn là người viết nội dung fanpage Facebook cho game kiếm hiệp cổ trang "Tam Sinh Duyên" (tiếng Việt).
 Loại bài: ${tpl.name}. Phong cách: ${tpl.style}.
 BÀI MẪU:
 """${tpl.sample||"(không có bài mẫu)"}"""
 ${tpl.fixed?`Các phần PHẢI giữ nguyên nguyên văn: """${tpl.fixed}"""`:""}
-Nhiệm vụ: viết bài đăng mới cho lần tổ chức này, dựa trên NỘI DUNG CHÍNH của bài mẫu (tên sự kiện, cách chơi, điều kiện, thông tin khác giữ như bài mẫu).
-THỜI GIAN: ${t?`thay toàn bộ thời gian trong bài mẫu bằng "từ ${f} đến ${t}".`:`thay toàn bộ thời gian trong bài mẫu bằng ngày bắt đầu ${f}. CHỈ ghi ngày bắt đầu, TUYỆT ĐỐI không ghi ngày kết thúc hay thời hạn kết thúc.`}
-PHẦN THƯỞNG: ${r?`thay phần thưởng trong bài mẫu bằng danh sách mới sau, giữ cách trình bày phần thưởng của bài mẫu:\n"""${r}"""`:"giữ nguyên phần thưởng như bài mẫu, không thêm bớt."}
-FORMAT: ${vary?"giữ đủ các thông tin trên nhưng viết lại với câu mở đầu, cách diễn đạt, bố cục và emoji MỚI, khác rõ rệt bài mẫu; vẫn đúng phong cách "+tpl.style+", vẫn giữ các phần bắt buộc giữ nguyên và kiểu hashtag.":"giữ y hệt bố cục, thứ tự, câu chữ, cách xuống dòng, emoji và hashtag của bài mẫu; chỉ thay thời gian và phần thưởng (nếu có)."}
-Trả về DUY NHẤT một JSON hợp lệ, không kèm chữ nào khác:
-{"post":"bài đăng hoàn chỉnh, dùng \\n để xuống dòng","headline":"tiêu đề ngắn cho ảnh, tối đa 8 chữ","subline":"${t?"khoảng thời gian dạng dd/mm – dd/mm":"ngày bắt đầu, ví dụ Từ dd/mm"}",${imgSpecJson($("#wFmt").value)}${wantSheet?`,"sheet":{"columns":["..."],"rows":[["..."]]}`:""}}
-${imgSpecGuide($("#wFmt").value)}
-${wantSheet?`"sheet" là bảng kế hoạch triển khai hoạt động (ví dụ cột Hạng mục, Nội dung chi tiết, Thời gian, Phần thưởng/Điều kiện, Ghi chú), 5–12 dòng.`:""}`}
+${data}
+Nhiệm vụ: viết bài đăng mới cho lần tổ chức này, dựa trên NỘI DUNG CHÍNH của bài mẫu${sh?", nhưng mọi thông tin cụ thể (thời gian, cách tham gia, điều kiện, phần thưởng, lưu ý) lấy theo DỮ LIỆU SHEET thay cho bài mẫu":" (tên sự kiện, cách chơi, điều kiện, thông tin khác giữ như bài mẫu)"}.
+THỜI GIAN: thay toàn bộ thời gian trong bài mẫu: ${time}
+PHẦN THƯỞNG: ${r?`thay phần thưởng trong bài mẫu bằng danh sách mới sau, giữ cách trình bày phần thưởng của bài mẫu:\n"""${r}"""`:sh?"lấy phần thưởng theo DỮ LIỆU SHEET, trình bày giống cách bài mẫu trình bày phần thưởng.":"giữ nguyên phần thưởng như bài mẫu, không thêm bớt."}
+FORMAT: ${vary?"giữ đủ các thông tin trên nhưng viết lại với câu mở đầu, cách diễn đạt, bố cục và emoji MỚI, khác rõ rệt bài mẫu; vẫn đúng phong cách "+tpl.style+", vẫn giữ các phần bắt buộc giữ nguyên và kiểu hashtag.":sh?"giữ bố cục, giọng văn, cách xuống dòng, emoji và hashtag của bài mẫu; nội dung cụ thể thay theo sheet.":"giữ y hệt bố cục, thứ tự, câu chữ, cách xuống dòng, emoji và hashtag của bài mẫu; chỉ thay thời gian và phần thưởng (nếu có)."}
+${tail}`}
 /* The AI designs the cover image as data; renderDesign draws it into the chosen format */
 function imgSpecJson(fmt){return `"image":{"format":"${fmt==="auto"?"một trong: "+IMG_FORMATS.map(f=>f.id).join(", "):fmt}","slogan":"slogan","tag":"nhãn","highlights":["ý nổi bật"],"badge":{"big":"chữ lớn","small":"chữ nhỏ"},"accent":"${Object.keys(ACCENTS).join("|")}","focus":"nam|nu|canh|doi","motif":"hoa|may|sao|lua"${artworks.length?`,"art":"mã tranh trong KHO TRANH","tone":"${Object.keys(TONES).join("|")}","flip":false,"zoom":1.0`:""}}`}
 function imgSpecGuide(fmt){return `"image" là thiết kế ảnh bìa 1200×630 cho bài, hãy SÁNG TẠO mới mỗi lần (mã ngẫu nhiên ${Math.random().toString(36).slice(2,8)}):
@@ -824,14 +851,14 @@ KHO TRANH (mã | tên | nhãn | không khí | sự kiện):
 ${artCatalog()}`:""}`}
 $("#wClear").onclick=()=>{W_FIELDS.forEach(id=>$(id).value="");$("#wTime").value="";$("#wSub").value="";wSubTouched=false;wArtPicked=null;$("#wVary").checked=false;$("#wPost").value="";$("#wHead").value="";$("#wSub").value="";wSheet=null;renderWSheet();
   $("#wThinking").textContent="";$("#wErr").textContent="";setWImg(null);$("#wFrom").focus()};
-$("#wGen").onclick=async()=>{const tpl=templates.find(x=>x.id===$("#wTpl").value);
-  if(!tpl){$("#wErr").textContent="Hãy chọn một mẫu.";return}
-  if(!$("#wFrom").value){$("#wErr").textContent="Hãy chọn ngày bắt đầu.";return}
+$("#wGen").onclick=async()=>{const tpl=templates.find(x=>x.id===$("#wTpl").value),sh=savedSheets.find(x=>x.id===$("#wSrc").value);
+  if(!tpl&&!sh){$("#wErr").textContent="Hãy chọn một mẫu bài hoặc một sheet.";return}
+  if(!$("#wFrom").value&&!sh){$("#wErr").textContent="Hãy chọn ngày bắt đầu (hoặc chọn sheet có sẵn thời gian).";return}
   if($("#wTo").value&&$("#wTo").value<$("#wFrom").value){$("#wErr").textContent="Ngày kết thúc đang sớm hơn ngày bắt đầu.";return}
-  $("#wErr").textContent="";$("#wGen").disabled=true;$("#wStop").classList.remove("hidden");$("#wThinking").textContent="AI đang viết theo mẫu…";
+  $("#wErr").textContent="";$("#wGen").disabled=true;$("#wStop").classList.remove("hidden");$("#wThinking").textContent=sh?(tpl?"AI đang viết theo mẫu và sheet…":"AI đang viết theo sheet…"):"AI đang viết theo mẫu…";
   wCtl=new AbortController(); const wantSheet=$("#wSheetOn").checked;
-  try{const r=await aiJson(quickPrompt(tpl,wantSheet));
-    $("#wPost").value=r.post||"";$("#wHead").value=tpl.headline||r.headline||"";$("#wSub").value=timeText()||r.subline||"";wSubTouched=false;
+  try{const r=await aiJson(quickPrompt(tpl,wantSheet,sh));
+    $("#wPost").value=r.post||"";$("#wHead").value=tpl?.headline||r.headline||"";$("#wSub").value=timeText()||r.subline||"";wSubTouched=false;
     wSheet=wantSheet?normSheet(r):null;renderWSheet();setWImg(wArtPicked!==null?{...r.image,art:wArtPicked}:r.image);
     $("#wThinking").textContent="Xong. Bấm Copy rồi dán lên fanpage.";
   }catch(e){$("#wThinking").textContent="";$("#wErr").textContent=aiErrMsg(e)}
@@ -954,11 +981,11 @@ $("#sGen").onclick=async()=>{const post=$("#sPost").value.trim();
   sCtl=new AbortController();
   try{const r=normSections(await aiJson(sheetPrompt(post,$("#sKind").value,$("#sNote").value.trim())));
     if(!r)throw {code:"bad_json",message:"AI chưa tách được bảng, bấm Tạo sheet để thử lại"};
-    sData=r;$("#sThinking").textContent="Xong. Sửa trực tiếp trong bảng nếu cần.";
+    sData=r;sEditId=null;$("#sThinking").textContent="Xong. Sửa trực tiếp trong bảng nếu cần, rồi bấm Lưu sheet.";
   }catch(e){$("#sThinking").textContent="";$("#sErr").textContent=e.code==="bad_json"?e.message:aiErrMsg(e)}
   finally{renderSheetOut(false);if(sData&&innerWidth<=860)$("#sOut").scrollIntoView({behavior:"smooth"});$("#sGen").disabled=false;$("#sStop").classList.add("hidden");sCtl=null}};
 $("#sStop").onclick=()=>{cancelAi();sCtl?.abort()};
-$("#sClear").onclick=()=>{$("#sPost").value="";$("#sNote").value="";sData=null;$("#sErr").textContent="";$("#sThinking").textContent="";renderSheetOut(false);$("#sPost").focus()};
+$("#sClear").onclick=()=>{sEditId=null;$("#sPost").value="";$("#sNote").value="";sData=null;$("#sErr").textContent="";$("#sThinking").textContent="";renderSheetOut(false);$("#sPost").focus()};
 /* Google Sheets keeps colors when pasting an HTML table; plain TSV is the fallback */
 $("#sCopy").onclick=async()=>{if(!sData)return;const width=Math.max(...sData.sections.map(x=>x.columns.length));
   const cell=(v,st)=>`<td style="border:1px solid #D9CCD6;padding:4px 8px;${st||""}">${esc(v)}</td>`;
@@ -981,6 +1008,23 @@ $("#sXlsx").onclick=()=>{if(!sData)return;if(!window.XLSX){toast("Chưa tải đ
   add("Tổng hợp",all);sData.sections.forEach(x=>add(x.name,[x.columns,...x.rows]));
   save(fname("xlsx",sData.title),new Uint8Array(XLSX.write(wb,{type:"array",bookType:"xlsx"})))};
 renderSheetOut(false);
+let sEditId=null;
+function renderSaved(){$("#sSaved").innerHTML=savedSheets.length?savedSheets.map(x=>`<div class="it"><div><b>${esc(x.name||"Sheet")}</b><span>${(x.sections||[]).length} nhóm · ${new Date(x.updated||Date.now()).toLocaleDateString("vi-VN")}</span></div>
+  <button class="btn ghost small" data-sopen="${x.id}">Mở</button><button class="btn ghost small" data-swrite="${x.id}">Viết bài</button>${can("delete")?`<button class="btn ghost small" data-sdel="${x.id}">Xóa</button>`:""}</div>`).join("")
+  :'<div class="empty" style="padding:12px">Chưa có sheet nào. Tạo sheet rồi bấm <b>Lưu sheet</b>.</div>'}
+$("#sSave").onclick=async()=>{if(!sData)return;const data={kind:"sheet",name:(sData.title||"Sheet").trim(),summary:sData.summary||"",sections:sData.sections,source:$("#sPost").value.trim().slice(0,12000),updated:Date.now(),by:me.id};
+  try{if(sEditId&&savedSheets.some(x=>x.id===sEditId))await db.doc("templates/"+sEditId).set(data);else sEditId=(await db.collection("templates").add(data)).id;toast("Đã lưu sheet “"+data.name+"”")}
+  catch(e){toast("Không lưu được: "+errMsg(e))}};
+$("#sSaved").onclick=async e=>{const t=e.target.dataset,x=savedSheets.find(y=>y.id===(t.sopen||t.swrite||t.sdel));if(!x)return;
+  if(t.sopen){sEditId=x.id;sData={title:x.name,summary:x.summary,sections:JSON.parse(JSON.stringify(x.sections||[]))};$("#sPost").value=x.source||"";$("#sErr").textContent="";$("#sThinking").textContent="Đang sửa sheet đã lưu. Bấm Lưu sheet để cập nhật.";renderSheetOut(false)}
+  if(t.swrite){fillSrcSelect();$("#wSrc").value=x.id;srcHint();show("write")}
+  if(t.sdel){if(!confirm(`Xóa sheet “${x.name}”?`))return;try{await db.doc("templates/"+x.id).delete();if(sEditId===x.id)sEditId=null;toast("Đã xóa sheet")}catch(err){toast("Không xóa được: "+errMsg(err))}}};
+function fillSrcSelect(){const cur=$("#wSrc").value;$("#wSrc").innerHTML='<option value="">Không dùng sheet</option>'+savedSheets.map(x=>`<option value="${x.id}">${esc(x.name||"Sheet")}</option>`).join("");
+  if(savedSheets.some(x=>x.id===cur))$("#wSrc").value=cur;srcHint()}
+function srcHint(){const x=savedSheets.find(y=>y.id===$("#wSrc").value);
+  $("#wSrcHint").textContent=x?`${x.summary||""} AI lấy thời gian, điều kiện, phần thưởng từ sheet này${templates.some(t=>t.id===$("#wTpl").value)?", giữ giọng văn của mẫu":""}.`:(savedSheets.length?"":"Chưa có sheet đã lưu. Vào Tạo sheet để tạo và lưu.")}
+$("#wSrc").onchange=()=>{$("#wErr").textContent="";srcHint()};$("#wTpl").addEventListener("change",()=>{$("#wErr").textContent="";srcHint()});
+fillSrcSelect();renderSaved();
 
 /* ---------- sheet ---------- */
 function renderSheet(){const w=$("#dSheetWrap");
