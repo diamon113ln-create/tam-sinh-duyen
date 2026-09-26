@@ -645,8 +645,11 @@ const PORTALS=[
   {v:"accounts",t:"Tài khoản",s:"thành viên trong nhóm",pos:"92% 20%",n:()=>accounts.length,admin:true}];
 function renderHome(){if(!me)return;
   $("#homeHi").textContent="Chào "+me.name;
-  $("#portals").innerHTML=PORTALS.filter(p=>!p.admin||me.role==="admin").map(p=>{const n=p.n();
-    return `<button class="portal" data-open="${p.v}" style="--pos:${p.pos}"><div class="art"></div><div class="txt">${n!==""?`<div class="num">${n}</div>`:""}<h3>${p.t}</h3><div class="sub">${p.s}</div><span class="go">Mở →</span></div></button>`}).join("")}
+  /* portrait pictures from Kho ảnh, one per card; oldest first so a new upload doesn't reshuffle every card */
+  const tall=artworks.filter(a=>a.url&&a.h>a.w*1.05).slice().reverse();
+  $("#portals").innerHTML=PORTALS.filter(p=>!p.admin||me.role==="admin").map((p,i)=>{const n=p.n(),a=tall.length?tall[i%tall.length]:null;
+    const bg=a?` style="background:url('${esc(a.url)}') ${Math.round((a.focus?.x??.5)*100)}% ${Math.round((a.focus?.y??.35)*100)}%/cover no-repeat"`:"";
+    return `<button class="portal" data-open="${p.v}" style="--pos:${p.pos}"><div class="art"${bg}></div><div class="txt">${n!==""?`<div class="num">${n}</div>`:""}<h3>${p.t}</h3><div class="sub">${p.s}</div><span class="go">Mở →</span></div></button>`}).join("")}
 function openFromCard(card){const v=card.dataset.open,strip=$(VIEWS[v]+" .strip"),art=card.querySelector(".art");
   if(!document.startViewTransition||matchMedia("(prefers-reduced-motion:reduce)").matches){
     show(v);const el=$(VIEWS[v]);el.classList.remove("view-enter");void el.offsetWidth;el.classList.add("view-enter");return}
