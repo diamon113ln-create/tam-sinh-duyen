@@ -44,6 +44,14 @@ Làm lần lượt từ trên xuống. Tổng thời gian khoảng 30–45 phút
 2. Deploy lại hàm `write-post` bằng file mới nhất `supabase/functions/write-post/index.ts` (để AI xem được ảnh và tự gắn nhãn).
 3. Vào web → **Kho ảnh** → tải ảnh lên. Mỗi ảnh AI gắn nhãn tốn khoảng 100đ.
 
+## Bật AI vẽ tranh (OpenAI, không bắt buộc)
+
+1. Tạo khóa ở https://platform.openai.com/api-keys (nạp credit ở mục Billing). **Không gửi khóa cho ai, không dán vào chat.**
+2. Supabase → **Edge Functions → Secrets** → thêm `OPENAI_API_KEY` = khóa vừa tạo → Save.
+3. **Edge Functions → Deploy a new function → Via Editor**, tên `draw-image`, dán toàn bộ file `supabase/functions/draw-image/index.ts` → **Deploy**.
+4. Vào web → Viết bài nhanh → **AI vẽ tranh mới**. Tranh vẽ xong tự lưu vào Kho ảnh.
+- Tùy chọn Secrets: `OPENAI_IMAGE_QUALITY` = `low` (rẻ nhất) / `medium` (mặc định) / `high`; `OPENAI_IMAGE_MODEL` để đổi model.
+
 ## Sửa code sau này
 
 - Mở kho code trên GitHub, bấm phím **.** (dấu chấm) → hiện trình soạn thảo giống VS Code ngay trên trình duyệt.
