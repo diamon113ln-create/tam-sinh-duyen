@@ -135,6 +135,20 @@ canvas{width:100%;height:auto;border-radius:10px;border:1px solid var(--line);ma
 .status-flow button[aria-pressed="true"]{background:var(--crimson);border-color:var(--crimson);color:#fff}
 .thinking{font-size:13px;color:var(--ink-soft);font-style:italic}
 
+/* Image formats */
+.fmt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.fmt{background:var(--paper);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.fmt canvas{margin:0;border:0;border-radius:0;border-bottom:1px solid var(--line)}
+.fmt .auto-art{aspect-ratio:1200/630;display:grid;place-items:center;text-align:center;padding:16px;color:#fff;font:700 22px/1.3 var(--serif);
+  background:linear-gradient(120deg,#7A1230,#9E1B3A 40%,#6A55B8)}
+.fmt .b{padding:12px 14px;display:flex;flex-direction:column;gap:6px;flex:1}
+.fmt .b h4{margin:0;font:700 16px var(--serif);display:flex;align-items:center;gap:8px}
+.fmt .b p{margin:0;font-size:13px;color:var(--ink-soft);flex:1}
+.fmt[aria-current="true"]{border-color:var(--crimson);box-shadow:0 0 0 2px var(--crimson)}
+.fmt .cur{font:600 11px var(--sans);padding:1px 8px;border-radius:999px;background:var(--crimson);color:#fff}
+details.imgmore{margin-top:10px;border:1px solid var(--line);border-radius:10px;padding:6px 12px}
+details.imgmore summary{cursor:pointer;font-weight:600;font-size:13px;color:var(--ink-soft);padding:4px 0}
+
 /* Sheet builder */
 .sh-empty{display:grid;place-items:center;text-align:center;min-height:320px;color:var(--ink-soft);border:1px dashed var(--line);border-radius:14px;padding:24px}
 .sh-empty svg{width:48px;height:48px;color:var(--blossom);margin-bottom:8px}
@@ -173,11 +187,11 @@ canvas{width:100%;height:auto;border-radius:10px;border:1px solid var(--line);ma
 @keyframes portalin{from{opacity:0;translate:0 18px}to{opacity:1;translate:0 0}}
 @keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 @keyframes fall{0%{transform:translate(0,0) rotate(0)}100%{transform:translate(var(--dx,60px),520px) rotate(540deg)}}
-.portals{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:18px;margin-top:22px;perspective:1000px}
+.portals{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:18px;margin-top:22px;perspective:1000px}
 .portal{position:relative;aspect-ratio:3/4;border:0;padding:0;border-radius:18px;overflow:hidden;cursor:pointer;text-align:left;color:#fff;background:#1a0f1c;
   box-shadow:0 10px 26px rgba(20,10,22,.35),inset 0 0 0 1px rgba(217,178,106,.55);transform-style:preserve-3d;
   transition:transform .35s cubic-bezier(.2,.8,.2,1),box-shadow .35s;opacity:0;animation:portalin .7s ease-out forwards}
-.portal:nth-child(1){animation-delay:.35s}.portal:nth-child(2){animation-delay:.45s}.portal:nth-child(3){animation-delay:.55s}.portal:nth-child(4){animation-delay:.65s}.portal:nth-child(5){animation-delay:.75s}
+.portal:nth-child(1){animation-delay:.35s}.portal:nth-child(2){animation-delay:.45s}.portal:nth-child(3){animation-delay:.55s}.portal:nth-child(4){animation-delay:.65s}.portal:nth-child(5){animation-delay:.75s}.portal:nth-child(6){animation-delay:.85s}
 .portal .art{position:absolute;inset:0;background:url(assets/bg.jpg) var(--pos,center)/auto 170% no-repeat;transition:transform .6s cubic-bezier(.2,.8,.2,1)}
 .portal::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(0deg,rgba(26,12,28,.95) 0%,rgba(26,12,28,.25) 55%,rgba(26,12,28,0) 80%)}
 .portal::after{content:"";position:absolute;inset:0;z-index:2;background:linear-gradient(115deg,transparent 30%,rgba(255,236,200,.35) 48%,transparent 62%);
@@ -208,12 +222,12 @@ aside.side .logo{cursor:pointer}
   aside.side{position:fixed;top:auto;bottom:0;left:0;right:0;height:auto;z-index:20;flex-direction:row;align-items:center;
     padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));background:rgba(42,26,44,.97)}
   aside.side .logo,aside.side .me b,aside.side .me .role,aside.side .me span{display:none}
-  aside.side nav{flex-direction:row;flex:1;justify-content:space-around}
-  aside.side nav button{flex-direction:column;gap:2px;flex:1 1 0;min-width:0;font-size:10.5px;line-height:1.2;text-align:center;padding:6px 2px;border-left:0;border-top:3px solid transparent;border-radius:8px}
+  aside.side nav{flex-direction:row;flex:1;justify-content:space-around;overflow-x:auto;scrollbar-width:none}
+  aside.side nav button{flex-direction:column;gap:2px;flex:1 1 0;min-width:42px;font-size:10px;line-height:1.2;text-align:center;padding:6px 2px;border-left:0;border-top:3px solid transparent;border-radius:8px}
   aside.side nav button[aria-current="true"]{border-top-color:#F2B8C6}
   aside.side .me{margin:0;border:0;padding:0}
   aside.side .me{display:flex;flex-direction:column;gap:4px}
-  aside.side .me .btn{margin:0;width:auto;font-size:10.5px;padding:4px 6px}
+  aside.side .me .btn{margin:0;width:auto;font-size:10px;padding:4px 5px}
   main{padding:12px 12px 90px}
   .two{grid-template-columns:1fr}
   .board{grid-template-columns:1fr}
@@ -252,6 +266,7 @@ aside.side .logo{cursor:pointer}
       <button data-view="write"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/></svg><span>Viết bài nhanh</span></button>
       <button data-view="board"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="5" height="16" rx="1"/><rect x="10" y="4" width="5" height="10" rx="1"/><rect x="17" y="4" width="4" height="13" rx="1"/></svg><span>Công việc</span></button>
       <button data-view="templates"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/></svg><span>Mẫu bài viết</span></button>
+      <button data-view="formats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="M21 16l-5-5-8 8"/></svg><span>Format ảnh</span></button>
       <button data-view="sheet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M3 14.5h18M9 4v16"/></svg><span>Tạo sheet</span></button>
       <button data-view="accounts" id="tabAcc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M17 8v6M14 11h6"/></svg><span>Tài khoản</span></button>
     </nav>
@@ -295,11 +310,24 @@ aside.side .logo{cursor:pointer}
           <label for="wPost" style="margin-top:0">Bài đăng</label>
           <textarea id="wPost" style="min-height:260px" placeholder="Bài viết sẽ hiện ở đây."></textarea>
           <button class="btn copybig" id="wCopy">Copy để đăng Facebook</button>
+          <div class="grid2">
+            <div><label for="wFmt">Format ảnh</label><select id="wFmt"></select></div>
+            <div style="display:flex;align-items:flex-end"><button type="button" class="btn ghost" id="wReimg" style="width:100%">AI tạo ảnh khác</button></div>
+          </div>
           <canvas id="wCanvas" width="1200" height="630"></canvas>
           <div class="grid2">
             <div><label for="wHead">Tiêu đề trên ảnh</label><input id="wHead"></div>
             <div><label for="wSub">Dòng phụ</label><input id="wSub"></div>
           </div>
+          <details class="imgmore"><summary>Chỉnh chi tiết ảnh</summary>
+            <div class="grid2">
+              <div><label for="wTag">Nhãn</label><input id="wTag" placeholder="SỰ KIỆN MỚI"></div>
+              <div><label for="wAccent">Màu nhấn</label><select id="wAccent"></select></div>
+              <div><label for="wBadgeBig">Huy hiệu (chữ lớn)</label><input id="wBadgeBig" placeholder="x2"></div>
+              <div><label for="wBadgeSmall">Huy hiệu (chữ nhỏ)</label><input id="wBadgeSmall" placeholder="Kinh nghiệm"></div>
+            </div>
+            <label for="wHi">Điểm nổi bật (mỗi dòng một ý)</label><textarea id="wHi" style="min-height:80px"></textarea>
+          </details>
           <div class="row"><button class="btn ghost small" id="wPng">Tải ảnh PNG</button><button class="btn ghost small" id="wToTask">Lưu vào bảng công việc</button></div>
           <div id="wSheetBox" class="hidden">
             <div class="tablewrap" id="wSheetWrap"></div>
@@ -307,6 +335,12 @@ aside.side .logo{cursor:pointer}
           </div>
         </div>
       </div>
+    </div>
+
+    <div id="viewFormats" class="hidden">
+      <div class="strip"><h2>Format ảnh</h2></div>
+      <p class="hint" style="margin:0 0 14px;color:var(--ink-soft)">Chọn format mặc định cho ảnh ở mục Viết bài nhanh. Mỗi lần viết bài, AI tự sáng tạo nhãn, điểm nổi bật, huy hiệu, màu nhấn, vùng tranh và hiệu ứng theo format đã chọn. Ảnh xem trước dưới đây dùng nội dung mẫu.</p>
+      <div class="fmt-grid" id="fmtGrid"></div>
     </div>
 
     <div id="viewSheet" class="hidden">
@@ -521,7 +555,7 @@ $("#loginForm").onsubmit=async e=>{e.preventDefault();$("#loginErr").textContent
   $("#loginBtn").disabled=false;
   if(error){$("#loginErr").textContent="Sai tên đăng nhập hoặc mật khẩu.";return}
   $("#lPass").value="";await afterLogin(data.user)};
-function enter(){$("#login").classList.add("hidden");$("#app").classList.remove("hidden");renderShell();renderBoard();renderTemplates();fillTplSelects();renderHome();show("home");drawCard($("#wCanvas"),"","")}
+function enter(){$("#login").classList.add("hidden");$("#app").classList.remove("hidden");renderShell();renderBoard();renderTemplates();fillTplSelects();renderHome();show("home");redrawW()}
 async function logout(){await sb.auth.signOut();me=null;showLogin()}
 $("#logout").onclick=logout;
 $("#chgPass").onclick=async()=>{const p=prompt("Nhập mật khẩu mới (ít nhất 8 ký tự):");if(!p)return;
@@ -531,7 +565,7 @@ function renderShell(){$("#meName").textContent=me.name;$("#meRole").textContent
   $("#tabAcc").classList.toggle("hidden",me.role!=="admin");if(me.role==="admin")renderAccounts()}
 $("#tabs").onclick=e=>{const b=e.target.closest("button");if(b)show(b.dataset.view)};
 $("aside.side .logo").onclick=()=>show("home");
-const VIEWS={home:"#viewHome",write:"#viewWrite",board:"#viewBoard",templates:"#viewTemplates",sheet:"#viewSheet",accounts:"#viewAccounts"};
+const VIEWS={home:"#viewHome",write:"#viewWrite",board:"#viewBoard",templates:"#viewTemplates",sheet:"#viewSheet",formats:"#viewFormats",accounts:"#viewAccounts"};
 function show(v){if(v==="accounts"&&me.role!=="admin")v="home";
   document.querySelectorAll("#tabs button").forEach(b=>b.setAttribute("aria-current",b.dataset.view===v));
   for(const k in VIEWS)$(VIEWS[k]).classList.toggle("hidden",k!==v);scrollTo(0,0)}
@@ -541,6 +575,7 @@ const PORTALS=[
   {v:"write",t:"Viết bài nhanh",s:"Viết bài theo mẫu, copy đăng Facebook",pos:"20% 40%",n:()=>""},
   {v:"board",t:"Công việc",s:"việc đang chờ xử lý",pos:"42% 70%",n:()=>tasks.filter(t=>t.status!=="done").length},
   {v:"templates",t:"Mẫu bài viết",s:"mẫu đã lưu",pos:"78% 55%",n:()=>templates.length},
+  {v:"formats",t:"Format ảnh",s:"Chọn kiểu ảnh AI thiết kế",pos:"35% 15%",n:()=>""},
   {v:"sheet",t:"Tạo sheet",s:"Dán bài viết, AI lập bảng phân loại",pos:"60% 35%",n:()=>""},
   {v:"accounts",t:"Tài khoản",s:"thành viên trong nhóm",pos:"92% 20%",n:()=>accounts.length,admin:true}];
 function renderHome(){if(!me)return;
@@ -697,10 +732,19 @@ THỜI GIAN: ${t?`thay toàn bộ thời gian trong bài mẫu bằng "từ ${f}
 PHẦN THƯỞNG: ${r?`thay phần thưởng trong bài mẫu bằng danh sách mới sau, giữ cách trình bày phần thưởng của bài mẫu:\n"""${r}"""`:"giữ nguyên phần thưởng như bài mẫu, không thêm bớt."}
 FORMAT: ${vary?"giữ đủ các thông tin trên nhưng viết lại với câu mở đầu, cách diễn đạt, bố cục và emoji MỚI, khác rõ rệt bài mẫu; vẫn đúng phong cách "+tpl.style+", vẫn giữ các phần bắt buộc giữ nguyên và kiểu hashtag.":"giữ y hệt bố cục, thứ tự, câu chữ, cách xuống dòng, emoji và hashtag của bài mẫu; chỉ thay thời gian và phần thưởng (nếu có)."}
 Trả về DUY NHẤT một JSON hợp lệ, không kèm chữ nào khác:
-{"post":"bài đăng hoàn chỉnh, dùng \\n để xuống dòng","headline":"tiêu đề ngắn cho ảnh, tối đa 8 chữ","subline":"${t?"khoảng thời gian dạng dd/mm – dd/mm":"ngày bắt đầu, ví dụ Từ dd/mm"}"${wantSheet?`,"sheet":{"columns":["..."],"rows":[["..."]]}`:""}}
+{"post":"bài đăng hoàn chỉnh, dùng \\n để xuống dòng","headline":"tiêu đề ngắn cho ảnh, tối đa 8 chữ","subline":"${t?"khoảng thời gian dạng dd/mm – dd/mm":"ngày bắt đầu, ví dụ Từ dd/mm"}",${imgSpecJson($("#wFmt").value)}${wantSheet?`,"sheet":{"columns":["..."],"rows":[["..."]]}`:""}}
+${imgSpecGuide($("#wFmt").value)}
 ${wantSheet?`"sheet" là bảng kế hoạch triển khai hoạt động (ví dụ cột Hạng mục, Nội dung chi tiết, Thời gian, Phần thưởng/Điều kiện, Ghi chú), 5–12 dòng.`:""}`}
+/* The AI designs the cover image as data; renderDesign draws it into the chosen format */
+function imgSpecJson(fmt){return `"image":{"format":"${fmt==="auto"?"một trong: "+IMG_FORMATS.map(f=>f.id).join(", "):fmt}","tag":"nhãn","highlights":["ý nổi bật"],"badge":{"big":"chữ lớn","small":"chữ nhỏ"},"accent":"${Object.keys(ACCENTS).join("|")}","focus":"nam|nu|canh|doi","motif":"hoa|may|sao|lua"}`}
+function imgSpecGuide(fmt){return `"image" là thiết kế ảnh bìa 1200×630 cho bài, hãy SÁNG TẠO mới mỗi lần (mã ngẫu nhiên ${Math.random().toString(36).slice(2,8)}):
+- tag: 1–3 chữ IN HOA gợi không khí (ví dụ SĂN BOSS, QUÀ HOT, BẢO TRÌ).
+- highlights: 2–4 ý rất ngắn (tối đa 6 chữ), lấy từ phần thưởng hoặc điểm hấp dẫn CÓ TRONG bài, không bịa.
+- badge.big: tối đa 5 ký tự nổi bật (ví dụ x2, TOP1, 50%, 21:15); badge.small: tối đa 2 chữ giải thích.
+- accent (màu nhấn), focus (vùng tranh nền: nam = nhân vật nam, nu = nhân vật nữ, canh = phong cảnh, doi = cả đôi), motif (hiệu ứng: hoa đào, mây, sao lấp lánh, lửa) chọn hợp không khí hoạt động: chiến đấu/Boss hợp ember + lua, lễ hội/tình duyên hợp crimson hoặc violet + hoa, khuyến mãi hợp gold + sao, bảo trì/thông báo hợp azure + may. Được phá lệ nếu thấy hợp hơn.
+${fmt==="auto"?`- format: classic (thông báo chung), reward (nhiều phần thưởng), badge (có con số nổi bật), ribbon (nhấn mạnh mốc thời gian), minimal (trang trọng). Chọn cái hợp nhất.`:""}`}
 $("#wClear").onclick=()=>{W_FIELDS.forEach(id=>$(id).value="");$("#wVary").checked=false;$("#wPost").value="";$("#wHead").value="";$("#wSub").value="";wSheet=null;renderWSheet();
-  $("#wThinking").textContent="";$("#wErr").textContent="";drawCard($("#wCanvas"),"","");$("#wFrom").focus()};
+  $("#wThinking").textContent="";$("#wErr").textContent="";setWImg(null);$("#wFrom").focus()};
 $("#wGen").onclick=async()=>{const tpl=templates.find(x=>x.id===$("#wTpl").value);
   if(!tpl){$("#wErr").textContent="Hãy chọn một mẫu.";return}
   if(!$("#wFrom").value){$("#wErr").textContent="Hãy chọn ngày bắt đầu.";return}
@@ -709,7 +753,7 @@ $("#wGen").onclick=async()=>{const tpl=templates.find(x=>x.id===$("#wTpl").value
   wCtl=new AbortController(); const wantSheet=$("#wSheetOn").checked;
   try{const r=await aiJson(quickPrompt(tpl,wantSheet));
     $("#wPost").value=r.post||"";$("#wHead").value=tpl.headline||r.headline||"";$("#wSub").value=r.subline||"";
-    wSheet=wantSheet?normSheet(r):null;renderWSheet();drawCard($("#wCanvas"),$("#wHead").value,$("#wSub").value);
+    wSheet=wantSheet?normSheet(r):null;renderWSheet();setWImg(r.image);
     $("#wThinking").textContent="Xong. Bấm Copy rồi dán lên fanpage.";
   }catch(e){$("#wThinking").textContent="";$("#wErr").textContent=aiErrMsg(e)}
   finally{$("#wGen").disabled=false;$("#wStop").classList.add("hidden");wCtl=null}};
@@ -717,7 +761,29 @@ $("#wStop").onclick=()=>{cancelAi();wCtl?.abort()};
 $("#wCopy").onclick=()=>copyText($("#wPost"));
 async function copyText(el){if(!el.value.trim()){toast("Chưa có nội dung để copy");return}
   try{await navigator.clipboard.writeText(el.value);toast("Đã copy, dán lên Facebook là xong")}catch(e){el.select();toast("Đã bôi đen, nhấn Ctrl+C (hoặc giữ để sao chép)")}}
-$("#wHead").oninput=$("#wSub").oninput=()=>drawCard($("#wCanvas"),$("#wHead").value,$("#wSub").value);
+let wImg=null;
+function fmtChoice(){const v=$("#wFmt").value;return v==="auto"?null:v}
+function setWImg(spec){wImg=spec?normImg(spec,fmtChoice()||spec.format):null;if(wImg&&fmtChoice())wImg.format=fmtChoice();
+  $("#wTag").value=wImg?.tag||"";$("#wHi").value=(wImg?.highlights||[]).join("\n");$("#wBadgeBig").value=wImg?.badge.big||"";$("#wBadgeSmall").value=wImg?.badge.small||"";
+  $("#wAccent").value=wImg?.accent||"crimson";redrawW()}
+function redrawW(){drawCard($("#wCanvas"),$("#wHead").value,$("#wSub").value,wImg||{format:fmtChoice()||"classic",seed:7})}
+function syncWImg(){if(!wImg)wImg=normImg({format:fmtChoice()||"classic"});
+  Object.assign(wImg,{tag:$("#wTag").value.trim(),highlights:$("#wHi").value.split("\n").map(x=>x.trim()).filter(Boolean).slice(0,4),
+    badge:{big:$("#wBadgeBig").value.trim(),small:$("#wBadgeSmall").value.trim()},accent:$("#wAccent").value});redrawW()}
+$("#wHead").oninput=$("#wSub").oninput=redrawW;
+["#wTag","#wHi","#wBadgeBig","#wBadgeSmall"].forEach(id=>$(id).oninput=syncWImg);$("#wAccent").onchange=syncWImg;
+$("#wFmt").onchange=()=>{if(wImg&&fmtChoice())wImg.format=fmtChoice();redrawW()};
+$("#wReimg").onclick=async()=>{const post=$("#wPost").value.trim();if(!post){toast("Viết bài trước, AI sẽ dựa vào bài để thiết kế ảnh");return}
+  const tpl=templates.find(x=>x.id===$("#wTpl").value),fmt=$("#wFmt").value;
+  $("#wReimg").disabled=true;$("#wThinking").textContent="AI đang thiết kế ảnh mới…";$("#wErr").textContent="";
+  try{const r=await aiJson(`Bạn thiết kế ảnh bìa Facebook cho game kiếm hiệp cổ trang "Tam Sinh Duyên". Dựa vào bài đăng:
+"""${post}"""
+Tạo một thiết kế KHÁC với lần trước${wImg?` (lần trước: format ${wImg.format}, màu ${wImg.accent}, nền ${wImg.focus}, hiệu ứng ${wImg.motif}, nhãn "${wImg.tag}")`:""}.
+Trả về DUY NHẤT một JSON hợp lệ: {"headline":"tiêu đề ngắn cho ảnh, tối đa 8 chữ",${imgSpecJson(fmt)}}
+${imgSpecGuide(fmt)}`);
+    if(!tpl?.headline&&r.headline)$("#wHead").value=r.headline;setWImg(r.image);$("#wThinking").textContent="Đã tạo ảnh mới. Bấm lần nữa để có phương án khác.";
+  }catch(e){$("#wThinking").textContent="";$("#wErr").textContent=e.code==="bad_json"?e.message:aiErrMsg(e)}
+  finally{$("#wReimg").disabled=false}};
 $("#wPng").onclick=()=>$("#wCanvas").toBlob(b=>save(fname("png",$("#wHead").value),b),"image/png");
 function renderWSheet(){$("#wSheetBox").classList.toggle("hidden",!wSheet);if(!wSheet)return;
   $("#wSheetWrap").innerHTML=`<table><thead><tr>${wSheet.columns.map(c=>`<th>${esc(c)}</th>`).join("")}</tr></thead><tbody>${wSheet.rows.map((r,i)=>`<tr>${r.map((c,j)=>`<td contenteditable="true" data-r="${i}" data-c="${j}">${esc(c)}</td>`).join("")}</tr>`).join("")}</tbody></table>`}
@@ -841,19 +907,129 @@ function wrap(ctx,text,maxW){const words=text.split(/\s+/);const lines=[];let li
   for(const w of words){const t=line?line+" "+w:w;if(ctx.measureText(t).width>maxW&&line){lines.push(line);line=w}else line=t}
   if(line)lines.push(line);return lines}
 function drawImage(){drawCard($("#dCanvas"),$("#dHeadline").value,$("#dSubline").value)}
-function drawCard(cv,headIn,subIn){const ctx=cv.getContext("2d");const W=1200,H=630;
-  const draw=()=>{ctx.clearRect(0,0,W,H);
-    const s=Math.max(W/bgImg.width,H/bgImg.height),iw=bgImg.width*s,ih=bgImg.height*s;ctx.drawImage(bgImg,(W-iw)/2,(H-ih)*0.45,iw,ih);
-    const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,"rgba(30,12,28,0)");g.addColorStop(.45,"rgba(30,12,28,.05)");g.addColorStop(1,"rgba(30,12,28,.85)");ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
-    ctx.save();ctx.beginPath();ctx.roundRect(W-210,24,180,150,16);ctx.clip();ctx.drawImage(logoImg,W-210,24,180,150);ctx.restore();
-    const head=(headIn||"").trim()||"Tiêu đề bài đăng",sub=(subIn||"").trim();
-    ctx.font='700 64px "Noto Serif", Georgia, serif';ctx.fillStyle="#fff";ctx.shadowColor="rgba(0,0,0,.6)";ctx.shadowBlur=14;
-    const lines=wrap(ctx,head,W-120).slice(0,3);let y=H-60-(sub?54:0)-(lines.length-1)*76;
-    lines.forEach(l=>{ctx.fillText(l,60,y);y+=76});
-    if(sub){ctx.font='600 30px "Be Vietnam Pro", system-ui, sans-serif';ctx.fillStyle="#F9C9D6";ctx.fillText(sub,62,H-56)}
-    ctx.shadowBlur=0;ctx.fillStyle="#C2244A";ctx.fillRect(60,H-30,120,5)};
-  if(bgImg.complete&&logoImg.complete)draw();else{bgImg.addEventListener("load",()=>logoImg.complete&&draw());logoImg.addEventListener("load",()=>bgImg.complete&&draw())}
-  document.fonts?.ready.then(draw)}
+/* An image "spec" is what the AI designs each time; the format decides the layout it is drawn into. */
+const IMG_FORMATS=[
+  {id:"classic",name:"Cổ phong",desc:"Tranh phủ kín, tiêu đề lớn ở góc dưới. Hợp thông báo chung."},
+  {id:"reward",name:"Bảng thưởng",desc:"Tranh bên trái, khung phần thưởng bên phải. Hợp sự kiện có quà."},
+  {id:"badge",name:"Huy hiệu",desc:"Huy hiệu tròn nổi bật con số (x2, TOP 1, 50%). Hợp khuyến mãi, đua top."},
+  {id:"ribbon",name:"Dải lụa",desc:"Dải màu ngang giữa ảnh kèm ô ngày giờ. Hợp mốc thời gian, bảo trì, server mới."},
+  {id:"minimal",name:"Tối giản",desc:"Nền mờ, chữ căn giữa, viền vàng mảnh. Hợp tin trang trọng."}];
+const ACCENTS={crimson:["Đỏ son","#C2244A","#F9C9D6"],gold:["Vàng kim","#C9973F","#FBE3B0"],jade:["Ngọc bích","#2E8B6E","#BFEBDC"],
+  violet:["Tím","#6A55B8","#DCD3FA"],azure:["Lam","#2F6FB0","#CFE3F7"],ember:["Cam lửa","#D2582A","#FBD2BF"]};
+const FOCUS={nam:[430,300],nu:[600,420],canh:[1050,430],doi:[520,380]};
+const MOTIFS=["hoa","may","sao","lua"];
+function rng(seed){let a=seed>>>0||1;return()=>{a+=0x6D2B79F5;let t=a;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296}}
+function normImg(x,fmt){x=x||{};const pick=(v,list,d)=>list.includes(v)?v:d;
+  return {format:pick(x.format,IMG_FORMATS.map(f=>f.id),fmt||"classic"),tag:String(x.tag||"").slice(0,24),
+    highlights:(Array.isArray(x.highlights)?x.highlights:[]).map(String).filter(Boolean).slice(0,4),
+    badge:{big:String(x.badge?.big||"").slice(0,6),small:String(x.badge?.small||"").slice(0,18)},
+    accent:pick(x.accent,Object.keys(ACCENTS),"crimson"),focus:pick(x.focus,Object.keys(FOCUS),"doi"),
+    motif:pick(x.motif,MOTIFS,"hoa"),seed:x.seed||Math.floor(Math.random()*1e9)}}
+function cover(ctx,x,y,w,h,focus,zoom){const [fx,fy]=FOCUS[focus]||FOCUS.doi;
+  const s=Math.max(w/bgImg.width,h/bgImg.height)*(zoom||1),iw=bgImg.width*s,ih=bgImg.height*s;
+  const dx=Math.min(x,Math.max(x+w-iw,x+w/2-fx*s)),dy=Math.min(y,Math.max(y+h-ih,y+h/2-fy*s));
+  ctx.save();ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();ctx.drawImage(bgImg,dx,dy,iw,ih);ctx.restore();
+  /* the artwork already carries the logo around (1050–1340, 60–270); report how much of it is visible */
+  const [lx0,ly0,lx1,ly1]=[1050,60,1340,270].map((v,i)=>i%2?dy+v*s:dx+v*s);
+  const vis=Math.max(0,Math.min(lx1,x+w)-Math.max(lx0,x))*Math.max(0,Math.min(ly1,y+h)-Math.max(ly0,y))/((lx1-lx0)*(ly1-ly0));
+  return vis>.5}
+function fitText(ctx,text,maxW,size,min,weight,family){let sz=size;
+  do{ctx.font=`${weight} ${sz}px ${family}`;if(ctx.measureText(text).width<=maxW)return text;sz-=2}while(sz>=min);
+  ctx.font=`${weight} ${min}px ${family}`;let t=text;while(t.length>1&&ctx.measureText(t+"…").width>maxW)t=t.slice(0,-1);return t.trimEnd()+"…"}
+function joinFit(ctx,items,sep,maxW){let out="";for(const it of items){const t=out?out+sep+it:it;if(ctx.measureText(t).width>maxW)break;out=t}return out}
+function fitLines(ctx,text,maxW,maxLines,size,min,weight,family){let sz=size,lines;
+  do{ctx.font=`${weight} ${sz}px ${family}`;lines=wrap(ctx,text,maxW);sz-=4}while(lines.length>maxLines&&sz>=min);
+  return {lines:lines.slice(0,maxLines),size:sz+4}}
+const SERIF='"Noto Serif", Georgia, serif',SANS='"Be Vietnam Pro", system-ui, sans-serif';
+function motif(ctx,W,H,kind,rand,area){const [x0,y0,x1,y1]=area||[0,0,W,H];ctx.save();
+  for(let i=0;i<(kind==="may"?7:26);i++){const x=x0+rand()*(x1-x0),y=y0+rand()*(y1-y0),r=rand();
+    if(kind==="hoa"){ctx.fillStyle=`rgba(255,${190+r*40|0},${205+r*30|0},${.55+r*.35})`;ctx.beginPath();ctx.ellipse(x,y,6+r*7,3+r*4,rand()*Math.PI,0,Math.PI*2);ctx.fill()}
+    else if(kind==="sao"){const k=3+r*7;ctx.fillStyle=`rgba(255,230,160,${.5+r*.5})`;ctx.beginPath();
+      ctx.moveTo(x,y-k*2);ctx.quadraticCurveTo(x,y,x+k*2,y);ctx.quadraticCurveTo(x,y,x,y+k*2);ctx.quadraticCurveTo(x,y,x-k*2,y);ctx.quadraticCurveTo(x,y,x,y-k*2);ctx.fill()}
+    else if(kind==="lua"){ctx.fillStyle=`rgba(255,${120+r*100|0},40,${.45+r*.45})`;ctx.shadowColor="rgba(255,140,40,.9)";ctx.shadowBlur=10;ctx.beginPath();ctx.arc(x,y,1.5+r*3.5,0,Math.PI*2);ctx.fill()}
+    else{const g=ctx.createRadialGradient(x,H-40-r*120,0,x,H-40-r*120,120+r*120);g.addColorStop(0,"rgba(255,255,255,.28)");g.addColorStop(1,"rgba(255,255,255,0)");ctx.fillStyle=g;ctx.fillRect(x-260,H-300,520,300)}}
+  ctx.restore()}
+function pill(ctx,text,x,y,bg,align){if(!text)return 0;ctx.font=`700 22px ${SANS}`;const w=ctx.measureText(text).width+36,px=align==="center"?x-w/2:x;
+  ctx.fillStyle=bg;ctx.beginPath();ctx.roundRect(px,y,w,42,21);ctx.fill();ctx.fillStyle="#fff";ctx.textBaseline="middle";ctx.fillText(text,px+18,y+22);ctx.textBaseline="alphabetic";return w}
+function logo(ctx,x,y,w){const h=w*logoImg.height/logoImg.width;ctx.save();ctx.shadowColor="rgba(0,0,0,.45)";ctx.shadowBlur=18;
+  ctx.beginPath();ctx.roundRect(x,y,w,h,14);ctx.fillStyle="#fff";ctx.fill();ctx.shadowBlur=0;ctx.clip();ctx.drawImage(logoImg,x,y,w,h);ctx.restore()}
+function shade(ctx,x,y,w,h,stops,vertical){const g=vertical===false?ctx.createLinearGradient(x,0,x+w,0):ctx.createLinearGradient(0,y,0,y+h);
+  stops.forEach(([o,c])=>g.addColorStop(o,c));ctx.fillStyle=g;ctx.fillRect(x,y,w,h)}
+function renderDesign(ctx,W,H,d){const [ ,ac,acl]=ACCENTS[d.accent],rand=rng(d.seed);const head=d.headline||"Tiêu đề bài đăng",sub=d.subline||"";
+  ctx.clearRect(0,0,W,H);ctx.textAlign="left";ctx.shadowBlur=0;
+  const glow=()=>{ctx.shadowColor="rgba(0,0,0,.6)";ctx.shadowBlur=14},noglow=()=>{ctx.shadowBlur=0};
+  if(d.format==="reward"){const artLogo=cover(ctx,0,0,606,H,d.focus,1.05);motif(ctx,W,H,d.motif,rand,[0,0,600,H]);
+    ctx.fillStyle="rgba(24,10,26,.93)";ctx.beginPath();ctx.moveTo(610,0);ctx.lineTo(W,0);ctx.lineTo(W,H);ctx.lineTo(540,H);ctx.closePath();ctx.fill();
+    ctx.fillStyle=ac;ctx.beginPath();ctx.moveTo(604,0);ctx.lineTo(616,0);ctx.lineTo(546,H);ctx.lineTo(534,H);ctx.closePath();ctx.fill();
+    if(!artLogo)logo(ctx,W-160,26,130);let y=48;if(d.tag){pill(ctx,d.tag,640,y,ac);y+=66}else y+=20;
+    const t=fitLines(ctx,head,W-640-180,3,50,34,700,SERIF);ctx.fillStyle="#fff";t.lines.forEach(l=>{y+=t.size;ctx.fillText(l,640,y);y+=10});
+    if(sub){const tx=fitText(ctx,sub,W-680,26,18,600,SANS);ctx.fillStyle=acl;y+=40;ctx.fillText(tx,640,y)}
+    y+=26;ctx.font=`500 26px ${SANS}`;
+    d.highlights.forEach(h=>{y+=48;if(y>H-40)return;ctx.fillStyle=ac;ctx.save();ctx.translate(652,y-9);ctx.rotate(Math.PI/4);ctx.fillRect(-7,-7,14,14);ctx.restore();
+      ctx.fillStyle="#F3E9F1";ctx.fillText(fitText(ctx,h,W-718,26,20,500,SANS),678,y)});
+    ctx.fillStyle=ac;ctx.fillRect(640,H-34,120,5);return}
+  if(d.format==="minimal"){ctx.save();ctx.filter="blur(7px)";cover(ctx,-20,-20,W+40,H+40,d.focus,1.1);ctx.restore();
+    ctx.fillStyle="rgba(22,10,24,.62)";ctx.fillRect(0,0,W,H);motif(ctx,W,H,d.motif,rand);
+    ctx.strokeStyle=ACCENTS.gold[1];ctx.lineWidth=2;ctx.strokeRect(28,28,W-56,H-56);logo(ctx,W/2-60,52,120);ctx.textAlign="center";
+    let y=250;if(d.tag){ctx.font=`600 22px ${SANS}`;ctx.fillStyle=acl;ctx.fillText(d.tag.split("").join(" "),W/2,y);y+=16}
+    const t=fitLines(ctx,head,W-200,2,68,44,700,SERIF);glow();ctx.fillStyle="#fff";t.lines.forEach(l=>{y+=t.size+6;ctx.fillText(l,W/2,y)});noglow();
+    y+=44;if(sub){const tx=fitText(ctx,sub,W-380,28,20,600,SANS);const w=ctx.measureText(tx).width;ctx.fillStyle=acl;ctx.fillText(tx,W/2,y);
+      ctx.fillStyle=ACCENTS.gold[1];ctx.fillRect(W/2-w/2-110,y-10,80,2);ctx.fillRect(W/2+w/2+30,y-10,80,2);y+=48}
+    if(d.highlights.length){ctx.font=`500 24px ${SANS}`;ctx.fillStyle="#EADCE6";ctx.fillText(joinFit(ctx,d.highlights,"  ·  ",W-200),W/2,y)}
+    ctx.textAlign="left";return}
+  const artLogo=cover(ctx,0,0,W,H,d.focus,d.format==="badge"?1.08:1);motif(ctx,W,H,d.motif,rand);
+  if(d.format==="badge"){ctx.fillStyle="rgba(22,10,24,.45)";ctx.fillRect(0,0,W,H);shade(ctx,440,0,W-440,H,[[0,"rgba(22,10,24,0)"],[.35,"rgba(22,10,24,.6)"],[1,"rgba(22,10,24,.85)"]],false);
+    const cx=260,cy=330,R=150;ctx.save();ctx.shadowColor=ac;ctx.shadowBlur=40;ctx.fillStyle=ac;ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.fill();ctx.restore();
+    ctx.strokeStyle=acl;ctx.lineWidth=4;ctx.beginPath();ctx.arc(cx,cy,R-16,0,Math.PI*2);ctx.stroke();
+    ctx.setLineDash([2,10]);ctx.beginPath();ctx.arc(cx,cy,R+14,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
+    ctx.textAlign="center";ctx.fillStyle="#fff";const big=d.badge.big||"HOT";const b=fitLines(ctx,big,R*1.6,1,110,50,800,SERIF);ctx.fillText(b.lines[0],cx,cy+(d.badge.small?20:b.size/3));
+    if(d.badge.small){ctx.font=`700 24px ${SANS}`;ctx.fillStyle=acl;ctx.fillText(d.badge.small.toUpperCase(),cx,cy+62)}ctx.textAlign="left";
+    if(!artLogo)logo(ctx,W-170,24,140);let y=150;if(d.tag){pill(ctx,d.tag,500,y,ac);y+=62}
+    const t=fitLines(ctx,head,W-560,3,58,38,700,SERIF);glow();ctx.fillStyle="#fff";t.lines.forEach(l=>{y+=t.size;ctx.fillText(l,500,y);y+=8});noglow();
+    if(sub){const tx=fitText(ctx,sub,W-540,28,20,600,SANS);ctx.fillStyle=acl;y+=40;ctx.fillText(tx,500,y)}
+    y+=24;let x=500;ctx.font=`600 21px ${SANS}`;d.highlights.forEach(h=>{const w=ctx.measureText(h).width+28;if(x+w>W-40){x=500;y+=46}if(y>H-60)return;
+      ctx.fillStyle="rgba(255,255,255,.14)";ctx.beginPath();ctx.roundRect(x,y+14,w,36,18);ctx.fill();ctx.fillStyle="#fff";ctx.fillText(h,x+14,y+39);x+=w+10});return}
+  if(d.format==="ribbon"){shade(ctx,0,0,W,H,[[0,"rgba(22,10,24,.15)"],[1,"rgba(22,10,24,.55)"]]);
+    const by=360,bh=190;shade(ctx,0,by,W,bh,[[0,ac+"F2"],[.7,ac+"CC"],[1,ac+"00"]],false);
+    ctx.fillStyle="rgba(255,255,255,.5)";ctx.fillRect(0,by,W,2);ctx.fillRect(0,by+bh-2,W,2);
+    ctx.fillStyle="#fff";ctx.beginPath();ctx.roundRect(56,by-30,200,200,18);ctx.fill();ctx.fillStyle=ac;ctx.fillRect(56,by-30,200,44);
+    ctx.textAlign="center";ctx.font=`700 22px ${SANS}`;ctx.fillStyle="#fff";ctx.fillText((d.badge.small||d.tag||"THÔNG BÁO").toUpperCase().slice(0,14),156,by);
+    const bb=fitLines(ctx,d.badge.big||(sub.match(/\d{1,2}\/\d{1,2}/)||["NEW"])[0],170,1,72,34,800,SERIF);ctx.fillStyle="#2A1A2C";ctx.fillText(bb.lines[0],156,by+100);ctx.textAlign="left";
+    if(!artLogo)logo(ctx,W-170,24,140);if(d.tag)pill(ctx,d.tag,300,by-60,"rgba(22,10,24,.75)");
+    const t=fitLines(ctx,head,W-360,2,56,36,700,SERIF);glow();ctx.fillStyle="#fff";let y=by+(t.lines.length>1?10:40);t.lines.forEach(l=>{y+=t.size;ctx.fillText(l,300,y);y+=6});noglow();
+    if(sub){const tx=fitText(ctx,sub,W-340,26,18,600,SANS);ctx.fillStyle="#fff";ctx.fillText(tx,300,by+bh-24)}
+    if(d.highlights.length){ctx.font=`600 24px ${SANS}`;glow();ctx.fillStyle="#fff";ctx.fillText(joinFit(ctx,d.highlights,"  ✦  ",W-120),60,H-30);noglow()}return}
+  /* classic */
+  shade(ctx,0,0,W,H,[[0,"rgba(30,12,28,0)"],[.45,"rgba(30,12,28,.05)"],[1,"rgba(30,12,28,.88)"]]);if(!artLogo)logo(ctx,W-210,24,180);
+  if(d.tag)pill(ctx,d.tag,60,40,ac);
+  const t=fitLines(ctx,head,W-120,3,66,44,700,SERIF);let y=H-60-(sub?54:0)-(d.highlights.length?52:0)-(t.lines.length-1)*(t.size+12);
+  glow();ctx.fillStyle="#fff";t.lines.forEach(l=>{ctx.fillText(l,60,y);y+=t.size+12});noglow();
+  if(sub){const tx=fitText(ctx,sub,W-140,30,20,600,SANS);ctx.fillStyle=acl;ctx.fillText(tx,62,H-56-(d.highlights.length?52:0))}
+  if(d.highlights.length){ctx.font=`600 22px ${SANS}`;let x=60;d.highlights.forEach(h=>{const w=ctx.measureText(h).width+28;if(x+w>W-40)return;
+    ctx.fillStyle="rgba(255,255,255,.16)";ctx.beginPath();ctx.roundRect(x,H-92,w,36,18);ctx.fill();ctx.fillStyle="#fff";ctx.fillText(h,x+14,H-67);x+=w+10})}
+  ctx.fillStyle=ac;ctx.fillRect(60,H-30,120,5)}
+function drawCard(cv,headIn,subIn,spec){const ctx=cv.getContext("2d");const d={...normImg(spec||{seed:7}),headline:(headIn||"").trim(),subline:(subIn||"").trim()};
+  const draw=()=>{if(bgImg.complete&&bgImg.naturalWidth&&logoImg.complete&&logoImg.naturalWidth)renderDesign(ctx,cv.width,cv.height,d)};
+  draw();bgImg.addEventListener("load",draw,{once:true});logoImg.addEventListener("load",draw,{once:true});document.fonts?.ready.then(draw)}
+
+/* ---------- image formats tab ---------- */
+const FMT_KEY="tsd.imgfmt";
+function defFmt(){try{return localStorage.getItem(FMT_KEY)||"auto"}catch(e){return "auto"}}
+const FMT_SAMPLE={headline:"Săn Boss Tứ Linh",subline:"21:15 · 09/09/2026",tag:"SỰ KIỆN",highlights:["Hộp Quà Tứ Linh","Nguyên bảo x500","Danh hiệu Đồ Long"],badge:{big:"x2",small:"Phần thưởng"}};
+const FMT_DEMO={classic:["crimson","doi","hoa"],reward:["gold","nam","sao"],badge:["ember","nu","lua"],ribbon:["azure","canh","may"],minimal:["violet","doi","sao"]};
+function renderFormats(){const cur=defFmt();
+  $("#fmtGrid").innerHTML=`<div class="fmt" data-fmt="auto" aria-current="${cur==="auto"}"><div class="auto-art">✦ AI tự chọn format ✦<br><span style="font:500 14px var(--sans)">phù hợp nhất với từng bài</span></div><div class="b"><h4>AI tự chọn${cur==="auto"?'<span class="cur">Mặc định</span>':""}</h4><p>Mỗi bài AI chọn một trong các format bên cạnh cho hợp nội dung.</p><div class="row" style="margin:0"><button class="btn small" data-set="auto">Đặt làm mặc định</button></div></div></div>`+
+    IMG_FORMATS.map(f=>`<div class="fmt" data-fmt="${f.id}" aria-current="${cur===f.id}"><canvas width="1200" height="630" data-prev="${f.id}"></canvas><div class="b"><h4>${f.name}${cur===f.id?'<span class="cur">Mặc định</span>':""}</h4><p>${f.desc}</p><div class="row" style="margin:0"><button class="btn small" data-set="${f.id}">Đặt làm mặc định</button><button class="btn ghost small" data-try="${f.id}">Viết bài với format này</button></div></div></div>`).join("");
+  document.querySelectorAll("#fmtGrid canvas[data-prev]").forEach(cv=>{const [accent,focus,motif]=FMT_DEMO[cv.dataset.prev];
+    drawCard(cv,FMT_SAMPLE.headline,FMT_SAMPLE.subline,{...FMT_SAMPLE,format:cv.dataset.prev,accent,focus,motif,seed:42})})}
+$("#fmtGrid").onclick=e=>{const set=e.target.dataset.set,tr=e.target.dataset.try;
+  if(set){try{localStorage.setItem(FMT_KEY,set)}catch(_){}$("#wFmt").value=set;renderFormats();toast("Đã đặt format mặc định")}
+  if(tr){$("#wFmt").value=tr;if(wImg){wImg.format=tr;redrawW()}show("write")}};
+$("#wFmt").innerHTML='<option value="auto">AI tự chọn</option>'+IMG_FORMATS.map(f=>`<option value="${f.id}">${f.name}</option>`).join("");
+$("#wFmt").value=defFmt();
+$("#wAccent").innerHTML=Object.entries(ACCENTS).map(([k,[n]])=>`<option value="${k}">${n}</option>`).join("");
+renderFormats();
+
 $("#dHeadline").oninput=drawImage;$("#dSubline").oninput=drawImage;
 $("#dPng").onclick=()=>$("#dCanvas").toBlob(b=>save(fname("png"),b),"image/png");
 </script>
