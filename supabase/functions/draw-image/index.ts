@@ -48,7 +48,7 @@ Deno.serve(async (req) => {
     if (refBlob) {
       const form = new FormData();
       form.append("model", model);
-      form.append("prompt", "Use the reference image only as a guide for art style, costume design and colour palette; paint a NEW scene. " + fullPrompt);
+      form.append("prompt", "Use the reference image only as a guide for drawing style and costume design; follow the colours described below; paint a NEW scene. " + fullPrompt);
       form.append("size", "1536x1024");
       form.append("quality", quality);
       form.append("image", new File([refBlob], "ref." + (refBlob.type.split("/")[1] || "png"), { type: refBlob.type }));

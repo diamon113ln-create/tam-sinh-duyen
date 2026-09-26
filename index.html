@@ -357,6 +357,8 @@ aside.side .logo{cursor:pointer}
             <div><label for="wFmt">Format ảnh</label><select id="wFmt"></select></div>
             <div><label for="wFont">Kiểu chữ</label><select id="wFont"></select></div>
           </div>
+          <label for="wStyle">Phong cách vẽ (cho nút AI vẽ tranh mới)</label><select id="wStyle"></select>
+          <p class="hint" id="wStyleHint" style="font-size:13px;color:var(--ink-soft);margin:6px 0 0;white-space:pre-line"></p>
           <div class="grid2">
             <button type="button" class="btn ghost" id="wReimg" style="margin-top:10px">AI tạo ảnh khác</button>
             <button type="button" class="btn" id="wDraw" style="margin-top:10px" title="AI vẽ tranh nền mới hợp với bài (khoảng 30–90 giây)">AI vẽ tranh mới</button>
@@ -393,6 +395,21 @@ aside.side .logo{cursor:pointer}
       <div class="strip"><h2>Format ảnh</h2></div>
       <p class="hint" style="margin:0 0 14px;color:var(--ink-soft)">Chọn format mặc định cho ảnh ở mục Viết bài nhanh. Mỗi lần viết bài, AI tự sáng tạo nhãn, điểm nổi bật, huy hiệu, màu nhấn, vùng tranh và hiệu ứng theo format đã chọn. Ảnh xem trước dưới đây dùng nội dung mẫu.</p>
       <div class="fmt-grid" id="fmtGrid"></div>
+      <div class="panel" style="margin-top:18px">
+        <div class="row" style="margin:0;justify-content:space-between"><h4 style="margin:0;font:700 22px var(--callig)">Phong cách vẽ AI</h4><button class="btn small" id="stNew">Thêm phong cách</button></div>
+        <p class="hint" style="margin:6px 0 0;font-size:13px;color:var(--ink-soft)">Mô tả sẵn tông màu, nhân vật, nền, hiệu ứng… Khi bấm <b>AI vẽ tranh mới</b>, AI vẽ đúng theo phong cách đã chọn; tiêu đề, slogan, thời gian, logo do web ghép lên theo format chữ bạn gán cho phong cách.</p>
+        <div class="saved" id="stList"></div>
+        <form id="stForm" class="hidden" style="margin-top:12px">
+          <label for="stName">Tên phong cách</label><input id="stName" required placeholder="Ví dụ: Poster kiếm hiệp xanh rêu">
+          <label for="stDesc">Mô tả phong cách (mỗi dòng một ý)</label><textarea id="stDesc" style="min-height:190px" required></textarea>
+          <div class="grid2">
+            <div><label for="stFmt">Format chữ trên ảnh</label><select id="stFmt"></select></div>
+            <div><label for="stAccent">Màu nhấn</label><select id="stAccent"></select></div>
+            <div><label for="stFont">Kiểu chữ</label><select id="stFont"></select></div>
+          </div>
+          <div class="row"><button class="btn" id="stSave">Lưu phong cách</button><button type="button" class="btn ghost" id="stCancel">Hủy</button><button type="button" class="btn ghost hidden" id="stDel">Xóa</button></div>
+        </form>
+      </div>
     </div>
 
     <div id="viewArt" class="hidden">
@@ -553,7 +570,7 @@ const STATUSES=[["todo","Chưa làm","#9A8FA8"],["doing","Đang làm","#B4661C"]
 const ROLE_NAME={admin:"Admin",lead:"Trưởng nhóm",member:"Thành viên"};
 const $=s=>document.querySelector(s);
 const sample=true, downloads=true;
-let templates=[],savedSheets=[];
+let templates=[],savedSheets=[],artStyles=[];
 const STYLES=["Ngắn gọn, rõ ý","Kiếm hiệp mạnh mẽ","Cổ phong lãng mạn","Hài hước, gần gũi","Thông báo trang trọng"];
 const LENS=[["ngắn (80–120 chữ)","Ngắn"],["vừa (150–220 chữ)","Vừa"],["dài (250–350 chữ)","Dài"]];
 let accounts=[], tasks=[], me=null, editing=null, sheet=null, abortCtl=null, mobileCol="todo";
@@ -580,7 +597,8 @@ async function refresh(name){try{
   if(name==="templates"){const all=await loadTable("templates");
     /* saved sheets live in the templates table, marked kind:"sheet" (no extra table needed) */
     savedSheets=all.filter(x=>x.kind==="sheet").sort((a,b)=>(b.updated||0)-(a.updated||0));
-    templates=all.filter(x=>x.kind!=="sheet").sort((a,b)=>(a.name||"").localeCompare(b.name||"","vi"));if(me){renderTemplates();fillTplSelects();renderHome();renderSaved();fillSrcSelect()}}
+    artStyles=all.filter(x=>x.kind==="artstyle").sort((a,b)=>(a.name||"").localeCompare(b.name||"","vi"));
+    templates=all.filter(x=>!x.kind).sort((a,b)=>(a.name||"").localeCompare(b.name||"","vi"));if(me){renderTemplates();fillTplSelects();renderHome();renderSaved();fillSrcSelect();renderStyles();fillStyleSel()}}
 }catch(e){toast("Lỗi tải dữ liệu: "+errMsg(e))}}
 const db={
   collection:name=>({async add(obj){const {data,error}=await sb.from(name).insert({data:obj}).select("id").single();if(error)throw error;refresh(name);return{id:data.id}}}),
@@ -885,21 +903,61 @@ $("#wHead").oninput=$("#wSub").oninput=redrawW;
 ["#wTag","#wHi","#wBadgeBig","#wBadgeSmall","#wSlogan"].forEach(id=>$(id).oninput=syncWImg);
 $("#wSub").addEventListener("input",()=>{wSubTouched=true});
 ["#wFrom","#wTo","#wTime"].forEach(id=>$(id).addEventListener("change",()=>{if(!wSubTouched){$("#wSub").value=timeText();redrawW()}}));
+/* ---------- Phong cách vẽ AI (saved in templates, kind:"artstyle") ---------- */
+const STYLE_EXAMPLE={name:"Poster kiếm hiệp xanh rêu",format:"poster",accent:"moss",font:"pattaya",desc:`🎨 Tông xanh rêu – be – đen – ánh vàng
+⚔️ 2 nhân vật nam nữ cầm kiếm, tạo hình ngầu, mạnh mẽ
+👥 Nền gameplay cực đông người, giữ cảm giác quy mô lớn và làm mờ phía sau
+🖌️ Tiêu đề lớn font thư pháp/brush, nổi bật ở trung tâm
+✨ Có slogan ngắn, giật gân, tạo hype
+🌫️ Hiệu ứng mực loang, khói, ánh sáng vàng, tre/lá
+🏔️ Phong cách poster kiếm hiệp điện ảnh, bố cục hoành tráng
+🏷️ Logo Tam Sinh Duyên ở phía trên`};
+let stEditing=null;
+/* runs after the image constants further down are defined */
+function initStyles(){$("#stFmt").innerHTML=IMG_FORMATS.map(f=>`<option value="${f.id}">${f.name}</option>`).join("");
+  $("#stAccent").innerHTML=Object.entries(ACCENTS).map(([k,[n]])=>`<option value="${k}">${n}</option>`).join("");
+  $("#stFont").innerHTML=Object.entries(TITLE_FONTS).map(([k,v])=>`<option value="${k}">${v[3]}</option>`).join("");renderStyles();fillStyleSel()}
+function renderStyles(){$("#stList").innerHTML=artStyles.length?artStyles.map(x=>`<div class="it"><div><b>${esc(x.name)}</b><span>${esc((IMG_FORMATS.find(f=>f.id===x.format)||{}).name||"")} · ${esc((ACCENTS[x.accent]||[""])[0])} · ${esc((x.desc||"").split("\n")[0])}</span></div><button class="btn ghost small" data-stedit="${x.id}">Sửa</button><button class="btn ghost small" data-stuse="${x.id}">Dùng</button></div>`).join("")
+  :'<div class="empty" style="padding:12px">Chưa có phong cách nào. <button type="button" class="btn small" id="stSeed">Tạo từ mẫu gợi ý (poster xanh rêu)</button></div>'}
+function openStyle(x){stEditing=x?.id||null;$("#stForm").classList.remove("hidden");$("#stName").value=x?.name||"";$("#stDesc").value=x?.desc||"";
+  $("#stFmt").value=x?.format||"poster";$("#stAccent").value=x?.accent||"moss";$("#stFont").value=x?.font||"charm";$("#stDel").classList.toggle("hidden",!stEditing||!can("delete"));$("#stName").focus()}
+$("#stNew").onclick=()=>openStyle(null);$("#stCancel").onclick=()=>$("#stForm").classList.add("hidden");
+$("#stList").onclick=e=>{if(e.target.id==="stSeed"){openStyle(STYLE_EXAMPLE);stEditing=null;return}
+  const t=e.target.dataset,x=artStyles.find(y=>y.id===(t.stedit||t.stuse));if(!x)return;
+  if(t.stedit)openStyle(x);if(t.stuse){fillStyleSel();$("#wStyle").value=x.id;applyStyle();show("write")}};
+$("#stForm").onsubmit=async e=>{e.preventDefault();const data={kind:"artstyle",name:$("#stName").value.trim(),desc:$("#stDesc").value.trim(),format:$("#stFmt").value,accent:$("#stAccent").value,font:$("#stFont").value,updated:Date.now(),by:me.id};
+  try{if(stEditing)await db.doc("templates/"+stEditing).set(data);else stEditing=(await db.collection("templates").add(data)).id;$("#stForm").classList.add("hidden");toast("Đã lưu phong cách “"+data.name+"”")}catch(err){toast("Không lưu được: "+errMsg(err))}};
+$("#stDel").onclick=async()=>{if(!stEditing||!confirm("Xóa phong cách này?"))return;try{await db.doc("templates/"+stEditing).delete();$("#stForm").classList.add("hidden");toast("Đã xóa phong cách")}catch(err){toast("Không xóa được: "+errMsg(err))}};
+function fillStyleSel(){const cur=$("#wStyle").value;$("#wStyle").innerHTML='<option value="">Không dùng (AI tự nghĩ theo bài)</option>'+artStyles.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join("");
+  if(artStyles.some(x=>x.id===cur))$("#wStyle").value=cur;styleHint()}
+function curStyle(){return artStyles.find(x=>x.id===$("#wStyle").value)||null}
+function styleHint(){const x=curStyle();$("#wStyleHint").textContent=x?x.desc:(artStyles.length?"":"Chưa có phong cách vẽ. Vào Format ảnh → Phong cách vẽ AI để tạo.")}
+/* choosing a style also sets the lettering: format, accent colour and font */
+function applyStyle(){const x=curStyle();styleHint();if(!x)return;
+  if(x.format){$("#wFmt").value=x.format}if(x.font&&TITLE_FONTS[x.font]){$("#wFont").value=x.font}
+  if(!wImg)wImg=normImg({format:x.format||"poster"});wImg.format=x.format||wImg.format;if(ACCENTS[x.accent])wImg.accent=x.accent;$("#wAccent").value=wImg.accent;redrawW()}
+$("#wStyle").onchange=applyStyle;
+
 /* AI paints a new background: Claude writes the English brief, the draw-image function paints it (OpenAI) and files it in Kho ảnh */
 $("#wDraw").onclick=async()=>{const post=$("#wPost").value.trim(),head=$("#wHead").value.trim();
   if(!post&&!head){toast("Viết bài hoặc nhập tiêu đề trước, AI sẽ dựa vào đó để vẽ");return}
   if(!artReady){toast("Cần bật Kho ảnh trước (chạy supabase/kho-anh.sql)");return}
   const btn=$("#wDraw");btn.disabled=true;$("#wErr").textContent="";$("#wThinking").textContent="AI đang nghĩ bối cảnh tranh…";
+  const st=curStyle();
   try{const r=await aiJson(`Bạn là họa sĩ thiết kế key art cho game kiếm hiệp cổ trang "Tam Sinh Duyên". Dựa vào bài đăng dưới đây, viết đề bài để mô hình AI vẽ ảnh nền cho ảnh bìa Facebook.
 BÀI ĐĂNG:
 """${(post||head).slice(0,4000)}"""
+${st?`PHONG CÁCH VẼ BẮT BUỘC (người dùng định sẵn, phải theo sát từng ý về màu sắc, nhân vật, nền, hiệu ứng, bố cục):
+"""${st.desc}"""
+Các ý về tiêu đề, chữ, slogan, logo trong phong cách này KHÔNG đưa vào đề bài (web tự ghép chữ và logo sau); thay vào đó chừa khoảng trống thoáng ở giữa ảnh cho tiêu đề và phía trên cho logo.`:""}
 Trả về DUY NHẤT một JSON hợp lệ: {"prompt":"đề bài bằng TIẾNG ANH, 60–120 từ: bối cảnh, nhân vật (trang phục cổ trang), hành động, không khí, ánh sáng, màu chủ đạo hợp với sự kiện; tuyệt đối không có chữ, logo","name":"tên tranh tiếng Việt 2–5 chữ","tags":["4–8 nhãn tiếng Việt viết thường như ở Kho ảnh"]}`);
     if(!r.prompt)throw {code:"bad_json",message:"AI chưa viết được đề bài vẽ, bấm lại để thử"};
     $("#wThinking").textContent="AI đang vẽ tranh, thường mất 30–90 giây…";
-    const cur=artById(wImg?.art),ref=cur?cur.url:new URL(BG,location.href).href;
+    /* reference picture: the one picked by hand; without a style fall back to the default artwork, with a style let it define the look */
+    const cur=wArtPicked?artById(wArtPicked):null,ref=cur?cur.url:st?"":new URL(BG,location.href).href;
     const {data,error}=await sb.functions.invoke("draw-image",{body:{prompt:String(r.prompt),ref,name:r.name,tags:r.tags}});
     if(error)throw {code:"ai_error",message:await fnErr(error,"draw-image")};
-    await loadArt();if(!wImg)wImg=normImg({format:fmtChoice()||"poster"});wImg.art=data.id;wArtPicked=data.id;
+    await loadArt();if(!wImg)wImg=normImg({format:fmtChoice()||st?.format||"poster"});wImg.art=data.id;wArtPicked=data.id;if(st&&ACCENTS[st.accent])wImg.accent=st.accent;
     $("#wArt").value=data.id;renderPicker();redrawW();$("#wThinking").textContent="Đã vẽ xong và lưu vào Kho ảnh. Bấm lần nữa để vẽ tranh khác.";
   }catch(e){$("#wThinking").textContent="";$("#wErr").textContent=e.code==="bad_json"?e.message:e.code==="ai_error"?"AI chưa vẽ được: "+e.message:aiErrMsg(e)}
   finally{btn.disabled=false}};
@@ -1077,7 +1135,7 @@ const IMG_FORMATS=[
   {id:"ribbon",name:"Dải lụa",desc:"Dải màu ngang giữa ảnh kèm ô ngày giờ. Hợp mốc thời gian, bảo trì, server mới."},
   {id:"poster",name:"Áp phích",desc:"Tiêu đề thư pháp vàng lớn giữa ảnh trên nền vệt bút lông, dải khẩu hiệu, khung thời gian và máy chủ. Hợp sự kiện lớn."},
   {id:"minimal",name:"Tối giản",desc:"Nền mờ, chữ căn giữa, viền vàng mảnh. Hợp tin trang trọng."}];
-const ACCENTS={crimson:["Đỏ son","#C2244A","#F9C9D6"],gold:["Vàng kim","#C9973F","#FBE3B0"],jade:["Ngọc bích","#2E8B6E","#BFEBDC"],
+const ACCENTS={moss:["Xanh rêu","#4F6B34","#E4E9C6"],crimson:["Đỏ son","#C2244A","#F9C9D6"],gold:["Vàng kim","#C9973F","#FBE3B0"],jade:["Ngọc bích","#2E8B6E","#BFEBDC"],
   violet:["Tím","#6A55B8","#DCD3FA"],azure:["Lam","#2F6FB0","#CFE3F7"],ember:["Cam lửa","#D2582A","#FBD2BF"]};
 const FOCUS={nam:[430,300],nu:[600,420],canh:[1050,430],doi:[520,380]};
 const MOTIFS=["hoa","may","sao","lua"];
@@ -1335,7 +1393,7 @@ $("#wFmt").value=defFmt();
 $("#wFont").innerHTML=Object.entries(TITLE_FONTS).map(([k,v])=>`<option value="${k}">${v[3]}</option>`).join("");$("#wFont").value=defFont();
 $("#wFont").onchange=()=>{try{localStorage.setItem("tsd.font",$("#wFont").value)}catch(_){};if(wImg)wImg.font=$("#wFont").value;redrawW();renderFormats()};
 $("#wAccent").innerHTML=Object.entries(ACCENTS).map(([k,[n]])=>`<option value="${k}">${n}</option>`).join("");
-renderFormats();
+renderFormats();initStyles();
 
 $("#dHeadline").oninput=drawImage;$("#dSubline").oninput=drawImage;
 $("#dPng").onclick=()=>$("#dCanvas").toBlob(b=>save(fname("png"),b),"image/png");
