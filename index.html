@@ -352,8 +352,8 @@ aside.side .logo{cursor:pointer}
           <div class="imgmaker" id="aiImg">
             <h4>Ảnh bài đăng</h4>
             <p class="hint" style="margin:0;font-size:13px;color:var(--ink-soft)">Chọn một ảnh hoạt động đã lưu, hoặc để AI đọc bài và motip để vẽ ảnh mới. Bấm <b>Copy ảnh</b> rồi dán (Ctrl+V) vào bài đăng Facebook.</p>
-            <label>Ảnh hoạt động đã lưu</label>
-            <div class="picker" id="wActPicker"></div>
+            <label for="wActSel">Ảnh hoạt động đã lưu</label>
+            <select id="wActSel"></select>
             <label for="wMotifSel">Hoặc để AI vẽ mới – motip đã lưu</label><select id="wMotifSel"></select>
             <label for="wMotif">Mô tả motip để AI vẽ</label>
             <textarea id="wMotif" style="min-height:150px" placeholder="Ví dụ:&#10;🎨 Tông xanh rêu – be – đen – ánh vàng&#10;⚔️ 2 nhân vật nam nữ cầm kiếm, tạo hình ngầu&#10;👥 Nền chiến trường cực đông người, làm mờ phía sau&#10;🌫️ Mực loang, khói, ánh sáng vàng, tre/lá&#10;🏔️ Poster kiếm hiệp điện ảnh, bố cục hoành tráng"></textarea>
@@ -990,9 +990,11 @@ function copyImage(url){if(!navigator.clipboard?.write||!window.ClipboardItem){t
     c.getContext("2d").drawImage(im,0,0);c.toBlob(b=>b?res(b):rej(new Error("png")),"image/png")};im.onerror=()=>rej(new Error("load"));im.src=url});
   navigator.clipboard.write([new ClipboardItem({"image/png":png})]).then(()=>toast("Đã copy ảnh, dán (Ctrl+V) vào bài đăng Facebook"),()=>toast("Không copy được ảnh, hãy dùng Tải ảnh"))}
 async function downloadImage(url,base){try{const b=await (await fetch(url)).blob();save(fname((b.type.split("/")[1]||"png").replace("jpeg","jpg"),base),b)}catch(err){window.open(url,"_blank")}}
-function renderActPicker(){$("#wActPicker").innerHTML=actImgs.length?actImgs.map(a=>`<button type="button" data-act="${a.id}" aria-pressed="${a.url===wAiUrl}" title="${esc(a.name||"")}"><img src="${esc(a.url)}" alt="" loading="lazy"><span>${esc(a.name||"Ảnh")}</span></button>`).join("")
-  :'<span class="hint" style="font-size:13px;color:var(--ink-soft)">Chưa có ảnh hoạt động. Vào mục Ảnh hoạt động để tải lên, hoặc lưu ảnh AI vẽ.</span>'}
-$("#wActPicker").onclick=e=>{const b=e.target.closest("button[data-act]");if(!b)return;const a=actImgs.find(x=>x.id===b.dataset.act);if(a)showAiImg(a.url,true)};
+/* dropdown of saved activity pictures; the chosen one shows below with Copy/Tải */
+function renderActPicker(){const cur=actImgs.find(a=>a.url===wAiUrl);
+  $("#wActSel").innerHTML=(actImgs.length?'<option value="">— Chọn ảnh hoạt động —</option>':'<option value="">Chưa có ảnh hoạt động (vào mục Ảnh hoạt động để tải lên)</option>')+
+    actImgs.map(a=>`<option value="${a.id}">${esc(a.name||"Ảnh hoạt động")}</option>`).join("");$("#wActSel").value=cur?cur.id:""}
+$("#wActSel").onchange=()=>{const a=actImgs.find(x=>x.id===$("#wActSel").value);showAiImg(a?a.url:"",!!a)};
 $("#wAiDraw").onclick=async()=>{const post=$("#wPost").value.trim(),motif=$("#wMotif").value.trim();
   if(!post){toast("Bấm Viết bài trước, AI sẽ dựa vào bài để vẽ ảnh");return}
   if(!artReady){toast("Cần bật Kho ảnh trước (chạy supabase/kho-anh.sql)");return}
