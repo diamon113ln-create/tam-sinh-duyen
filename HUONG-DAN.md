@@ -68,6 +68,17 @@ Làm lần lượt từ trên xuống. Tổng thời gian khoảng 30–45 phút
 - Bấm **💾 Lưu bài viết** dưới khung Kết quả để lưu bài thành Mẫu bài viết; qua **Viết bài nhanh** chọn mẫu đó, đổi ngày rồi bấm Viết bài.
 - Danh sách đã gửi và thẻ hỏi dùng chung cả nhóm; đoạn hội thoại chỉ lưu trên máy đang dùng.
 
+## Phát code riêng cho mem
+
+1. Trong Google Sheet chứa mã: **Chia sẻ → Quyền truy cập chung → Bất kỳ ai có đường liên kết (Người xem)**. Mở đúng trang tính có mã rồi copy link.
+2. Vào tab **Phát code → Thêm đợt code**: đặt tên, dán link sheet (hoặc chọn file Excel/CSV, hoặc dán danh sách mã), sửa **tin nhắn mẫu** (`{code}` là chỗ điền mã) → **Lưu**.
+   - Web tự tìm cột mã. Nếu sheet có cột ô tick (TRUE/FALSE) thì mã đã tick được coi là đã phát.
+3. Mỗi lần bấm **📋 Copy mã tiếp theo**: web copy 1 mã chưa tick (từ trên xuống) kèm tin nhắn và tự tick mã đó. Dán vào tin nhắn gửi mem.
+   - Lỡ bấm mà chưa gửi: bấm **Hoàn tác** để trả mã lại.
+   - Cả nhóm dùng chung, 2 người bấm cùng lúc cũng không bị trùng mã (web báo nếu mã vừa bị người khác lấy).
+4. Thêm mã vào sheet sau này: bấm **🔄 Lấy mã mới từ Google Sheet**. Mã mới được thêm vào cuối, mã đã tick giữ nguyên.
+- Web không tự sửa file Google Sheet; muốn cập nhật sheet thì dùng **Copy các mã đã phát** hoặc **Tải Excel**.
+
 ## Sửa code sau này
 
 - Mở kho code trên GitHub, bấm phím **.** (dấu chấm) → hiện trình soạn thảo giống VS Code ngay trên trình duyệt.
