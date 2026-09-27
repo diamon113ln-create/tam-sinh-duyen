@@ -595,17 +595,18 @@ button.ask-a:hover{border-color:var(--crimson)}
             <div class="cb-stat" id="cbStat"></div>
             <button type="button" class="btn cb-go" id="cbNext">📋 Copy mã tiếp theo</button>
             <div class="cb-hot">
-              <label><input type="checkbox" id="cbHot"> ⌨️ Bật phím tắt <kbd>Alt</kbd> + <kbd>Shift</kbd> + <kbd>C</kbd> để copy mã tiếp theo</label>
+              <label><input type="checkbox" id="cbHot"> ⌨️ Bật phím tắt <kbd>Alt</kbd> + <kbd>Shift</kbd> + <kbd>C</kbd> trên trang này</label>
               <details><summary>Dùng phím tắt khi đang ở tab khác (Vpage, Messenger…)</summary>
                 <p>Trang web chỉ nhận phím khi đang mở. Muốn bấm phím ở tab khác, cài <b>tiện ích Chrome “Phát code nhanh”</b> (làm 1 lần, dùng được cho Chrome, Cốc Cốc, Edge):</p>
                 <ol class="cb-steps">
                   <li><a href="tien-ich-phat-code.zip" download>⬇️ Tải tiện ích</a> rồi giải nén (chuột phải → Giải nén tất cả).</li>
                   <li>Mở trang <code>chrome://extensions</code> (Cốc Cốc: <code>coccoc://extensions</code>), bật <b>Chế độ dành cho nhà phát triển</b> ở góc phải.</li>
                   <li>Bấm <b>Tải tiện ích đã giải nén</b> → chọn thư mục vừa giải nén.</li>
-                  <li>Giữ 1 tab web Tam Sinh Duyên đang mở (ở tab Phát code, chọn đúng đợt code) và tích ô <b>Bật phím tắt</b> ở trên.</li>
+                  <li>Ghim tiện ích (biểu tượng 🧩 → 📌). <b>Bấm vào biểu tượng</b> để mở bảng nhỏ: công tắc <b>Bật / Tắt</b> phím tắt, số mã còn lại, nút copy và nút đổi phím.</li>
+                  <li>Giữ 1 tab web Tam Sinh Duyên đang mở (đã đăng nhập, ở tab Phát code, chọn đúng đợt code).</li>
                   <li>Ở bất kỳ tab nào bấm <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>C</kbd> → mã tiếp theo kèm tin nhắn đã nằm sẵn trong bộ nhớ, bấm <kbd>Ctrl</kbd>+<kbd>V</kbd> để dán. Góc màn hình hiện thông báo mã vừa copy và số mã còn lại.</li>
                 </ol>
-                <p>Đổi phím tắt: mở <code>chrome://extensions/shortcuts</code>. Bấm biểu tượng tiện ích trên thanh công cụ cũng copy mã được.</p>
+                <p>Đổi phím tắt: bấm biểu tượng tiện ích → <b>⌨️ Đổi phím tắt</b>. Đã cài bản cũ: tải bản mới, giải nén đè lên thư mục cũ rồi bấm ⟳ (Tải lại) ở tiện ích trong <code>chrome://extensions</code>.</p>
               </details>
             </div>
             <p class="hint" style="font-size:13px;color:var(--ink-soft);margin:8px 0 0">Mỗi lần bấm: copy <b>1 mã chưa tick</b> (từ trên xuống) kèm tin nhắn mẫu và tự tick mã đó. Dán (Ctrl+V) vào tin nhắn gửi mem. Cả nhóm dùng chung nên không ai phát trùng mã.</p>
@@ -1664,7 +1665,8 @@ $("#cbHot").checked=cbHotOn();
 $("#cbHot").onchange=()=>{try{localStorage.setItem("tsd.cbHot",$("#cbHot").checked?"1":"0")}catch(e){}toast($("#cbHot").checked?"Đã bật phím tắt Alt+Shift+C":"Đã tắt phím tắt")};
 document.addEventListener("keydown",e=>{if(!e.altKey||!e.shiftKey||e.ctrlKey||e.metaKey||e.code!=="KeyC"||!me||!cbHotOn())return;e.preventDefault();cbTake(cbClip)});
 /* called by the extension (chrome.scripting, world MAIN); null = not enabled here, so the extension tells the user to tick the box */
-window.tsdHotkeyNext=async()=>{if(!me||!cbHotOn())return null;
+/* opts.ext: the extension has its own on/off switch, so the box on this page is only needed for older versions of it */
+window.tsdHotkeyNext=async opts=>{if(!me)return {ok:false,error:"Web chưa đăng nhập"};if(!opts?.ext&&!cbHotOn())return null;
   /* no clipboard deadline here, so check the sheet first (at most 4 s) in case someone ticked a code there */
   if(Date.now()-cbSyncAt>5000)await Promise.race([cbSheetSync(cbCur(),true),new Promise(r=>setTimeout(r,4000))]);
   return cbTake(null)};

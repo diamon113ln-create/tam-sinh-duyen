@@ -96,6 +96,8 @@ Sau đó Thành viên / Trưởng nhóm chỉ thấy tên hiển thị của m�
 - **Phím tắt copy mã**: tích ô **⌨️ Bật phím tắt** trong tab Phát code, rồi bấm `Alt + Shift + C` để copy mã tiếp theo.
   - Muốn bấm phím khi đang ở tab khác (Vpage, Messenger…): cài tiện ích **Phát code nhanh** (1 lần). Trên web bấm **⬇️ Tải tiện ích** → giải nén → mở `chrome://extensions` (Cốc Cốc: `coccoc://extensions`) → bật **Chế độ dành cho nhà phát triển** → **Tải tiện ích đã giải nén** → chọn thư mục `tien-ich-phat-code`.
   - Giữ 1 tab web đang mở ở Phát code (đúng đợt code, đã tích Bật phím tắt). Ở tab bất kỳ bấm `Alt + Shift + C` rồi `Ctrl + V` để dán. Góc màn hình báo mã vừa copy và số mã còn lại.
+  - **Bấm biểu tượng tiện ích** (ghim qua 🧩 → 📌) để mở bảng nhỏ: công tắc **Bật / Tắt** phím tắt, số mã còn lại, nút Copy mã, nút **Đổi phím tắt**. Khi tắt, biểu tượng hiện chữ OFF.
+  - Cập nhật tiện ích: tải bản mới, giải nén đè lên thư mục cũ, vào `chrome://extensions` bấm ⟳ ở tiện ích.
   - Đổi phím: `chrome://extensions/shortcuts`. Sửa file trong thư mục `tien-ich-phat-code` thì chạy lại lệnh đóng gói zip (hoặc nhờ Claude) để nút Tải tiện ích có bản mới.
 
 ## Sửa code sau này

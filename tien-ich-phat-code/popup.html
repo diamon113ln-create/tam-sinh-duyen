@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8">
+<style>
+  body{margin:0;width:280px;font:14px/1.5 "Segoe UI",system-ui,sans-serif;color:#2A1A2C;background:#fff}
+  header{display:flex;align-items:center;gap:8px;padding:12px 14px;background:#9E1B3A;color:#fff}
+  header img{width:28px;height:28px;border-radius:6px}
+  header b{font-size:14px}
+  main{padding:12px 14px}
+  .sw{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid #E6DCE6;border-radius:12px;cursor:pointer;user-select:none}
+  .sw .t{font-weight:700;font-size:15px}
+  .sw .s{font-size:12px;color:#5E5170}
+  .sw input{display:none}
+  .knob{flex:none;width:46px;height:26px;border-radius:13px;background:#ccc;position:relative;transition:.2s}
+  .knob::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+  input:checked + .knob{background:#2F7D5B}
+  input:checked + .knob::after{left:23px}
+  .info{margin:10px 0 0;font-size:13px;color:#5E5170}
+  .info b{color:#9E1B3A}
+  button{width:100%;margin-top:10px;border:0;border-radius:10px;padding:10px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;background:#9E1B3A;color:#fff}
+  button.ghost{background:#fff;color:#2A1A2C;border:1px solid #E6DCE6;font-weight:500}
+  button:hover{filter:brightness(1.08)}
+  kbd{font:600 12px Consolas,monospace;border:1px solid #E6DCE6;border-bottom-width:2px;border-radius:5px;padding:0 5px;background:#F8F5F9}
+  #msg{margin-top:8px;font-size:12px;min-height:1em}
+</style></head>
+<body>
+  <header><img src="icon.png" alt=""><b>Phát code nhanh</b></header>
+  <main>
+    <label class="sw"><span><span class="t" id="state">Phím tắt: …</span><br><span class="s">Bấm để bật / tắt</span></span><input type="checkbox" id="on"><span class="knob"></span></label>
+    <p class="info">Phím tắt: <kbd id="key">…</kbd><br><span id="left"></span></p>
+    <button id="copy">📋 Copy mã tiếp theo</button>
+    <button class="ghost" id="keys">⌨️ Đổi phím tắt</button>
+    <div id="msg"></div>
+  </main>
+  <script src="popup.js"></script>
+</body></html>
