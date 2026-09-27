@@ -899,8 +899,14 @@ function errMsg(e){return e?.message||String(e)}
 async function loadTable(name){const {data,error}=await sb.from(name).select("id,data,created_by");if(error)throw error;
   return data.map(r=>({id:r.id,...(r.data||{}),createdBy:r.created_by}))}
 async function refresh(name){try{
-  if(name==="profiles"){const {data,error}=await sb.from("profiles").select("id,username,name,role");if(error)throw error;accounts=data;
-    if(me){const u=accounts.find(a=>a.id===me.id);if(u){me=u;renderShell()}}renderHome()}
+  if(name==="profiles"){
+    if(me?.role==="admin"){const {data,error}=await sb.from("profiles").select("id,username,name,role");if(error)throw error;accounts=data}
+    else{/* non-admins only get display names (no usernames / roles); member_names() comes from supabase/chi-admin-xem-tai-khoan.sql */
+      const {data,error}=await sb.rpc("member_names");
+      accounts=!error&&data?data:((await sb.from("profiles").select("id,name")).data||[])}
+    if(me){const {data:u}=await sb.from("profiles").select("id,username,name,role").eq("id",me.id).maybeSingle();
+      if(u){const was=me.role;me=u;renderShell();if(was!==u.role&&(was==="admin"||u.role==="admin"))return refresh("profiles")}}
+    renderHome()}
   if(name==="tasks"){tasks=await loadTable("tasks");if(me){renderBoard();renderHome()}}
   if(name==="artworks"){await loadArt();return}
   if(name==="templates"){const all=await loadTable("templates");
