@@ -611,7 +611,7 @@ button.ask-a:hover{border-color:var(--crimson)}
             <p class="hint" style="font-size:13px;color:var(--ink-soft);margin:8px 0 0">Mỗi lần bấm: copy <b>1 mã chưa tick</b> (từ trên xuống) kèm tin nhắn mẫu và tự tick mã đó. Dán (Ctrl+V) vào tin nhắn gửi mem. Cả nhóm dùng chung nên không ai phát trùng mã.</p>
             <div class="cb-last hidden" id="cbLast"><div class="h"><span>✅ Vừa copy mã <b id="cbLastCode"></b></span><button type="button" class="btn ghost small" id="cbRecopy">Copy lại</button><button type="button" class="btn ghost small" id="cbUndo" title="Bỏ tick nếu chưa gửi mã này">Hoàn tác</button></div><pre class="cb-pre" id="cbLastMsg"></pre><div class="cb-sheet hidden" id="cbLastSheet"></div></div>
             <label>Tin nhắn mẫu (xem trước với mã tiếp theo)</label><pre class="cb-prev" id="cbMsgPrev"></pre>
-            <div class="row"><button type="button" class="btn ghost small" id="cbEdit">Sửa tin nhắn / nguồn mã</button><button type="button" class="btn ghost small" id="cbPick">Chọn lại cột mã</button><button type="button" class="btn ghost small hidden" id="cbReload">🔄 Lấy mã mới từ Google Sheet</button></div>
+            <div class="row"><button type="button" class="btn ghost small" id="cbEdit">Sửa tin nhắn / nguồn mã</button><button type="button" class="btn ghost small" id="cbPick">Chọn lại cột mã</button><button type="button" class="btn ghost small hidden" id="cbReload">🔄 Đồng bộ với Google Sheet ngay</button></div>
           </div>
         </div>
         <div class="panel" id="cbListBox">
@@ -983,7 +983,7 @@ $("aside.side .logo").onclick=()=>show("home");
 const VIEWS={home:"#viewHome",write:"#viewWrite",week:"#viewWeek",ask:"#viewAsk",codes:"#viewCodes",board:"#viewBoard",templates:"#viewTemplates",sheet:"#viewSheet",formats:"#viewFormats",art:"#viewArt",acts:"#viewActs",accounts:"#viewAccounts"};
 function show(v){if(v==="accounts"&&me.role!=="admin")v="home";
   document.querySelectorAll("#tabs button").forEach(b=>b.setAttribute("aria-current",b.dataset.view===v));
-  if(v==="write")renderSug();if(v==="week")renderWeek();
+  if(v==="write")renderSug();if(v==="week")renderWeek();if(v==="codes"&&Date.now()-cbSyncAt>5000)cbSheetSync(cbCur(),true);
   for(const k in VIEWS)$(VIEWS[k]).classList.toggle("hidden",k!==v);scrollTo(0,0)}
 
 /* ---------- home ---------- */
@@ -1594,6 +1594,7 @@ function renderCodes(){if(!me)return;const b=cbCur();
   $("#cbReload").classList.toggle("hidden",!b.sheetUrl);
   const next=(b.codes||[]).findIndex(cbAvail);const mp=b.map;
   $("#cbSrcInfo").textContent=mp?`Mã lấy từ cột ${colName(mp.codeCol)}${mp.tickCol>=0?` · tick theo cột ${colName(mp.tickCol)}`:""} · từ dòng ${(mp.start||0)+1}`:"";
+  if(b.sheetUrl&&cbSyncAt)$("#cbSrcInfo").textContent+=` · 🔄 tự đồng bộ với sheet (lần cuối ${new Date(cbSyncAt).toLocaleTimeString("vi-VN")})`;
   const rows=(b.codes||[]).map((x,i)=>({x,i})).filter(({x})=>cbFilter==="all"||(cbFilter==="left"?!x.u:x.u));
   $("#cbRows").innerHTML=rows.length?rows.map(({x,i})=>`<tr class="${x.u?"used":""}${i===next?" next":""}${cbOk(x.c)?"":" bad"}"><td class="n">${i+1}</td><td class="c">${esc(x.c)}${cbOk(x.c)?"":' <small>(không phải mã, bỏ qua)</small>'}</td><td><input type="checkbox" data-cbtick="${i}"${x.u?" checked":""} aria-label="Đã phát ${esc(x.c)}"></td><td class="w">${i===next?"⬅ mã tiếp theo":esc(cbWhen(x))}</td></tr>`).join("")
     :`<tr><td colspan="4" class="w" style="text-align:center;padding:16px">Không có mã nào</td></tr>`}
@@ -1657,7 +1658,10 @@ $("#cbHot").checked=cbHotOn();
 $("#cbHot").onchange=()=>{try{localStorage.setItem("tsd.cbHot",$("#cbHot").checked?"1":"0")}catch(e){}toast($("#cbHot").checked?"Đã bật phím tắt Alt+Shift+C":"Đã tắt phím tắt")};
 document.addEventListener("keydown",e=>{if(!e.altKey||!e.shiftKey||e.ctrlKey||e.metaKey||e.code!=="KeyC"||!me||!cbHotOn())return;e.preventDefault();cbTake(cbClip)});
 /* called by the extension (chrome.scripting, world MAIN); null = not enabled here, so the extension tells the user to tick the box */
-window.tsdHotkeyNext=async()=>{if(!me||!cbHotOn())return null;return cbTake(null)};
+window.tsdHotkeyNext=async()=>{if(!me||!cbHotOn())return null;
+  /* no clipboard deadline here, so check the sheet first (at most 4 s) in case someone ticked a code there */
+  if(Date.now()-cbSyncAt>5000)await Promise.race([cbSheetSync(cbCur(),true),new Promise(r=>setTimeout(r,4000))]);
+  return cbTake(null)};
 $("#cbRecopy").onclick=async()=>{if(cbLast)toast(await cbClip(cbLast.msg)?"Đã copy lại":"Không copy được")};
 $("#cbUndo").onclick=async()=>{if(!cbLast)return;const {id,c}=cbLast;
   try{await cbPersist(id,codes=>{const y=codes.find(z=>z.c===c);if(!y)return false;Object.assign(y,{u:0,t:0,b:""})});cbLast=null;renderCodes();
@@ -1770,10 +1774,22 @@ $("#cbForm").onsubmit=async e=>{e.preventDefault();const btn=$("#cbSave");$("#cb
     toast(!old?`Đã tạo đợt “${name}” với ${res.n} mã${res.tick?` (${res.tick} mã đã tick sẵn trong sheet)`:""}`:replace?`Đã thay danh sách: ${res.n} mã`:`Đã lưu. Thêm ${res.add} mã mới${res.tick?`, tick ${res.tick} mã theo sheet`:""}`)}
   catch(err){$("#cbErr").textContent=errMsg(err)}
   finally{btn.disabled=false;btn.textContent="Lưu"}};
-$("#cbReload").onclick=async()=>{const b=cbCur();if(!b?.sheetUrl)return;const btn=$("#cbReload");btn.disabled=true;
-  try{const inc=codesFromRows(await rowsFromSheet(b.sheetUrl),b.map||null);let add=0,tick=0;await cbPersist(b.id,(codes,d)=>{const m=mergeCodes(codes,inc);d.codes=m.codes;add=m.add;tick=m.tick});
-    toast(add||tick?`Đã cập nhật: thêm ${add} mã mới, tick ${tick} mã theo sheet`:"Sheet không có gì mới")}
-  catch(e){toast(errMsg(e))}finally{btn.disabled=false}};
+/* sheet → web: ticks made in Google Sheet (and new codes) are pulled in; an untick in the sheet never unticks here,
+   so a code can't be handed out twice if the sheet missed a tick */
+let cbSyncing=false,cbSyncAt=0;
+async function cbSheetSync(b,quiet){if(!b?.sheetUrl||cbSyncing)return null;cbSyncing=true;
+  try{const inc=codesFromRows(await rowsFromSheet(b.sheetUrl),b.map||null),pre=mergeCodes(b.codes,inc);let add=0,tick=0;
+    if(pre.add||pre.tick)await cbPersist(b.id,(codes,d)=>{const m=mergeCodes(codes,inc);if(!m.add&&!m.tick)return false;d.codes=m.codes;add=m.add;tick=m.tick});
+    cbSyncAt=Date.now();renderCodes();
+    if(add||tick)toast(`🔄 Theo Google Sheet: ${tick?`tick thêm ${tick} mã`:""}${tick&&add?", ":""}${add?`thêm ${add} mã mới`:""}`);else if(!quiet)toast("Sheet không có gì mới");
+    return {add,tick}}
+  catch(e){if(!quiet)toast(errMsg(e));return null}
+  finally{cbSyncing=false}}
+$("#cbReload").onclick=async()=>{const btn=$("#cbReload");btn.disabled=true;try{await cbSheetSync(cbCur(),false)}finally{btn.disabled=false}};
+/* poll every 20 s while Phát code is on screen, or while the shortcut is on (the tab may sit in the background serving the extension) */
+setInterval(()=>{if(!me||cbBusy)return;const onView=!$("#viewCodes").classList.contains("hidden")&&document.visibilityState==="visible";
+  if(onView||cbHotOn())cbSheetSync(cbCur(),true)},20000);
+document.addEventListener("visibilitychange",()=>{if(me&&document.visibilityState==="visible"&&!$("#viewCodes").classList.contains("hidden")&&Date.now()-cbSyncAt>5000)cbSheetSync(cbCur(),true)});
 $("#cbDel").onclick=async()=>{if(!cbEditing||!confirm("Xóa đợt code này? Trạng thái đã phát cũng bị xóa."))return;
   try{await db.doc("templates/"+cbEditing).delete();$("#cbDlg").close();toast("Đã xóa đợt code")}catch(err){toast("Không xóa được: "+errMsg(err))}};
 

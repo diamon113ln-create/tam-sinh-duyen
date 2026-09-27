@@ -78,7 +78,8 @@ Làm lần lượt từ trên xuống. Tổng thời gian khoảng 30–45 phút
 3. Mỗi lần bấm **📋 Copy mã tiếp theo**: web copy 1 mã chưa tick (từ trên xuống) kèm tin nhắn và tự tick mã đó. Dán vào tin nhắn gửi mem.
    - Lỡ bấm mà chưa gửi: bấm **Hoàn tác** để trả mã lại.
    - Cả nhóm dùng chung, 2 người bấm cùng lúc cũng không bị trùng mã (web báo nếu mã vừa bị người khác lấy).
-4. Thêm mã vào sheet sau này: bấm **🔄 Lấy mã mới từ Google Sheet**. Mã mới được thêm vào cuối, mã đã tick giữ nguyên.
+4. **Web tự đồng bộ với sheet** khoảng 20 giây một lần khi đang mở tab Phát code (hoặc khi đã bật phím tắt): mã tick trong sheet được tick theo trên web, mã mới thêm vào sheet được thêm vào cuối. Muốn cập nhật ngay thì bấm **🔄 Đồng bộ với Google Sheet ngay**.
+   - Bỏ tick trong sheet **không** bỏ tick trên web (để tránh phát trùng). Muốn trả mã lại thì bỏ tick trong danh sách trên web.
 - **Tự tick vào Google Sheet** (không bắt buộc, cài 1 lần cho mỗi file sheet): trong hộp **Sửa tin nhắn / nguồn mã**, chọn **Cột tick**, mở mục **🔗 Tự tick vào Google Sheet** rồi làm theo 4 bước:
   1. Google Sheet → **Tiện ích mở rộng → Apps Script**.
   2. Xóa code có sẵn, bấm **📋 Copy đoạn script** trên web rồi dán vào (mật khẩu đã có sẵn trong script) → **Lưu dự án**.
