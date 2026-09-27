@@ -307,6 +307,11 @@ aside.side .logo{cursor:pointer}
 .cb-table tr.bad td.c{color:var(--ink-soft);text-decoration:line-through}
 .cb-table tr.bad small{font:11px var(--sans);text-decoration:none}
 .cb-table tr.next td.w{color:var(--crimson);font-weight:700}
+.cb-sheet{margin-top:8px;font-size:13px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.cb-sheet.err{color:var(--crimson)}
+details input,details select,details textarea{box-sizing:border-box}
+.cb-steps{margin:8px 0 0;padding-left:20px;font-size:13px;line-height:1.7}
+.cb-steps li{margin-bottom:4px}
 .cb-map{margin-top:8px;border:1px solid var(--line);border-radius:12px;padding:4px 12px 10px;background:var(--mist)}
 .cb-prev-codes{margin:8px 0 0;font-size:13px}
 .cb-prev-codes code{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:12px}
@@ -583,7 +588,7 @@ button.ask-a:hover{border-color:var(--crimson)}
             <div class="cb-stat" id="cbStat"></div>
             <button type="button" class="btn cb-go" id="cbNext">📋 Copy mã tiếp theo</button>
             <p class="hint" style="font-size:13px;color:var(--ink-soft);margin:8px 0 0">Mỗi lần bấm: copy <b>1 mã chưa tick</b> (từ trên xuống) kèm tin nhắn mẫu và tự tick mã đó. Dán (Ctrl+V) vào tin nhắn gửi mem. Cả nhóm dùng chung nên không ai phát trùng mã.</p>
-            <div class="cb-last hidden" id="cbLast"><div class="h"><span>✅ Vừa copy mã <b id="cbLastCode"></b></span><button type="button" class="btn ghost small" id="cbRecopy">Copy lại</button><button type="button" class="btn ghost small" id="cbUndo" title="Bỏ tick nếu chưa gửi mã này">Hoàn tác</button></div><pre class="cb-pre" id="cbLastMsg"></pre></div>
+            <div class="cb-last hidden" id="cbLast"><div class="h"><span>✅ Vừa copy mã <b id="cbLastCode"></b></span><button type="button" class="btn ghost small" id="cbRecopy">Copy lại</button><button type="button" class="btn ghost small" id="cbUndo" title="Bỏ tick nếu chưa gửi mã này">Hoàn tác</button></div><pre class="cb-pre" id="cbLastMsg"></pre><div class="cb-sheet hidden" id="cbLastSheet"></div></div>
             <label>Tin nhắn mẫu (xem trước với mã tiếp theo)</label><pre class="cb-prev" id="cbMsgPrev"></pre>
             <div class="row"><button type="button" class="btn ghost small" id="cbEdit">Sửa tin nhắn / nguồn mã</button><button type="button" class="btn ghost small" id="cbPick">Chọn lại cột mã</button><button type="button" class="btn ghost small hidden" id="cbReload">🔄 Lấy mã mới từ Google Sheet</button></div>
           </div>
@@ -591,7 +596,7 @@ button.ask-a:hover{border-color:var(--crimson)}
         <div class="panel" id="cbListBox">
           <div class="row" style="margin:0"><h4 style="margin:0;font:700 17px var(--serif);flex:1">Danh sách mã<small id="cbSrcInfo" style="display:block;font:500 12px var(--sans);color:var(--ink-soft)"></small></h4><select id="cbFilter" style="width:auto"><option value="all">Tất cả</option><option value="left">Chưa phát</option><option value="used">Đã phát</option></select></div>
           <div class="tablewrap cb-table"><table><thead><tr><th>#</th><th>Mã</th><th>Tick</th><th>Người phát · thời gian</th></tr></thead><tbody id="cbRows"></tbody></table></div>
-          <div class="row"><button type="button" class="btn ghost small" id="cbCopyUsed">Copy các mã đã phát</button><button type="button" class="btn ghost small" id="cbXlsx">Tải Excel</button></div>
+          <div class="row"><button type="button" class="btn ghost small" id="cbCopyUsed">Copy các mã đã phát</button><button type="button" class="btn ghost small" id="cbXlsx">Tải Excel</button><button type="button" class="btn ghost small hidden" id="cbSyncAll" title="Đánh dấu tick vào Google Sheet cho mọi mã đã phát trên web">📗 Tick lên sheet các mã đã phát</button></div>
           <p class="hint" style="font-size:12px;color:var(--ink-soft);margin:6px 0 0">Web không tự sửa được file Google Sheet của bạn; tick được lưu trên web. Muốn cập nhật lại sheet thì dùng <b>Copy các mã đã phát</b> hoặc <b>Tải Excel</b>.</p>
         </div>
       </div>
@@ -791,6 +796,18 @@ button.ask-a:hover{border-color:var(--crimson)}
       <label for="cbPaste">Hoặc dán danh sách mã (mỗi dòng một mã)</label><textarea id="cbPaste" style="min-height:70px" placeholder="TSD8K2P9Q&#10;TSD4M7X1Z"></textarea>
       <p class="hint" id="cbSrcHint" style="font-size:12px;color:var(--ink-soft);margin:4px 0 0"></p>
       <label id="cbReplaceRow" style="display:flex;gap:8px;align-items:flex-start;font-weight:500;color:var(--ink)"><input type="checkbox" id="cbReplace" style="width:auto;margin-top:4px"><span>Thay toàn bộ danh sách mã bằng mã đọc được<br><span style="font-size:12px;color:var(--ink-soft)">Dùng khi trước đó chọn sai cột. Mã nào đã phát vẫn giữ trạng thái đã phát.</span></span></label>
+      <details class="imgmore" id="cbHookBox"><summary>🔗 Tự tick vào Google Sheet (không bắt buộc)</summary>
+        <p class="hint" style="font-size:12px;color:var(--ink-soft);margin:4px 0 0">Mỗi lần phát / hoàn tác, web tự đánh dấu vào <b>Cột tick</b> đã chọn ở trên, đúng dòng của mã. Cài 1 lần cho mỗi file sheet:</p>
+        <ol class="cb-steps">
+          <li>Mở file Google Sheet → <b>Tiện ích mở rộng → Apps Script</b>.</li>
+          <li>Xóa hết code có sẵn, bấm <button type="button" class="btn small" id="cbScriptCopy">📋 Copy đoạn script</button> rồi dán vào → bấm 💾 <b>Lưu dự án</b>.</li>
+          <li>Bấm <b>Triển khai → Tùy chọn triển khai mới</b> → biểu tượng ⚙ chọn <b>Ứng dụng web</b>. <i>Thực thi với tư cách</i>: <b>Tôi</b>; <i>Người có quyền truy cập</i>: <b>Bất kỳ ai</b> → <b>Triển khai</b>. Google hỏi cấp quyền: chọn tài khoản → <b>Nâng cao</b> → <b>Đi tới … (không an toàn)</b> → <b>Cho phép</b>.</li>
+          <li>Copy <b>URL ứng dụng web</b> (kết thúc bằng <code>/exec</code>), dán vào ô dưới rồi bấm <b>Thử kết nối</b>.</li>
+        </ol>
+        <label for="cbHook">Link tự tick (URL ứng dụng web)</label><input id="cbHook" placeholder="https://script.google.com/macros/s/…/exec">
+        <label for="cbHookKey">Mật khẩu tự tick (đã điền sẵn trong đoạn script khi bấm Copy)</label><input id="cbHookKey" autocomplete="off">
+        <div class="row"><button type="button" class="btn ghost small" id="cbHookTest">Thử kết nối</button><span class="hint" id="cbHookMsg" style="font-size:13px"></span></div>
+      </details>
       <label for="cbText">Tin nhắn mẫu (<b>{code}</b> là chỗ điền mã)</label><textarea id="cbText" style="min-height:130px"></textarea>
       <div class="row"><button class="btn" id="cbSave">Lưu</button><button type="button" class="btn ghost" id="cbCancel">Hủy</button><button type="button" class="btn ghost hidden" id="cbDel" style="margin-left:auto">Xóa đợt</button></div>
       <div class="err" id="cbErr"></div>
@@ -1550,7 +1567,9 @@ function renderCodes(){if(!me)return;const b=cbCur();
   $("#cbNext").disabled=!left;$("#cbNext").textContent=left?"📋 Copy mã tiếp theo":"Đã phát hết mã";
   $("#cbMsgPrev").textContent=cbMsg(b,(b.codes||[]).find(cbAvail)?.c||"XXXXXXXX");
   const L=cbLast&&cbLast.id===b.id?cbLast:null;$("#cbLast").classList.toggle("hidden",!L);
-  if(L){$("#cbLastCode").textContent=L.c;$("#cbLastMsg").textContent=L.msg}
+  if(L){$("#cbLastCode").textContent=L.c;$("#cbLastMsg").textContent=L.msg;const st=L.sheet,el=$("#cbLastSheet");el.classList.toggle("hidden",!st);el.classList.toggle("err",!!st&&st!=="wait"&&st!=="ok");
+    el.innerHTML=!st?"":st==="wait"?"⏳ Đang tick vào Google Sheet…":st==="ok"?"📗 Đã tick vào Google Sheet":`⚠️ ${esc(st)} <button type="button" class="btn ghost small" id="cbLastRetry">Tick lại vào sheet</button>`}
+  $("#cbSyncAll").classList.toggle("hidden",!cbHookOn(b));
   $("#cbReload").classList.toggle("hidden",!b.sheetUrl);
   const next=(b.codes||[]).findIndex(cbAvail);const mp=b.map;
   $("#cbSrcInfo").textContent=mp?`Mã lấy từ cột ${colName(mp.codeCol)}${mp.tickCol>=0?` · tick theo cột ${colName(mp.tickCol)}`:""} · từ dòng ${(mp.start||0)+1}`:"";
@@ -1564,22 +1583,55 @@ async function cbPersist(id,mutate){const {data:row,error}=await sb.from("templa
   const d=row.data||{};d.codes=d.codes||[];if(mutate(d.codes,d)===false)return false;d.updated=Date.now();
   const {error:e2}=await sb.from("templates").update({data:d}).eq("id",id);if(e2)throw e2;refresh("templates");return true}
 async function cbClip(text){try{await navigator.clipboard.writeText(text);return true}catch(e){return false}}
+/* ---- tự tick: the Apps Script web app in the user's sheet writes the tick next to the code ---- */
+const cbHookOn=b=>!!(b?.hook&&b.map&&b.map.tickCol>=0);
+function cbGid(b){const g=String(b?.sheetUrl||"").match(/[#&?]gid=(\d+)/);return g?g[1]:""}
+async function cbHookCall(hook,body){let r;try{r=await fetch(hook,{method:"POST",body:JSON.stringify(body)})}catch(e){throw new Error("Không kết nối được Apps Script (kiểm tra link /exec và quyền truy cập “Bất kỳ ai”)")}
+  let j;try{j=await r.json()}catch(e){throw new Error("Apps Script trả về sai, hãy triển khai lại dạng Ứng dụng web")}
+  if(!j.ok)throw new Error(j.error||"Apps Script báo lỗi");return j}
+async function sheetTick(b,codes,tick){const m=b.map;
+  return cbHookCall(b.hook,{secret:b.hookKey||"",gid:cbGid(b),codeCol:m.codeCol,tickCol:m.tickCol,start:m.start||0,codes,tick:!!tick})}
+async function cbSheetLast(b,L){if(!cbHookOn(b)||!L)return;L.sheet="wait";renderCodes();
+  try{const j=await sheetTick(b,[L.c],true);L.sheet=j.missing?.length?"Không thấy mã này trong sheet để tick":"ok"}catch(e){L.sheet="Chưa tick được vào sheet: "+errMsg(e)}
+  renderCodes()}
+$("#cbLast").addEventListener("click",e=>{if(e.target.id==="cbLastRetry"&&cbLast){const b=codeBatches.find(x=>x.id===cbLast.id);if(b)cbSheetLast(b,cbLast)}});
+$("#cbSyncAll").onclick=async()=>{const b=cbCur();if(!cbHookOn(b))return;const list=b.codes.filter(x=>x.u&&cbOk(x.c)).map(x=>x.c);if(!list.length){toast("Chưa có mã nào đã phát");return}
+  if(!confirm(`Đánh dấu tick vào Google Sheet cho ${list.length} mã đã phát?`))return;const btn=$("#cbSyncAll");btn.disabled=true;let done=0,miss=0;
+  try{for(let i=0;i<list.length;i+=300){btn.textContent=`Đang tick ${i}/${list.length}…`;const j=await sheetTick(b,list.slice(i,i+300),true);done+=j.done?.length||0;miss+=j.missing?.length||0}
+    toast(`Đã tick ${done} mã vào sheet${miss?`, ${miss} mã không thấy trong sheet`:""}`)}
+  catch(e){toast(errMsg(e))}finally{btn.disabled=false;btn.textContent="📗 Tick lên sheet các mã đã phát"}};
+$("#cbScriptCopy").onclick=async()=>{let key=$("#cbHookKey").value.trim();if(!key){key=cbNewKey();$("#cbHookKey").value=key}
+  try{const t=cbScriptTxt||await cbLoadScript();
+    toast(await cbClip(t.replace("__MAT_KHAU__",key.replace(/["\\]/g,"")))?"Đã copy đoạn script (đã có sẵn mật khẩu), dán vào Apps Script":"Không copy được")}
+  catch(e){toast("Không tải được đoạn script: "+errMsg(e))}};
+/* fetched when the dialog opens, so the copy happens right on the click (Safari drops clipboard access after a slow await) */
+let cbScriptTxt=null;async function cbLoadScript(){cbScriptTxt=await (await fetch("google-apps-script/tu-tick.gs",{cache:"no-store"})).text();return cbScriptTxt}
+function cbNewKey(){const a=new Uint8Array(9);crypto.getRandomValues(a);return "tsd-"+[...a].map(x=>x.toString(36).padStart(2,"0")).join("").slice(0,14)}
+$("#cbHookTest").onclick=async()=>{const hook=$("#cbHook").value.trim(),msg=$("#cbHookMsg");
+  if(!/^https:\/\/script\.google\.com\/.+\/exec(\?.*)?$/.test(hook)){msg.textContent="Link phải có dạng https://script.google.com/macros/s/…/exec";msg.style.color="var(--crimson)";return}
+  msg.textContent="Đang thử…";msg.style.color="var(--ink-soft)";
+  try{const j=await cbHookCall(hook,{secret:$("#cbHookKey").value.trim(),gid:cbGid({sheetUrl:$("#cbUrl").value}),ping:true});msg.textContent=`✅ Kết nối được, sẽ tick vào trang “${j.sheet}”`;msg.style.color="var(--ok)"}
+  catch(e){msg.textContent="❌ "+errMsg(e);msg.style.color="var(--crimson)"}};
 $("#cbNext").onclick=async()=>{const b=cbCur();if(!b||cbBusy)return;const x=(b.codes||[]).find(cbAvail);if(!x){toast("Đã phát hết mã");return}
   const code=x.c,msg=cbMsg(b,code),ok=await cbClip(msg);/* copy first: the browser only allows it right after the click */
   Object.assign(x,{u:1,t:Date.now(),b:me.id});cbLast={id:b.id,c:code,msg};renderCodes();
   toast(ok?`Đã copy mã ${code}, dán (Ctrl+V) vào tin nhắn`:"Chưa copy tự động được, hãy bôi đen tin nhắn bên dưới rồi Ctrl+C");
   cbBusy=true;$("#cbNext").disabled=true;
   try{const saved=await cbPersist(b.id,codes=>{const y=codes.find(z=>z.c===code);if(!y||y.u)return false;Object.assign(y,{u:1,t:x.t,b:me.id})});
-    if(!saved){cbLast=null;toast(`Mã ${code} vừa được người khác phát! Đừng gửi mã này, bấm lại để lấy mã khác`);await refresh("templates")}}
+    if(!saved){cbLast=null;toast(`Mã ${code} vừa được người khác phát! Đừng gửi mã này, bấm lại để lấy mã khác`);await refresh("templates")}
+    else cbSheetLast(b,cbLast)}
   catch(e){Object.assign(x,{u:0,t:0,b:""});cbLast=null;toast("Không lưu được trạng thái, đừng gửi mã này: "+errMsg(e))}
   finally{cbBusy=false;renderCodes()}};
 $("#cbRecopy").onclick=async()=>{if(cbLast)toast(await cbClip(cbLast.msg)?"Đã copy lại":"Không copy được")};
 $("#cbUndo").onclick=async()=>{if(!cbLast)return;const {id,c}=cbLast;
-  try{await cbPersist(id,codes=>{const y=codes.find(z=>z.c===c);if(!y)return false;Object.assign(y,{u:0,t:0,b:""})});cbLast=null;toast(`Đã bỏ tick mã ${c}, mã sẽ được phát lại`);renderCodes()}
+  try{await cbPersist(id,codes=>{const y=codes.find(z=>z.c===c);if(!y)return false;Object.assign(y,{u:0,t:0,b:""})});cbLast=null;renderCodes();
+    const b=codeBatches.find(x=>x.id===id);let extra="";if(cbHookOn(b)){try{await sheetTick(b,[c],false);extra=" (đã bỏ tick trong sheet)"}catch(e){extra=" – chưa bỏ tick trong sheet được: "+errMsg(e)}}
+    toast(`Đã bỏ tick mã ${c}, mã sẽ được phát lại${extra}`)}
   catch(e){toast("Không hoàn tác được: "+errMsg(e))}};
 $("#cbRows").onchange=async e=>{const cb=e.target.closest("[data-cbtick]");const b=cbCur();if(!cb||!b)return;const x=b.codes[+cb.dataset.cbtick],on=cb.checked;
   try{await cbPersist(b.id,codes=>{const y=codes.find(z=>z.c===x.c);if(!y)return false;Object.assign(y,on?{u:1,t:Date.now(),b:me.id}:{u:0,t:0,b:""})})}
-  catch(err){cb.checked=!on;toast("Không lưu được: "+errMsg(err))}};
+  catch(err){cb.checked=!on;toast("Không lưu được: "+errMsg(err));return}
+  if(cbHookOn(b))sheetTick(b,[x.c],on).catch(err=>toast("Chưa cập nhật được tick trong sheet: "+errMsg(err)))};
 $("#cbCopyUsed").onclick=async()=>{const b=cbCur();const list=(b?.codes||[]).filter(x=>x.u).map(x=>x.c);if(!list.length){toast("Chưa phát mã nào");return}
   toast(await cbClip(list.join("\n"))?`Đã copy ${list.length} mã đã phát (mỗi dòng một mã)`:"Không copy được")};
 $("#cbXlsx").onclick=()=>{const b=cbCur();if(!b)return;
@@ -1652,6 +1704,7 @@ $("#cbRead").onclick=async()=>{const btn=$("#cbRead");$("#cbErr").textContent=""
   catch(err){$("#cbErr").textContent=errMsg(err)}finally{btn.disabled=false;btn.textContent="📑 Đọc sheet & chọn cột"}};
 function openCb(b){cbEditing=b?.id||null;$("#cbTitle").textContent=b?"Sửa đợt code":"Đợt code mới";$("#cbErr").textContent="";
   $("#cbName").value=b?.name||"";$("#cbUrl").value=b?.sheetUrl||"";$("#cbPaste").value="";$("#cbFile").value="";$("#cbText").value=b?.msg||CB_MSG;
+  $("#cbHook").value=b?.hook||"";$("#cbHookKey").value=b?.hookKey||cbNewKey();$("#cbHookMsg").textContent="";$("#cbHookBox").open=!!b?.hook;if(!cbScriptTxt)cbLoadScript().catch(()=>{});
   cbSrcRows=null;$("#cbMap").classList.add("hidden");$("#cbReplace").checked=false;$("#cbReplaceRow").classList.toggle("hidden",!b);
   $("#cbSrcHint").textContent=b?`Đang có ${(b.codes||[]).length} mã. Mã mới trong nguồn được thêm vào cuối; mã đã tick giữ nguyên.`:"";
   $("#cbDel").classList.toggle("hidden",!b||!can("delete"));$("#cbDlg").showModal();$("#cbName").focus()}
@@ -1665,15 +1718,18 @@ $("#cbForm").onsubmit=async e=>{e.preventDefault();const btn=$("#cbSave");$("#cb
     const rows=await cbReadSrc();
     if(rows){map=!$("#cbMap").classList.contains("hidden")?cbMapNow():(old?.map&&old.sheetUrl===url?old.map:guessMap(rows));inc=codesFromRows(rows,map)}
     if(paste)inc=inc.concat(codesFromRows(paste.split("\n").map(l=>[l.split(/\t|,|;/)[0]]),{codeCol:0,tickCol:-1,start:0}));
+    const hook=$("#cbHook").value.trim(),hookKey=$("#cbHookKey").value.trim();
+    if(hook&&!/^https:\/\/script\.google\.com\/.+\/exec(\?.*)?$/.test(hook))throw new Error("Link tự tick phải có dạng https://script.google.com/macros/s/…/exec");
+    if(hook&&!(map&&map.tickCol>=0))throw new Error("Để tự tick vào sheet, bấm “Đọc sheet & chọn cột” và chọn Cột tick đã phát.");
     if(rows&&map.tickCol>=0&&map.tickCol===map.codeCol)throw new Error("Cột chứa mã và cột tick đang trùng nhau, hãy chọn lại.");
     if(!old&&!inc.length)throw new Error("Chưa có mã nào. Dán link Google Sheet, chọn file hoặc dán danh sách mã.");
     if((rows||paste)&&!inc.length)throw new Error("Không tìm thấy mã nào. Bấm “Đọc sheet & chọn cột” để chọn đúng cột chứa mã.");
     if(replace&&!inc.length)throw new Error("Muốn thay toàn bộ danh sách thì cần có nguồn mã (link sheet, file hoặc dán mã).");
     const name=$("#cbName").value.trim()||"Đợt code",msg=$("#cbText").value.trim()||CB_MSG;let res={add:0,tick:0,n:0};
     if(old){await cbPersist(old.id,(codes,d)=>{if(replace){d.codes=replaceCodes(codes,inc);res.n=d.codes.length}else{const mm=mergeCodes(codes,inc);d.codes=mm.codes;res.add=mm.add;res.tick=mm.tick}
-      d.name=name;d.msg=msg;d.sheetUrl=url;if(rows)d.map=map})}
+      d.name=name;d.msg=msg;d.sheetUrl=url;if(rows)d.map=map;d.hook=hook;d.hookKey=hookKey})}
     else{const m=mergeCodes([],inc);res.n=m.codes.length;res.tick=m.codes.filter(x=>x.u).length;
-      const r=await db.collection("templates").add({kind:"codebatch",name,msg,sheetUrl:url,map:rows?map:null,codes:m.codes,created:Date.now(),updated:Date.now(),by:me.id});cbSelId=r.id;try{localStorage.setItem("tsd.cb",r.id)}catch(err){}}
+      const r=await db.collection("templates").add({kind:"codebatch",name,msg,sheetUrl:url,map:rows?map:null,hook,hookKey,codes:m.codes,created:Date.now(),updated:Date.now(),by:me.id});cbSelId=r.id;try{localStorage.setItem("tsd.cb",r.id)}catch(err){}}
     $("#cbDlg").close();if(cbLast?.id===old?.id&&replace)cbLast=null;
     toast(!old?`Đã tạo đợt “${name}” với ${res.n} mã${res.tick?` (${res.tick} mã đã tick sẵn trong sheet)`:""}`:replace?`Đã thay danh sách: ${res.n} mã`:`Đã lưu. Thêm ${res.add} mã mới${res.tick?`, tick ${res.tick} mã theo sheet`:""}`)}
   catch(err){$("#cbErr").textContent=errMsg(err)}

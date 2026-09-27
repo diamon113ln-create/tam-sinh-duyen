@@ -79,7 +79,14 @@ Làm lần lượt từ trên xuống. Tổng thời gian khoảng 30–45 phút
    - Lỡ bấm mà chưa gửi: bấm **Hoàn tác** để trả mã lại.
    - Cả nhóm dùng chung, 2 người bấm cùng lúc cũng không bị trùng mã (web báo nếu mã vừa bị người khác lấy).
 4. Thêm mã vào sheet sau này: bấm **🔄 Lấy mã mới từ Google Sheet**. Mã mới được thêm vào cuối, mã đã tick giữ nguyên.
-- Web không tự sửa file Google Sheet; muốn cập nhật sheet thì dùng **Copy các mã đã phát** hoặc **Tải Excel**.
+- **Tự tick vào Google Sheet** (không bắt buộc, cài 1 lần cho mỗi file sheet): trong hộp **Sửa tin nhắn / nguồn mã**, chọn **Cột tick**, mở mục **🔗 Tự tick vào Google Sheet** rồi làm theo 4 bước:
+  1. Google Sheet → **Tiện ích mở rộng → Apps Script**.
+  2. Xóa code có sẵn, bấm **📋 Copy đoạn script** trên web rồi dán vào (mật khẩu đã có sẵn trong script) → **Lưu dự án**.
+  3. **Triển khai → Tùy chọn triển khai mới → Ứng dụng web**, Thực thi với tư cách **Tôi**, Người có quyền truy cập **Bất kỳ ai** → Triển khai → cấp quyền (Nâng cao → Đi tới… → Cho phép).
+  4. Copy **URL ứng dụng web** (…/exec) dán vào ô **Link tự tick** → **Thử kết nối** → **Lưu**.
+  - Từ đó mỗi lần Copy mã / Hoàn tác / tick tay, web tự đánh "x" (hoặc tích ô checkbox) vào đúng dòng trong sheet. Mã đã phát từ trước: bấm **📗 Tick lên sheet các mã đã phát**.
+  - Đổi mật khẩu thì phải copy lại script và **Triển khai → Quản lý các lần triển khai → Chỉnh sửa → Phiên bản mới**.
+  - Nếu không cài: dùng **Copy các mã đã phát** hoặc **Tải Excel** để cập nhật sheet bằng tay.
 
 ## Sửa code sau này
 
