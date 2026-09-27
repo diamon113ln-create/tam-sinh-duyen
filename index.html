@@ -240,7 +240,7 @@ details.imgmore summary{cursor:pointer;font-weight:600;font-size:13px;color:var(
 .portal{position:relative;aspect-ratio:3/4;border:0;padding:0;border-radius:18px;overflow:hidden;cursor:pointer;text-align:left;color:#fff;background:#1a0f1c;
   box-shadow:0 10px 26px rgba(20,10,22,.35),inset 0 0 0 1px rgba(217,178,106,.55);transform-style:preserve-3d;
   transition:transform .35s cubic-bezier(.2,.8,.2,1),box-shadow .35s;opacity:0;animation:portalin .7s ease-out forwards}
-.portal:nth-child(1){animation-delay:.35s}.portal:nth-child(2){animation-delay:.45s}.portal:nth-child(3){animation-delay:.55s}.portal:nth-child(4){animation-delay:.65s}.portal:nth-child(5){animation-delay:.75s}.portal:nth-child(6){animation-delay:.85s}.portal:nth-child(7){animation-delay:.95s}.portal:nth-child(8){animation-delay:1.05s}.portal:nth-child(9){animation-delay:1.15s}.portal:nth-child(10){animation-delay:1.25s}
+.portal:nth-child(1){animation-delay:.35s}.portal:nth-child(2){animation-delay:.45s}.portal:nth-child(3){animation-delay:.55s}.portal:nth-child(4){animation-delay:.65s}.portal:nth-child(5){animation-delay:.75s}.portal:nth-child(6){animation-delay:.85s}.portal:nth-child(7){animation-delay:.95s}.portal:nth-child(8){animation-delay:1.05s}.portal:nth-child(9){animation-delay:1.15s}.portal:nth-child(10){animation-delay:1.25s}.portal:nth-child(11){animation-delay:1.35s}
 .portal .art{position:absolute;inset:0;background:url(assets/bg.jpg) var(--pos,center)/auto 170% no-repeat;transition:transform .6s cubic-bezier(.2,.8,.2,1)}
 .portal::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(0deg,rgba(26,12,28,.95) 0%,rgba(26,12,28,.25) 55%,rgba(26,12,28,0) 80%)}
 .portal::after{content:"";position:absolute;inset:0;z-index:2;background:linear-gradient(115deg,transparent 30%,rgba(255,236,200,.35) 48%,transparent 62%);
@@ -282,6 +282,21 @@ aside.side .logo{cursor:pointer}
 .wk-days label:has(input:checked){background:var(--crimson);border-color:var(--crimson);color:#fff}
 .wk-days input{width:auto;margin:0;accent-color:var(--crimson)}
 #wkImgPrev{width:100%;max-height:220px;object-fit:contain;border-radius:10px;border:1px solid var(--line);margin-top:8px;background:var(--mist)}
+/* Hỏi AI */
+.ask-two{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}
+.ask-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.ask-chip{border:1px solid var(--line);background:var(--mist);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.ask-chip:hover{border-color:var(--crimson);color:var(--crimson)}
+.ask-chip.add{border-style:dashed;color:var(--ink-soft);font-weight:500}
+.ask-chip i{font-style:normal;opacity:.5;padding:0 2px}.ask-chip i:hover{opacity:1;color:var(--crimson)}
+.ask-log{display:flex;flex-direction:column;gap:10px;max-height:min(62vh,640px);overflow:auto;padding:2px}
+.ask-q{align-self:flex-end;max-width:85%;background:var(--crimson);color:#fff;border-radius:14px 14px 4px 14px;padding:8px 12px;white-space:pre-wrap}
+.ask-a{align-self:flex-start;width:min(100%,640px);background:var(--mist);border:1px solid var(--line);border-radius:14px 14px 14px 4px;padding:10px 12px}
+.ask-a .t{white-space:pre-wrap}
+.ask-a ol{margin:6px 0 0;padding-left:26px;font:14px/1.7 ui-monospace,SFMono-Regular,Consolas,monospace}
+.ask-a .note{margin:6px 0 0;font-size:12px;color:var(--warn)}
+.ask-a .row{margin-top:8px}
+#askSent{min-height:320px;font:13px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace}
 /* Gợi ý theo lịch ở Viết bài nhanh */
 .sug{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--mist);margin-bottom:6px}
 .sug h4{margin:0 0 6px;font:700 15px var(--serif);display:flex;align-items:center;gap:8px}
@@ -302,6 +317,8 @@ aside.side .logo{cursor:pointer}
 
 @media (max-width:860px){
   .wk{grid-template-columns:1fr}
+  .ask-two{grid-template-columns:1fr}
+  #askSent{min-height:160px}
   .wk-day{min-height:0}
   .wk-act{display:flex;align-items:stretch}
   .wk-act img{width:110px;aspect-ratio:16/9;flex:none}
@@ -357,6 +374,7 @@ aside.side .logo{cursor:pointer}
       <button data-view="home" aria-current="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg><span>Trang chủ</span></button>
       <button data-view="write"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/></svg><span>Viết bài nhanh</span></button>
       <button data-view="week"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M7.5 14h2M11 14h2M14.5 14h2M7.5 17.5h2M11 17.5h2"/></svg><span>Lịch tuần</span></button>
+      <button data-view="ask"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path d="M9.5 9a2.5 2.5 0 1 1 3.2 2.4c-.5.2-.7.6-.7 1.1"/><path d="M12 14.5h.01"/></svg><span>Hỏi AI</span></button>
       <button data-view="board"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="5" height="16" rx="1"/><rect x="10" y="4" width="5" height="10" rx="1"/><rect x="17" y="4" width="4" height="13" rx="1"/></svg><span>Công việc</span></button>
       <button data-view="templates"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/></svg><span>Mẫu bài viết</span></button>
       <button data-view="formats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="M21 16l-5-5-8 8"/></svg><span>Format ảnh</span></button>
@@ -478,6 +496,26 @@ aside.side .logo{cursor:pointer}
       <div class="strip"><h2>Lịch hoạt động trong tuần</h2><button class="btn" id="wkNew">Thêm hoạt động</button></div>
       <p class="hint" style="margin:0 0 14px;color:var(--ink-soft)">Đặt sẵn mỗi ngày trong tuần có hoạt động gì (ví dụ Tài nguyên chiến tối Thứ Hai), kèm mẫu bài, giờ và ảnh trong kho. Ở <b>Viết bài nhanh</b> sẽ hiện ô gợi ý theo ngày; bấm vào ô là AI tự viết bài đúng ngày đó và gắn sẵn ảnh.</p>
       <div class="wk" id="wkGrid"></div>
+    </div>
+
+    <div id="viewAsk" class="hidden">
+      <div class="strip"><h2>Hỏi AI</h2><button class="btn" id="askNew">Cuộc trò chuyện mới</button></div>
+      <div class="two ask-two">
+        <div class="panel">
+          <div class="ask-chips" id="askCards"></div>
+          <div class="ask-log" id="askLog"></div>
+          <form id="askForm" style="margin-top:12px">
+            <textarea id="askQ" style="min-height:90px" placeholder="Ví dụ: Tạo 20 code fan cứng, 8 ký tự, bắt đầu bằng TSD (Ctrl+Enter để gửi)"></textarea>
+            <div class="row"><button class="btn" id="askGo">Hỏi AI</button><button type="button" class="btn ghost hidden" id="askStop">Dừng</button></div>
+          </form>
+        </div>
+        <div class="panel">
+          <div class="row" style="margin:0;justify-content:space-between"><h4 style="margin:0;font:700 17px var(--serif)">Đã gửi / đã dùng</h4><span class="hint" id="askSentN" style="font-size:12px;color:var(--ink-soft)"></span></div>
+          <p class="hint" style="margin:4px 0 0;font-size:13px;color:var(--ink-soft)">Mỗi dòng một mục (code, tên, câu…). AI không tạo lại những mục này; web còn tự kiểm tra và loại mục trùng. Bấm <b>Thêm vào danh sách đã gửi</b> dưới câu trả lời để cập nhật. Dùng chung cả nhóm.</p>
+          <textarea id="askSent" style="margin-top:8px" placeholder="TSDFAN01&#10;TSDFAN02&#10;…"></textarea>
+          <div class="row"><button type="button" class="btn small" id="askSentSave" disabled>Lưu danh sách</button></div>
+        </div>
+      </div>
     </div>
 
     <div id="viewFormats" class="hidden">
@@ -697,7 +735,7 @@ const STATUSES=[["todo","Chưa làm","#9A8FA8"],["doing","Đang làm","#B4661C"]
 const ROLE_NAME={admin:"Admin",lead:"Trưởng nhóm",member:"Thành viên"};
 const $=s=>document.querySelector(s);
 const sample=true, downloads=true;
-let templates=[],savedSheets=[],artStyles=[],weekActs=[];
+let templates=[],savedSheets=[],artStyles=[],weekActs=[],askCards=[],askMemo=null;
 const STYLES=["Ngắn gọn, rõ ý","Kiếm hiệp mạnh mẽ","Cổ phong lãng mạn","Hài hước, gần gũi","Thông báo trang trọng"];
 const LENS=[["ngắn (80–120 chữ)","Ngắn"],["vừa (150–220 chữ)","Vừa"],["dài (250–350 chữ)","Dài"]];
 let accounts=[], tasks=[], me=null, editing=null, sheet=null, abortCtl=null, mobileCol="todo";
@@ -727,7 +765,10 @@ async function refresh(name){try{
     artStyles=all.filter(x=>x.kind==="artstyle").sort((a,b)=>(a.name||"").localeCompare(b.name||"","vi"));
     /* weekly schedule entries: one row per activity, kind:"weekact" */
     weekActs=all.filter(x=>x.kind==="weekact").sort((a,b)=>(a.time||"99").localeCompare(b.time||"99")||(a.name||"").localeCompare(b.name||"","vi"));
-    templates=all.filter(x=>!x.kind).sort((a,b)=>(a.name||"").localeCompare(b.name||"","vi"));if(me){renderTemplates();fillTplSelects();renderHome();renderSaved();fillSrcSelect();renderStyles();fillStyleSel();renderWeek();renderSug()}}
+    /* Hỏi AI: saved question cards (kind:"askcard") and the one shared "đã gửi" list (kind:"askmemo") */
+    askCards=all.filter(x=>x.kind==="askcard").sort((a,b)=>(a.name||"").localeCompare(b.name||"","vi"));
+    askMemo=all.filter(x=>x.kind==="askmemo").sort((a,b)=>(b.updated||0)-(a.updated||0))[0]||null;
+    templates=all.filter(x=>!x.kind).sort((a,b)=>(a.name||"").localeCompare(b.name||"","vi"));if(me){renderTemplates();fillTplSelects();renderHome();renderSaved();fillSrcSelect();renderStyles();fillStyleSel();renderWeek();renderSug();renderAskCards();renderAskMemo()}}
 }catch(e){toast("Lỗi tải dữ liệu: "+errMsg(e))}}
 const db={
   collection:name=>({async add(obj){const {data,error}=await sb.from(name).insert({data:obj}).select("id").single();if(error)throw error;refresh(name);return{id:data.id}}}),
@@ -793,7 +834,7 @@ function renderShell(){$("#meName").textContent=me.name;$("#meRole").textContent
   $("#tabAcc").classList.toggle("hidden",me.role!=="admin");if(me.role==="admin")renderAccounts()}
 $("#tabs").onclick=e=>{const b=e.target.closest("button");if(b)show(b.dataset.view)};
 $("aside.side .logo").onclick=()=>show("home");
-const VIEWS={home:"#viewHome",write:"#viewWrite",week:"#viewWeek",board:"#viewBoard",templates:"#viewTemplates",sheet:"#viewSheet",formats:"#viewFormats",art:"#viewArt",acts:"#viewActs",accounts:"#viewAccounts"};
+const VIEWS={home:"#viewHome",write:"#viewWrite",week:"#viewWeek",ask:"#viewAsk",board:"#viewBoard",templates:"#viewTemplates",sheet:"#viewSheet",formats:"#viewFormats",art:"#viewArt",acts:"#viewActs",accounts:"#viewAccounts"};
 function show(v){if(v==="accounts"&&me.role!=="admin")v="home";
   document.querySelectorAll("#tabs button").forEach(b=>b.setAttribute("aria-current",b.dataset.view===v));
   if(v==="write")renderSug();if(v==="week")renderWeek();
@@ -803,6 +844,7 @@ function show(v){if(v==="accounts"&&me.role!=="admin")v="home";
 const PORTALS=[
   {v:"write",t:"Viết bài nhanh",s:"Viết bài theo mẫu, copy đăng Facebook",pos:"20% 40%",n:()=>""},
   {v:"week",t:"Lịch tuần",s:"hoạt động đặt sẵn trong tuần",pos:"55% 45%",n:()=>weekActs.length},
+  {v:"ask",t:"Hỏi AI",s:"Hỏi nhanh, tạo code không trùng",pos:"30% 55%",n:()=>""},
   {v:"board",t:"Công việc",s:"việc đang chờ xử lý",pos:"42% 70%",n:()=>tasks.filter(t=>t.status!=="done").length},
   {v:"templates",t:"Mẫu bài viết",s:"mẫu đã lưu",pos:"78% 55%",n:()=>templates.length},
   {v:"formats",t:"Format ảnh",s:"Chọn kiểu ảnh AI thiết kế",pos:"35% 15%",n:()=>""},
@@ -1276,6 +1318,68 @@ async function writeWeekAct(a,date){if($("#wPost").value.trim()&&!confirm("Bài 
   const st=artStyles.find(x=>x.id===a.motifId);if(st){$("#wMotifSel").value=st.id;$("#wMotif").value=st.desc||""}
   const im=wkImgOf(a);showAiImg(im?im.url:"",im?.act);
   sugBusy=true;renderSug();try{await $("#wGen").onclick()}finally{sugBusy=false;renderSug()}}
+
+/* ---------- Hỏi AI: free questions, saved question cards, and a shared "đã gửi" list the answers must not repeat ---------- */
+const ASK_KEY="tsd.ask";let askLog=[],askBusy=false,askRun=0;
+try{askLog=JSON.parse(localStorage.getItem(ASK_KEY)||"[]")}catch(e){askLog=[]}
+function askSave(){try{localStorage.setItem(ASK_KEY,JSON.stringify(askLog.slice(-30)))}catch(e){}}
+const askNorm=s=>String(s).trim().replace(/^[-•*\d.)\s]+/,"").replace(/\s+/g," ").toUpperCase();
+function sentLines(){return (askMemo?.text||"").split("\n").map(x=>x.trim()).filter(Boolean)}
+function renderAskCards(){$("#askCards").innerHTML=askCards.map(c=>`<button type="button" class="ask-chip" data-acard="${c.id}" title="${esc(c.question)}">${esc(c.name)}${can("delete")?`<i data-acdel="${c.id}" title="Xóa thẻ">×</i>`:""}</button>`).join("")
+  +'<button type="button" class="ask-chip add" data-acnew="1">+ Lưu câu hỏi thành thẻ</button>'}
+function renderAskMemo(){if(!askMemoDirty)$("#askSent").value=askMemo?.text||"";askMemoCount()}
+let askMemoDirty=false;
+function askMemoCount(){const n=$("#askSent").value.split("\n").filter(x=>x.trim()).length;$("#askSentN").textContent=n?n+" mục":"trống";
+  $("#askSentSave").disabled=!askMemoDirty}
+$("#askSent").oninput=()=>{askMemoDirty=true;askMemoCount()};
+async function saveAskMemo(text){const data={kind:"askmemo",text,updated:Date.now(),by:me.id};
+  if(askMemo?.id)await db.doc("templates/"+askMemo.id).set(data);else await db.collection("templates").add(data);askMemo={...askMemo,...data}}
+$("#askSentSave").onclick=async()=>{try{await saveAskMemo($("#askSent").value.split("\n").map(x=>x.trim()).filter(Boolean).join("\n"));askMemoDirty=false;askMemoCount();toast("Đã lưu danh sách đã gửi")}catch(e){toast("Không lưu được: "+errMsg(e))}};
+function renderAsk(){const box=$("#askLog");
+  box.innerHTML=askLog.length?askLog.map((m,i)=>m.role==="user"?`<div class="ask-q">${esc(m.text)}</div>`
+    :`<div class="ask-a">${m.text?`<div class="t">${esc(m.text)}</div>`:""}${m.items?.length?`<ol>${m.items.map(x=>`<li>${esc(x)}</li>`).join("")}</ol>`:""}${m.note?`<p class="note">${esc(m.note)}</p>`:""}
+      <div class="row"><button type="button" class="btn small" data-acopy="${i}">Copy</button>${m.items?.length?`<button type="button" class="btn ghost small" data-akeep="${i}"${m.kept?" disabled":""}>${m.kept?"Đã thêm vào danh sách đã gửi":`Thêm ${m.items.length} mục vào danh sách đã gửi`}</button>`:""}</div></div>`).join("")
+    :'<div class="sh-empty" style="min-height:220px">Hỏi AI bất cứ điều gì cho fanpage. Ví dụ: “Tạo 20 code fan cứng, 8 ký tự, bắt đầu bằng TSD”.<br>AI sẽ tránh mọi thứ có trong danh sách <b>Đã gửi / đã dùng</b> bên phải.</div>';
+  if(askBusy)box.insertAdjacentHTML("beforeend",'<div class="ask-a"><div class="skel" style="width:60%"></div><div class="skel" style="width:40%"></div></div>');
+  box.scrollTop=box.scrollHeight;$("#askGo").disabled=askBusy;$("#askStop").classList.toggle("hidden",!askBusy)}
+function askPrompt(q,extraAvoid,need){const sent=sentLines(),recent=askLog.slice(-9,-1).map(m=>(m.role==="user"?"NGƯỜI DÙNG: ":"AI: ")+(m.text||"")+(m.items?.length?"\n"+m.items.join("\n"):"")).join("\n").slice(-5000);
+  let avoid=sent.join("\n");if(avoid.length>9000)avoid=avoid.slice(-9000);/* newest lines are at the end */
+  return `Bạn là trợ lý của đội vận hành fanpage game kiếm hiệp cổ trang "Tam Sinh Duyên". Trả lời bằng tiếng Việt, ngắn gọn, đúng yêu cầu.
+${recent?`ĐOẠN HỘI THOẠI TRƯỚC (để hiểu ngữ cảnh):\n"""${recent}"""\n`:""}${avoid?`DANH SÁCH ĐÃ GỬI / ĐÃ DÙNG (TUYỆT ĐỐI không tạo lại mục nào trùng hoặc gần giống, kể cả khác hoa thường):\n"""${avoid}"""\n`:""}${extraAvoid?.length?`CŨNG KHÔNG ĐƯỢC TRÙNG:\n${extraAvoid.join("\n")}\n`:""}
+CÂU HỎI: ${q}
+${need?`Hãy tạo đúng ${need} mục MỚI.`:""}
+Trả về DUY NHẤT một JSON hợp lệ: {"answer":"lời trả lời, dùng \\n để xuống dòng","items":["mỗi mục một phần tử"]}
+Nếu câu hỏi yêu cầu tạo một danh sách (code, giftcode, tên, câu slogan, câu hỏi minigame…) thì đặt TỪNG mục vào "items" (chỉ nội dung mục, không đánh số) và KHÔNG chép lại chúng trong "answer" ("answer" chỉ ghi chú ngắn nếu cần). Code phải là chữ IN HOA và số, không dấu, không khoảng trắng, trừ khi người dùng yêu cầu khác. Nếu không phải danh sách thì để "items": [].`}
+async function ask(q){q=q.trim();if(!q||askBusy)return;
+  askLog.push({role:"user",text:q});askBusy=true;$("#askQ").value="";renderAsk();const my=++askRun;
+  try{let r=await aiJson(askPrompt(q));
+    const seen=new Set(sentLines().map(askNorm)),out=[],dup=[];
+    const take=list=>{for(const x of (Array.isArray(list)?list:[]).map(v=>String(v).trim()).filter(Boolean)){const k=askNorm(x);if(seen.has(k))dup.push(x);else{seen.add(k);out.push(x)}}};
+    take(r.items);
+    /* the list check is done here, not trusted to the AI: anything already sent is dropped and topped up once */
+    if(dup.length&&my===askRun){const r2=await aiJson(askPrompt(q,[...dup,...out],dup.length));take(r2.items)}
+    if(my!==askRun)return;const removed=dup.length;
+    askLog.push({role:"ai",text:String(r.answer||"").trim(),items:out,note:removed?`Đã tự loại ${removed} mục trùng với danh sách đã gửi${out.length?" và tạo bù":""}.`:""});
+  }catch(e){if(my===askRun)askLog.push({role:"ai",text:aiErrMsg(e),items:[]})}
+  finally{if(my===askRun){askBusy=false;askSave();renderAsk()}}}
+$("#askForm").onsubmit=e=>{e.preventDefault();ask($("#askQ").value)};
+$("#askQ").onkeydown=e=>{if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)){e.preventDefault();ask($("#askQ").value)}};
+$("#askStop").onclick=()=>{cancelAi();askRun++;askBusy=false;askLog.push({role:"ai",text:"Đã dừng.",items:[]});askSave();renderAsk()};
+$("#askNew").onclick=()=>{if(askLog.length&&!confirm("Xóa đoạn hội thoại hiện tại? (Danh sách đã gửi vẫn giữ nguyên)"))return;askLog=[];askSave();renderAsk();$("#askQ").focus()};
+$("#askLog").onclick=async e=>{const b=e.target.closest("button");if(!b)return;const m=askLog[+(b.dataset.acopy??b.dataset.akeep)];if(!m)return;
+  if(b.dataset.acopy!==undefined){const t=[m.text,...(m.items||[])].filter(Boolean).join("\n");
+    try{await navigator.clipboard.writeText(t);toast("Đã copy")}catch(err){toast("Không copy được")}}
+  if(b.dataset.akeep!==undefined){const cur=sentLines(),have=new Set(cur.map(askNorm)),add=m.items.filter(x=>!have.has(askNorm(x)));
+    try{await saveAskMemo([...cur,...add].join("\n"));m.kept=true;askMemoDirty=false;askSave();renderAsk();renderAskMemo();toast(`Đã thêm ${add.length} mục vào danh sách đã gửi`)}catch(err){toast("Không lưu được: "+errMsg(err))}}};
+$("#askCards").onclick=async e=>{const del=e.target.closest("[data-acdel]");
+  if(del){e.stopPropagation();const c=askCards.find(x=>x.id===del.dataset.acdel);if(c&&confirm(`Xóa thẻ hỏi “${c.name}”?`)){try{await db.doc("templates/"+c.id).delete();toast("Đã xóa thẻ")}catch(err){toast("Không xóa được: "+errMsg(err))}}return}
+  const b=e.target.closest("button");if(!b)return;
+  if(b.dataset.acnew){const q=$("#askQ").value.trim()||[...askLog].reverse().find(m=>m.role==="user")?.text||"";
+    if(!q){toast("Gõ câu hỏi vào ô trước, rồi bấm lưu thành thẻ");$("#askQ").focus();return}
+    const name=prompt("Tên thẻ hỏi (ví dụ: Code fan cứng):",q.slice(0,30));if(!name)return;
+    try{await db.collection("templates").add({kind:"askcard",name:name.trim(),question:q,updated:Date.now(),by:me.id});toast("Đã lưu thẻ “"+name.trim()+"”")}catch(err){toast("Không lưu được: "+errMsg(err))}return}
+  const c=askCards.find(x=>x.id===b.dataset.acard);if(c)ask(c.question)};
+renderAsk();
 
 /* ---------- templates ---------- */
 let tEditing=null;

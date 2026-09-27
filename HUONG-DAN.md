@@ -59,6 +59,14 @@ Làm lần lượt từ trên xuống. Tổng thời gian khoảng 30–45 phút
 3. Vào **Viết bài nhanh**: phía trên có ô **Gợi ý theo lịch tuần**, chọn ngày (Hôm nay, Ngày mai…), bấm vào ô hoạt động → AI tự viết bài đúng ngày đó và gắn sẵn ảnh, chỉ việc Copy đăng.
 - Lịch lưu chung trong bảng mẫu bài, không cần chạy thêm SQL.
 
+## Hỏi AI (tạo code không trùng)
+
+1. Vào tab **Hỏi AI**, gõ câu hỏi (ví dụ `Tạo 20 code fan cứng, 8 ký tự, bắt đầu bằng TSD`) → **Hỏi AI** (hoặc Ctrl+Enter).
+2. Ô **Đã gửi / đã dùng** bên phải: mỗi dòng một mục (code đã phát, tên đã dùng…) → **Lưu danh sách**. AI tránh các mục này, web còn tự kiểm tra lại: mục nào trùng bị loại và AI tạo bù.
+3. Dưới câu trả lời bấm **Thêm N mục vào danh sách đã gửi** để lần sau không bị trùng.
+4. Câu hỏi hay dùng: gõ vào ô rồi bấm **+ Lưu câu hỏi thành thẻ**; lần sau chỉ cần bấm thẻ.
+- Danh sách đã gửi và thẻ hỏi dùng chung cả nhóm; đoạn hội thoại chỉ lưu trên máy đang dùng.
+
 ## Sửa code sau này
 
 - Mở kho code trên GitHub, bấm phím **.** (dấu chấm) → hiện trình soạn thảo giống VS Code ngay trên trình duyệt.
