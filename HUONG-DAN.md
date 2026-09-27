@@ -52,6 +52,13 @@ Làm lần lượt từ trên xuống. Tổng thời gian khoảng 30–45 phút
 4. Vào web → Viết bài nhanh → **AI vẽ tranh mới**. Tranh vẽ xong tự lưu vào Kho ảnh.
 - Tùy chọn Secrets: `OPENAI_IMAGE_QUALITY` = `low` (rẻ nhất) / `medium` (mặc định) / `high`; `OPENAI_IMAGE_MODEL` để đổi model.
 
+## Lịch tuần (viết bài theo lịch)
+
+1. Vào tab **Lịch tuần** → **Thêm hoạt động** (hoặc bấm **+** ở ngày muốn thêm).
+2. Nhập tên (ví dụ `Tài nguyên chiến`), tích các ngày trong tuần, giờ bắt đầu, chọn **Mẫu bài viết** (hoặc sheet), **Ảnh gắn sẵn** từ Ảnh hoạt động / Kho ảnh, phần thưởng nếu có → **Lưu**.
+3. Vào **Viết bài nhanh**: phía trên có ô **Gợi ý theo lịch tuần**, chọn ngày (Hôm nay, Ngày mai…), bấm vào ô hoạt động → AI tự viết bài đúng ngày đó và gắn sẵn ảnh, chỉ việc Copy đăng.
+- Lịch lưu chung trong bảng mẫu bài, không cần chạy thêm SQL.
+
 ## Sửa code sau này
 
 - Mở kho code trên GitHub, bấm phím **.** (dấu chấm) → hiện trình soạn thảo giống VS Code ngay trên trình duyệt.
