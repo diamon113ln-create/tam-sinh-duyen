@@ -283,7 +283,20 @@ aside.side .logo{cursor:pointer}
 .wk-days input{width:auto;margin:0;accent-color:var(--crimson)}
 #wkImgPrev{width:100%;max-height:220px;object-fit:contain;border-radius:10px;border:1px solid var(--line);margin-top:8px;background:var(--mist)}
 /* Hỏi AI */
-.ask-two{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}
+.ask-two{grid-template-columns:minmax(0,1fr) minmax(0,1.25fr)}
+.ask-right{display:grid;gap:16px;position:sticky;top:12px}
+.ask-outbox{border-top:4px solid var(--crimson)}
+.ask-out{max-height:min(60vh,620px);overflow:auto;padding-right:4px}
+.ask-ph{margin:0;color:var(--ink-soft);font-size:14px;padding:24px 8px;text-align:center;border:1px dashed var(--line);border-radius:12px}
+.ask-for{font-size:12px;color:var(--ink-soft);margin-bottom:8px;padding-bottom:8px;border-bottom:1px dashed var(--line)}
+.ask-text{white-space:pre-wrap;font-size:15px;line-height:1.75}
+.ask-items-h{font-size:12px;font-weight:700;color:var(--ink-soft);margin:10px 0 4px;text-transform:uppercase;letter-spacing:.05em}
+.ask-items{margin:0;padding:0;list-style:none;counter-reset:it;columns:auto 170px;column-gap:14px}
+.ask-items li{counter-increment:it;break-inside:avoid;padding:3px 0;font:14px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;border-bottom:1px dashed var(--line)}
+.ask-items li::before{content:counter(it);display:inline-block;min-width:32px;margin-right:6px;font:600 11px var(--sans);color:var(--ink-soft);text-align:right}
+.ask-out .note{margin:8px 0 0;font-size:12px;color:var(--warn)}
+.ask-sent summary{cursor:pointer;list-style:none}
+.ask-sent summary::-webkit-details-marker{display:none}
 .ask-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
 .ask-chip{border:1px solid var(--line);background:var(--mist);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
 .ask-chip:hover{border-color:var(--crimson);color:var(--crimson)}
@@ -291,12 +304,13 @@ aside.side .logo{cursor:pointer}
 .ask-chip i{font-style:normal;opacity:.5;padding:0 2px}.ask-chip i:hover{opacity:1;color:var(--crimson)}
 .ask-log{display:flex;flex-direction:column;gap:10px;max-height:min(62vh,640px);overflow:auto;padding:2px}
 .ask-q{align-self:flex-end;max-width:85%;background:var(--crimson);color:#fff;border-radius:14px 14px 4px 14px;padding:8px 12px;white-space:pre-wrap}
-.ask-a{align-self:flex-start;width:min(100%,640px);background:var(--mist);border:1px solid var(--line);border-radius:14px 14px 14px 4px;padding:10px 12px}
-.ask-a .t{white-space:pre-wrap}
-.ask-a ol{margin:6px 0 0;padding-left:26px;font:14px/1.7 ui-monospace,SFMono-Regular,Consolas,monospace}
-.ask-a .note{margin:6px 0 0;font-size:12px;color:var(--warn)}
-.ask-a .row{margin-top:8px}
-#askSent{min-height:320px;font:13px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace}
+.ask-a{align-self:flex-start;width:min(100%,520px);text-align:left;background:var(--mist);border:1px solid var(--line);border-radius:14px 14px 14px 4px;padding:10px 12px;cursor:pointer;display:block;font-size:14px}
+button.ask-a:hover{border-color:var(--crimson)}
+.ask-a[aria-pressed="true"]{border-color:var(--crimson);box-shadow:0 0 0 1px var(--crimson)}
+.ask-a .t{white-space:pre-wrap;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.ask-a .n{display:block;font-size:12px;color:var(--ink-soft);margin-top:2px}
+.ask-a .go{display:block;font-size:12px;font-weight:600;color:var(--crimson);margin-top:4px}
+#askSent{box-sizing:border-box;min-height:180px;font:13px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace}
 /* Gợi ý theo lịch ở Viết bài nhanh */
 .sug{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--mist);margin-bottom:6px}
 .sug h4{margin:0 0 6px;font:700 15px var(--serif);display:flex;align-items:center;gap:8px}
@@ -318,6 +332,7 @@ aside.side .logo{cursor:pointer}
 @media (max-width:860px){
   .wk{grid-template-columns:1fr}
   .ask-two{grid-template-columns:1fr}
+  .ask-right{position:static}
   #askSent{min-height:160px}
   .wk-day{min-height:0}
   .wk-act{display:flex;align-items:stretch}
@@ -509,11 +524,18 @@ aside.side .logo{cursor:pointer}
             <div class="row"><button class="btn" id="askGo">Hỏi AI</button><button type="button" class="btn ghost hidden" id="askStop">Dừng</button></div>
           </form>
         </div>
-        <div class="panel">
-          <div class="row" style="margin:0;justify-content:space-between"><h4 style="margin:0;font:700 17px var(--serif)">Đã gửi / đã dùng</h4><span class="hint" id="askSentN" style="font-size:12px;color:var(--ink-soft)"></span></div>
+        <div class="ask-right">
+        <div class="panel ask-outbox" id="askOutBox">
+          <h4 style="margin:0 0 8px;font:700 17px var(--serif)">Kết quả</h4>
+          <div class="ask-out" id="askOut"></div>
+          <div class="row hidden" id="askOutBar"><button type="button" class="btn" id="askCopy">Copy</button><button type="button" class="btn ghost hidden" id="askCopyPlain" title="Mỗi dòng một mục, không icon">Copy chỉ danh sách</button><button type="button" class="btn ghost small hidden" id="askKeep"></button></div>
+        </div>
+        <details class="panel ask-sent" open>
+          <summary class="row" style="margin:0;justify-content:space-between"><h4 style="margin:0;font:700 17px var(--serif);display:inline">Đã gửi / đã dùng</h4><span class="hint" id="askSentN" style="font-size:12px;color:var(--ink-soft)"></span></summary>
           <p class="hint" style="margin:4px 0 0;font-size:13px;color:var(--ink-soft)">Mỗi dòng một mục (code, tên, câu…). AI không tạo lại những mục này; web còn tự kiểm tra và loại mục trùng. Bấm <b>Thêm vào danh sách đã gửi</b> dưới câu trả lời để cập nhật. Dùng chung cả nhóm.</p>
           <textarea id="askSent" style="margin-top:8px" placeholder="TSDFAN01&#10;TSDFAN02&#10;…"></textarea>
           <div class="row"><button type="button" class="btn small" id="askSentSave" disabled>Lưu danh sách</button></div>
+        </details>
         </div>
       </div>
     </div>
@@ -1335,42 +1357,65 @@ $("#askSent").oninput=()=>{askMemoDirty=true;askMemoCount()};
 async function saveAskMemo(text){const data={kind:"askmemo",text,updated:Date.now(),by:me.id};
   if(askMemo?.id)await db.doc("templates/"+askMemo.id).set(data);else await db.collection("templates").add(data);askMemo={...askMemo,...data}}
 $("#askSentSave").onclick=async()=>{try{await saveAskMemo($("#askSent").value.split("\n").map(x=>x.trim()).filter(Boolean).join("\n"));askMemoDirty=false;askMemoCount();toast("Đã lưu danh sách đã gửi")}catch(e){toast("Không lưu được: "+errMsg(e))}};
-function renderAsk(){const box=$("#askLog");
+let askSel=-1;/* which answer the Kết quả panel shows; -1 = latest */
+/* a leading "-", "*" or "•" becomes an icon so every line start is easy to spot */
+function askFmt(t){return String(t||"").replace(/\r/g,"").split("\n").map(l=>l.replace(/^(\s*)[-*•]\s+/,"$1🔹 ").replace(/\s+$/,"")).join("\n").replace(/\n{3,}/g,"\n\n").trim()}
+function askCopyText(m,plain){if(plain)return (m.items||[]).join("\n");
+  return [m.text,(m.items||[]).map(x=>"🔹 "+x).join("\n")].filter(Boolean).join("\n\n")}
+function askCur(){const i=askSel>=0&&askLog[askSel]?.role==="ai"?askSel:askLog.map(m=>m.role).lastIndexOf("ai");return i}
+function renderAsk(){const box=$("#askLog"),cur=askCur();
   box.innerHTML=askLog.length?askLog.map((m,i)=>m.role==="user"?`<div class="ask-q">${esc(m.text)}</div>`
-    :`<div class="ask-a">${m.text?`<div class="t">${esc(m.text)}</div>`:""}${m.items?.length?`<ol>${m.items.map(x=>`<li>${esc(x)}</li>`).join("")}</ol>`:""}${m.note?`<p class="note">${esc(m.note)}</p>`:""}
-      <div class="row"><button type="button" class="btn small" data-acopy="${i}">Copy</button>${m.items?.length?`<button type="button" class="btn ghost small" data-akeep="${i}"${m.kept?" disabled":""}>${m.kept?"Đã thêm vào danh sách đã gửi":`Thêm ${m.items.length} mục vào danh sách đã gửi`}</button>`:""}</div></div>`).join("")
-    :'<div class="sh-empty" style="min-height:220px">Hỏi AI bất cứ điều gì cho fanpage. Ví dụ: “Tạo 20 code fan cứng, 8 ký tự, bắt đầu bằng TSD”.<br>AI sẽ tránh mọi thứ có trong danh sách <b>Đã gửi / đã dùng</b> bên phải.</div>';
+    :`<button type="button" class="ask-a" data-asel="${i}" aria-pressed="${i===cur}"><span class="t">${esc(m.text||(m.items?.length?m.items.length+" mục":""))}</span>${m.items?.length&&m.text?`<span class="n">+ ${m.items.length} mục</span>`:""}<span class="go">Xem ở khung Kết quả →</span></button>`).join("")
+    :'<div class="sh-empty" style="min-height:200px">Hỏi AI bất cứ điều gì cho fanpage. Ví dụ: “Tạo 20 code fan cứng, 8 ký tự, bắt đầu bằng TSD” hoặc “Viết bài xin lỗi bảo trì đột xuất”.<br>Câu trả lời hiện ở khung <b>Kết quả</b> để copy.</div>';
   if(askBusy)box.insertAdjacentHTML("beforeend",'<div class="ask-a"><div class="skel" style="width:60%"></div><div class="skel" style="width:40%"></div></div>');
-  box.scrollTop=box.scrollHeight;$("#askGo").disabled=askBusy;$("#askStop").classList.toggle("hidden",!askBusy)}
+  box.scrollTop=box.scrollHeight;$("#askGo").disabled=askBusy;$("#askStop").classList.toggle("hidden",!askBusy);renderAskOut()}
+function renderAskOut(){const m=askLog[askCur()],o=$("#askOut");
+  if(askBusy&&askSel<0){o.innerHTML='<div class="skel"></div><div class="skel" style="width:80%"></div><div class="skel" style="width:65%"></div>';$("#askOutBar").classList.add("hidden");return}
+  $("#askOutBar").classList.toggle("hidden",!m);
+  if(!m){o.innerHTML='<p class="ask-ph">Câu trả lời của AI sẽ hiện ở đây, trình bày từng dòng rõ ràng để copy.</p>';return}
+  const q=askLog.slice(0,askLog.indexOf(m)).reverse().find(x=>x.role==="user");
+  o.innerHTML=(q?`<div class="ask-for">Hỏi: ${esc(q.text)}</div>`:"")+(m.text?`<div class="ask-text">${esc(m.text)}</div>`:"")+
+    (m.items?.length?`<div class="ask-items-h">${m.items.length} mục</div><ol class="ask-items">${m.items.map(x=>`<li>${esc(x)}</li>`).join("")}</ol>`:"")+(m.note?`<p class="note">${esc(m.note)}</p>`:"");
+  const has=!!m.items?.length;$("#askCopyPlain").classList.toggle("hidden",!has);$("#askKeep").classList.toggle("hidden",!has);
+  $("#askKeep").disabled=!!m.kept;$("#askKeep").textContent=m.kept?"Đã thêm vào danh sách đã gửi":`Thêm ${m.items?.length||0} mục vào danh sách đã gửi`}
 function askPrompt(q,extraAvoid,need){const sent=sentLines(),recent=askLog.slice(-9,-1).map(m=>(m.role==="user"?"NGƯỜI DÙNG: ":"AI: ")+(m.text||"")+(m.items?.length?"\n"+m.items.join("\n"):"")).join("\n").slice(-5000);
   let avoid=sent.join("\n");if(avoid.length>9000)avoid=avoid.slice(-9000);/* newest lines are at the end */
-  return `Bạn là trợ lý của đội vận hành fanpage game kiếm hiệp cổ trang "Tam Sinh Duyên". Trả lời bằng tiếng Việt, ngắn gọn, đúng yêu cầu.
+  return `Bạn là trợ lý của đội vận hành fanpage game kiếm hiệp cổ trang "Tam Sinh Duyên". Trả lời bằng tiếng Việt, rõ ràng, đúng yêu cầu.
 ${recent?`ĐOẠN HỘI THOẠI TRƯỚC (để hiểu ngữ cảnh):\n"""${recent}"""\n`:""}${avoid?`DANH SÁCH ĐÃ GỬI / ĐÃ DÙNG (TUYỆT ĐỐI không tạo lại mục nào trùng hoặc gần giống, kể cả khác hoa thường):\n"""${avoid}"""\n`:""}${extraAvoid?.length?`CŨNG KHÔNG ĐƯỢC TRÙNG:\n${extraAvoid.join("\n")}\n`:""}
 CÂU HỎI: ${q}
 ${need?`Hãy tạo đúng ${need} mục MỚI.`:""}
-Trả về DUY NHẤT một JSON hợp lệ: {"answer":"lời trả lời, dùng \\n để xuống dòng","items":["mỗi mục một phần tử"]}
-Nếu câu hỏi yêu cầu tạo một danh sách (code, giftcode, tên, câu slogan, câu hỏi minigame…) thì đặt TỪNG mục vào "items" (chỉ nội dung mục, không đánh số) và KHÔNG chép lại chúng trong "answer" ("answer" chỉ ghi chú ngắn nếu cần). Code phải là chữ IN HOA và số, không dấu, không khoảng trắng, trừ khi người dùng yêu cầu khác. Nếu không phải danh sách thì để "items": [].`}
+Trả về DUY NHẤT một JSON hợp lệ: {"answer":"câu trả lời, dùng \\n để xuống dòng","items":["mỗi mục một phần tử"]}
+CÁCH TRÌNH BÀY "answer":
+- Mỗi ý một dòng riêng (dùng \\n), để trống một dòng (\\n\\n) giữa các phần/đoạn; không viết dồn thành một khối.
+- Mỗi dòng đầu mục/ý liệt kê bắt đầu bằng một icon emoji hợp nội dung (ví dụ 📢 tiêu đề/thông báo, ⏰ thời gian, 📍 địa điểm/máy chủ, 🎁 phần thưởng, 📌 lưu ý, ✅ việc cần làm, 🔹 ý thường) hoặc dấu ➖, để dễ nhìn đầu dòng.
+- Bài viết, thông báo, bài đăng, tin nhắn… luôn đặt TOÀN BỘ trong "answer", đúng bố cục một bài đăng Facebook hoàn chỉnh; KHÔNG đưa vào "items".
+"items" CHỈ dùng khi câu hỏi yêu cầu tạo danh sách các mục NGẮN (mỗi mục dưới 80 ký tự) như code, giftcode, tên, slogan, câu hỏi minigame: đặt từng mục vào "items" (chỉ nội dung, không đánh số, không icon) và không chép lại trong "answer" ("answer" chỉ một dòng ghi chú ngắn nếu cần). Code phải là chữ IN HOA và số, không dấu, không khoảng trắng, trừ khi người dùng yêu cầu khác. Các trường hợp khác để "items": [].
+Nếu không biết thông tin (ví dụ link, số liệu ngoài game) thì nói rõ là không biết, không bịa.`}
 async function ask(q){q=q.trim();if(!q||askBusy)return;
-  askLog.push({role:"user",text:q});askBusy=true;$("#askQ").value="";renderAsk();const my=++askRun;
-  try{let r=await aiJson(askPrompt(q));
+  askLog.push({role:"user",text:q});askBusy=true;askSel=-1;$("#askQ").value="";renderAsk();const my=++askRun;
+  try{let r=await aiJson(askPrompt(q));let text=askFmt(r.answer),items=(Array.isArray(r.items)?r.items:[]).map(v=>String(v).trim()).filter(Boolean);
+    /* a long "item" is really a post: show it as text, not as a numbered code list */
+    if(items.some(x=>x.length>150)){text=[text,...items.map(askFmt)].filter(Boolean).join("\n\n");items=[]}
     const seen=new Set(sentLines().map(askNorm)),out=[],dup=[];
-    const take=list=>{for(const x of (Array.isArray(list)?list:[]).map(v=>String(v).trim()).filter(Boolean)){const k=askNorm(x);if(seen.has(k))dup.push(x);else{seen.add(k);out.push(x)}}};
-    take(r.items);
+    const take=list=>{for(const x of list.map(v=>String(v).trim().replace(/^[-*•\d.)\s]+(?=\S)/,"")).filter(Boolean)){const k=askNorm(x);if(seen.has(k))dup.push(x);else{seen.add(k);out.push(x)}}};
+    take(items);
     /* the list check is done here, not trusted to the AI: anything already sent is dropped and topped up once */
-    if(dup.length&&my===askRun){const r2=await aiJson(askPrompt(q,[...dup,...out],dup.length));take(r2.items)}
+    if(dup.length&&my===askRun){const r2=await aiJson(askPrompt(q,[...dup,...out],dup.length));take((Array.isArray(r2.items)?r2.items:[]).filter(x=>String(x).length<=150))}
     if(my!==askRun)return;const removed=dup.length;
-    askLog.push({role:"ai",text:String(r.answer||"").trim(),items:out,note:removed?`Đã tự loại ${removed} mục trùng với danh sách đã gửi${out.length?" và tạo bù":""}.`:""});
+    askLog.push({role:"ai",text,items:out,note:removed?`Đã tự loại ${removed} mục trùng với danh sách đã gửi${out.length?" và tạo bù":""}.`:""});
   }catch(e){if(my===askRun)askLog.push({role:"ai",text:aiErrMsg(e),items:[]})}
-  finally{if(my===askRun){askBusy=false;askSave();renderAsk()}}}
+  finally{if(my===askRun){askBusy=false;askSel=-1;askSave();renderAsk()}}}
 $("#askForm").onsubmit=e=>{e.preventDefault();ask($("#askQ").value)};
 $("#askQ").onkeydown=e=>{if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)){e.preventDefault();ask($("#askQ").value)}};
 $("#askStop").onclick=()=>{cancelAi();askRun++;askBusy=false;askLog.push({role:"ai",text:"Đã dừng.",items:[]});askSave();renderAsk()};
-$("#askNew").onclick=()=>{if(askLog.length&&!confirm("Xóa đoạn hội thoại hiện tại? (Danh sách đã gửi vẫn giữ nguyên)"))return;askLog=[];askSave();renderAsk();$("#askQ").focus()};
-$("#askLog").onclick=async e=>{const b=e.target.closest("button");if(!b)return;const m=askLog[+(b.dataset.acopy??b.dataset.akeep)];if(!m)return;
-  if(b.dataset.acopy!==undefined){const t=[m.text,...(m.items||[])].filter(Boolean).join("\n");
-    try{await navigator.clipboard.writeText(t);toast("Đã copy")}catch(err){toast("Không copy được")}}
-  if(b.dataset.akeep!==undefined){const cur=sentLines(),have=new Set(cur.map(askNorm)),add=m.items.filter(x=>!have.has(askNorm(x)));
-    try{await saveAskMemo([...cur,...add].join("\n"));m.kept=true;askMemoDirty=false;askSave();renderAsk();renderAskMemo();toast(`Đã thêm ${add.length} mục vào danh sách đã gửi`)}catch(err){toast("Không lưu được: "+errMsg(err))}}};
+$("#askNew").onclick=()=>{if(askLog.length&&!confirm("Xóa đoạn hội thoại hiện tại? (Danh sách đã gửi vẫn giữ nguyên)"))return;askLog=[];askSel=-1;askSave();renderAsk();$("#askQ").focus()};
+$("#askLog").onclick=e=>{const b=e.target.closest("[data-asel]");if(!b)return;askSel=+b.dataset.asel;renderAsk();
+  if(matchMedia("(max-width:860px)").matches)$("#askOutBox").scrollIntoView({behavior:"smooth",block:"start"})};
+async function askCopy(plain){const m=askLog[askCur()];if(!m)return;
+  try{await navigator.clipboard.writeText(askCopyText(m,plain));toast(plain?"Đã copy danh sách, mỗi dòng một mục":"Đã copy")}catch(err){toast("Không copy được")}}
+$("#askCopy").onclick=()=>askCopy(false);$("#askCopyPlain").onclick=()=>askCopy(true);
+$("#askKeep").onclick=async()=>{const m=askLog[askCur()];if(!m?.items?.length)return;const cur=sentLines(),have=new Set(cur.map(askNorm)),add=m.items.filter(x=>!have.has(askNorm(x)));
+  try{await saveAskMemo([...cur,...add].join("\n"));m.kept=true;askMemoDirty=false;askSave();renderAsk();renderAskMemo();toast(`Đã thêm ${add.length} mục vào danh sách đã gửi`)}catch(err){toast("Không lưu được: "+errMsg(err))}};
 $("#askCards").onclick=async e=>{const del=e.target.closest("[data-acdel]");
   if(del){e.stopPropagation();const c=askCards.find(x=>x.id===del.dataset.acdel);if(c&&confirm(`Xóa thẻ hỏi “${c.name}”?`)){try{await db.doc("templates/"+c.id).delete();toast("Đã xóa thẻ")}catch(err){toast("Không xóa được: "+errMsg(err))}}return}
   const b=e.target.closest("button");if(!b)return;
