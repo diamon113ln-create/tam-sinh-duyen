@@ -240,7 +240,7 @@ details.imgmore summary{cursor:pointer;font-weight:600;font-size:13px;color:var(
 .portal{position:relative;aspect-ratio:3/4;border:0;padding:0;border-radius:18px;overflow:hidden;cursor:pointer;text-align:left;color:#fff;background:#1a0f1c;
   box-shadow:0 10px 26px rgba(20,10,22,.35),inset 0 0 0 1px rgba(217,178,106,.55);transform-style:preserve-3d;
   transition:transform .35s cubic-bezier(.2,.8,.2,1),box-shadow .35s;opacity:0;animation:portalin .7s ease-out forwards}
-.portal:nth-child(1){animation-delay:.35s}.portal:nth-child(2){animation-delay:.45s}.portal:nth-child(3){animation-delay:.55s}.portal:nth-child(4){animation-delay:.65s}.portal:nth-child(5){animation-delay:.75s}.portal:nth-child(6){animation-delay:.85s}.portal:nth-child(7){animation-delay:.95s}.portal:nth-child(8){animation-delay:1.05s}
+.portal:nth-child(1){animation-delay:.35s}.portal:nth-child(2){animation-delay:.45s}.portal:nth-child(3){animation-delay:.55s}.portal:nth-child(4){animation-delay:.65s}.portal:nth-child(5){animation-delay:.75s}.portal:nth-child(6){animation-delay:.85s}.portal:nth-child(7){animation-delay:.95s}.portal:nth-child(8){animation-delay:1.05s}.portal:nth-child(9){animation-delay:1.15s}.portal:nth-child(10){animation-delay:1.25s}
 .portal .art{position:absolute;inset:0;background:url(assets/bg.jpg) var(--pos,center)/auto 170% no-repeat;transition:transform .6s cubic-bezier(.2,.8,.2,1)}
 .portal::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(0deg,rgba(26,12,28,.95) 0%,rgba(26,12,28,.25) 55%,rgba(26,12,28,0) 80%)}
 .portal::after{content:"";position:absolute;inset:0;z-index:2;background:linear-gradient(115deg,transparent 30%,rgba(255,236,200,.35) 48%,transparent 62%);
@@ -261,7 +261,50 @@ details.imgmore summary{cursor:pointer;font-weight:600;font-size:13px;color:var(
 ::view-transition-group(portal){animation-duration:.55s;animation-timing-function:cubic-bezier(.2,.8,.2,1)}
 aside.side .logo{cursor:pointer}
 
+/* Lịch tuần */
+.wk{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px;align-items:start}
+.wk-day{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:10px;min-height:160px}
+.wk-day.today{border-color:var(--crimson);box-shadow:0 0 0 1px var(--crimson)}
+.wk-day h3{margin:0 0 8px;font:700 15px var(--serif);display:flex;align-items:center;gap:6px}
+.wk-day h3{flex-wrap:wrap}
+.wk-day h3 small{order:3;width:100%;font:600 11px var(--sans);color:var(--crimson)}
+.wk-day h3 .add{margin-left:auto;border:1px dashed var(--line);background:none;border-radius:8px;width:26px;height:26px;cursor:pointer;color:var(--ink-soft);font-size:16px;line-height:1}
+.wk-day h3 .add:hover{border-color:var(--crimson);color:var(--crimson)}
+.wk-act{display:block;width:100%;text-align:left;border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:10px;background:var(--mist);padding:0;margin-bottom:8px;cursor:pointer;overflow:hidden}
+.wk-act:hover{border-color:var(--crimson)}
+.wk-act img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block}
+.wk-act .b{padding:6px 8px}
+.wk-act b{display:block;font-size:13px;line-height:1.3}
+.wk-act span{display:block;font-size:11px;color:var(--ink-soft)}
+.wk-act .t{font-weight:700;color:var(--crimson)}
+.wk-days{display:flex;gap:6px;flex-wrap:wrap}
+.wk-days label{margin:0;display:flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:999px;padding:5px 12px;cursor:pointer;font-weight:600;color:var(--ink)}
+.wk-days label:has(input:checked){background:var(--crimson);border-color:var(--crimson);color:#fff}
+.wk-days input{width:auto;margin:0;accent-color:var(--crimson)}
+#wkImgPrev{width:100%;max-height:220px;object-fit:contain;border-radius:10px;border:1px solid var(--line);margin-top:8px;background:var(--mist)}
+/* Gợi ý theo lịch ở Viết bài nhanh */
+.sug{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--mist);margin-bottom:6px}
+.sug h4{margin:0 0 6px;font:700 15px var(--serif);display:flex;align-items:center;gap:8px}
+.sug h4 a{margin-left:auto;font:500 12px var(--sans);color:var(--crimson);cursor:pointer}
+.sug-days{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:thin}
+.sug-days button{flex:none;border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:4px 10px;font-size:12px;cursor:pointer;white-space:nowrap}
+.sug-days button[aria-pressed="true"]{background:var(--crimson);border-color:var(--crimson);color:#fff}
+.sug-days button i{font-style:normal;font-weight:700;margin-left:4px;opacity:.8}
+.sug-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:8px}
+.sug-card{display:flex;flex-direction:column;text-align:left;border:1px solid var(--line);border-radius:10px;background:var(--paper);padding:0;cursor:pointer;overflow:hidden;transition:transform .15s,border-color .15s}
+.sug-card:hover{border-color:var(--crimson);transform:translateY(-2px)}
+.sug-card:disabled{opacity:.5;cursor:wait;transform:none}
+.sug-card img,.sug-card .noimg{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:linear-gradient(120deg,#7A1230,#9E1B3A 45%,#6A55B8)}
+.sug-card .b{padding:6px 8px}
+.sug-card b{display:block;font-size:13px;line-height:1.3}
+.sug-card span{display:block;font-size:11px;color:var(--ink-soft)}
+.sug-empty{font-size:13px;color:var(--ink-soft);margin:8px 0 2px}
+
 @media (max-width:860px){
+  .wk{grid-template-columns:1fr}
+  .wk-day{min-height:0}
+  .wk-act{display:flex;align-items:stretch}
+  .wk-act img{width:110px;aspect-ratio:16/9;flex:none}
   .hero{min-height:0;aspect-ratio:1400/933;padding:16px;border-radius:16px}
   .hero .art{background-size:100% auto}
   .hero .kicker{font-size:11px}.hero h1{font-size:28px;margin:2px 0 0}.hero p{display:none}
@@ -313,6 +356,7 @@ aside.side .logo{cursor:pointer}
     <nav id="tabs">
       <button data-view="home" aria-current="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg><span>Trang chủ</span></button>
       <button data-view="write"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/></svg><span>Viết bài nhanh</span></button>
+      <button data-view="week"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M7.5 14h2M11 14h2M14.5 14h2M7.5 17.5h2M11 17.5h2"/></svg><span>Lịch tuần</span></button>
       <button data-view="board"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="5" height="16" rx="1"/><rect x="10" y="4" width="5" height="10" rx="1"/><rect x="17" y="4" width="4" height="13" rx="1"/></svg><span>Công việc</span></button>
       <button data-view="templates"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/></svg><span>Mẫu bài viết</span></button>
       <button data-view="formats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="M21 16l-5-5-8 8"/></svg><span>Format ảnh</span></button>
@@ -338,7 +382,8 @@ aside.side .logo{cursor:pointer}
       <div class="strip"><h2>Viết bài nhanh theo mẫu</h2></div>
       <div class="two">
         <div class="panel">
-          <label for="wTpl" style="margin-top:0">Mẫu bài viết</label>
+          <div class="sug" id="wSug"></div>
+          <label for="wTpl">Mẫu bài viết</label>
           <select id="wTpl"></select>
           <p class="hint" id="wTplHint" style="font-size:13px;color:var(--ink-soft);margin:6px 0 0"></p>
           <label for="wSrc">Dựa theo sheet (không bắt buộc)</label>
@@ -427,6 +472,12 @@ aside.side .logo{cursor:pointer}
           </div>
         </div>
       </div>
+    </div>
+
+    <div id="viewWeek" class="hidden">
+      <div class="strip"><h2>Lịch hoạt động trong tuần</h2><button class="btn" id="wkNew">Thêm hoạt động</button></div>
+      <p class="hint" style="margin:0 0 14px;color:var(--ink-soft)">Đặt sẵn mỗi ngày trong tuần có hoạt động gì (ví dụ Tài nguyên chiến tối Thứ Hai), kèm mẫu bài, giờ và ảnh trong kho. Ở <b>Viết bài nhanh</b> sẽ hiện ô gợi ý theo ngày; bấm vào ô là AI tự viết bài đúng ngày đó và gắn sẵn ảnh.</p>
+      <div class="wk" id="wkGrid"></div>
     </div>
 
     <div id="viewFormats" class="hidden">
@@ -603,6 +654,30 @@ aside.side .logo{cursor:pointer}
     <span class="hint">Mẹo: chuột phải vào ảnh → Sao chép hình ảnh. Phím ← → để chuyển ảnh, Esc để đóng.</span></div>
 </dialog>
 
+<dialog id="wkDlg" style="width:min(640px,96vw)">
+  <form id="wkForm">
+    <div class="dlg-head"><h3 id="wkTitle">Hoạt động mới</h3><button type="button" class="btn ghost small" id="wkClose">Đóng</button></div>
+    <div class="dlg-body">
+      <label for="wkName">Tên hoạt động</label><input id="wkName" required placeholder="Ví dụ: Tài nguyên chiến">
+      <label>Diễn ra vào các ngày</label><div class="wk-days" id="wkDays"></div>
+      <div class="grid2">
+        <div><label for="wkTime">Giờ bắt đầu (không bắt buộc)</label><input id="wkTime" type="time"></div>
+        <div><label for="wkDur">Kéo dài (số ngày)</label><input id="wkDur" type="number" min="1" max="30" value="1"></div>
+        <div><label for="wkTpl">Mẫu bài viết</label><select id="wkTpl"></select></div>
+        <div><label for="wkSrc">Dựa theo sheet (không bắt buộc)</label><select id="wkSrc"></select></div>
+      </div>
+      <label for="wkImg">Ảnh gắn sẵn (từ Ảnh hoạt động / Kho ảnh)</label><select id="wkImg"></select>
+      <img id="wkImgPrev" class="hidden" alt="">
+      <label for="wkMotif">Motip để AI vẽ (khi chưa có ảnh, không bắt buộc)</label><select id="wkMotif"></select>
+      <label for="wkReward">Phần thưởng (không bắt buộc)</label>
+      <textarea id="wkReward" style="min-height:90px" placeholder="Để trống thì giữ phần thưởng như bài mẫu / sheet."></textarea>
+      <label style="display:flex;gap:8px;align-items:center;font-weight:500;color:var(--ink)"><input type="checkbox" id="wkVary" style="width:auto"> Viết format khác bài mẫu</label>
+      <div class="row"><button class="btn">Lưu</button><button type="button" class="btn ghost" id="wkCancel">Hủy</button><button type="button" class="btn ghost hidden" id="wkDel" style="margin-left:auto">Xóa</button></div>
+      <div class="err" id="wkErr"></div>
+    </div>
+  </form>
+</dialog>
+
 <dialog id="artDlg">
   <form method="dialog" id="artForm">
     <div class="dlg-head"><h3>Sửa thông tin ảnh</h3><button class="btn ghost small" value="cancel">Đóng</button></div>
@@ -622,7 +697,7 @@ const STATUSES=[["todo","Chưa làm","#9A8FA8"],["doing","Đang làm","#B4661C"]
 const ROLE_NAME={admin:"Admin",lead:"Trưởng nhóm",member:"Thành viên"};
 const $=s=>document.querySelector(s);
 const sample=true, downloads=true;
-let templates=[],savedSheets=[],artStyles=[];
+let templates=[],savedSheets=[],artStyles=[],weekActs=[];
 const STYLES=["Ngắn gọn, rõ ý","Kiếm hiệp mạnh mẽ","Cổ phong lãng mạn","Hài hước, gần gũi","Thông báo trang trọng"];
 const LENS=[["ngắn (80–120 chữ)","Ngắn"],["vừa (150–220 chữ)","Vừa"],["dài (250–350 chữ)","Dài"]];
 let accounts=[], tasks=[], me=null, editing=null, sheet=null, abortCtl=null, mobileCol="todo";
@@ -650,7 +725,9 @@ async function refresh(name){try{
     /* saved sheets live in the templates table, marked kind:"sheet" (no extra table needed) */
     savedSheets=all.filter(x=>x.kind==="sheet").sort((a,b)=>(b.updated||0)-(a.updated||0));
     artStyles=all.filter(x=>x.kind==="artstyle").sort((a,b)=>(a.name||"").localeCompare(b.name||"","vi"));
-    templates=all.filter(x=>!x.kind).sort((a,b)=>(a.name||"").localeCompare(b.name||"","vi"));if(me){renderTemplates();fillTplSelects();renderHome();renderSaved();fillSrcSelect();renderStyles();fillStyleSel()}}
+    /* weekly schedule entries: one row per activity, kind:"weekact" */
+    weekActs=all.filter(x=>x.kind==="weekact").sort((a,b)=>(a.time||"99").localeCompare(b.time||"99")||(a.name||"").localeCompare(b.name||"","vi"));
+    templates=all.filter(x=>!x.kind).sort((a,b)=>(a.name||"").localeCompare(b.name||"","vi"));if(me){renderTemplates();fillTplSelects();renderHome();renderSaved();fillSrcSelect();renderStyles();fillStyleSel();renderWeek();renderSug()}}
 }catch(e){toast("Lỗi tải dữ liệu: "+errMsg(e))}}
 const db={
   collection:name=>({async add(obj){const {data,error}=await sb.from(name).insert({data:obj}).select("id").single();if(error)throw error;refresh(name);return{id:data.id}}}),
@@ -716,14 +793,16 @@ function renderShell(){$("#meName").textContent=me.name;$("#meRole").textContent
   $("#tabAcc").classList.toggle("hidden",me.role!=="admin");if(me.role==="admin")renderAccounts()}
 $("#tabs").onclick=e=>{const b=e.target.closest("button");if(b)show(b.dataset.view)};
 $("aside.side .logo").onclick=()=>show("home");
-const VIEWS={home:"#viewHome",write:"#viewWrite",board:"#viewBoard",templates:"#viewTemplates",sheet:"#viewSheet",formats:"#viewFormats",art:"#viewArt",acts:"#viewActs",accounts:"#viewAccounts"};
+const VIEWS={home:"#viewHome",write:"#viewWrite",week:"#viewWeek",board:"#viewBoard",templates:"#viewTemplates",sheet:"#viewSheet",formats:"#viewFormats",art:"#viewArt",acts:"#viewActs",accounts:"#viewAccounts"};
 function show(v){if(v==="accounts"&&me.role!=="admin")v="home";
   document.querySelectorAll("#tabs button").forEach(b=>b.setAttribute("aria-current",b.dataset.view===v));
+  if(v==="write")renderSug();if(v==="week")renderWeek();
   for(const k in VIEWS)$(VIEWS[k]).classList.toggle("hidden",k!==v);scrollTo(0,0)}
 
 /* ---------- home ---------- */
 const PORTALS=[
   {v:"write",t:"Viết bài nhanh",s:"Viết bài theo mẫu, copy đăng Facebook",pos:"20% 40%",n:()=>""},
+  {v:"week",t:"Lịch tuần",s:"hoạt động đặt sẵn trong tuần",pos:"55% 45%",n:()=>weekActs.length},
   {v:"board",t:"Công việc",s:"việc đang chờ xử lý",pos:"42% 70%",n:()=>tasks.filter(t=>t.status!=="done").length},
   {v:"templates",t:"Mẫu bài viết",s:"mẫu đã lưu",pos:"78% 55%",n:()=>templates.length},
   {v:"formats",t:"Format ảnh",s:"Chọn kiểu ảnh AI thiết kế",pos:"35% 15%",n:()=>""},
@@ -1123,6 +1202,81 @@ $("#wToTask").onclick=async()=>{if(!$("#wPost").value.trim()){toast("Chưa có b
     style:tpl?.style||STYLES[0],len:tpl?.len||LENS[1][0],post:$("#wPost").value,sheetJson:wSheet?JSON.stringify(wSheet):"",headline:$("#wHead").value,subline:$("#wSub").value,imageUrl:wAiUrl,
     templateId:tpl?.id||"",createdBy:me.id,created:Date.now(),updated:Date.now()});toast("Đã lưu vào cột Chờ duyệt")}catch(e){toast("Không lưu được: "+e.message)}};
 
+/* ---------- Lịch tuần: activities set per weekday, suggested in Viết bài nhanh ---------- */
+const WK_DAYS=["T2","T3","T4","T5","T6","T7","CN"],WK_FULL=["Thứ Hai","Thứ Ba","Thứ Tư","Thứ Năm","Thứ Sáu","Thứ Bảy","Chủ Nhật"];
+const wkDow=d=>(d.getDay()+6)%7+1;/* 1 = Thứ Hai … 7 = Chủ Nhật */
+function ymd(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function addDays(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return x}
+function wkImgOf(a){const id=a?.imgId;if(!id)return null;const x=actImgs.find(y=>y.id===id);if(x)return{url:x.url,act:true};const b=artworks.find(y=>y.id===id);return b?{url:b.url,act:false}:null}
+function wkMeta(a){const t=templates.find(x=>x.id===a.tplId),sh=savedSheets.find(x=>x.id===a.srcId);
+  return [t?t.name:"",sh?"sheet: "+(sh.name||"Sheet"):"",a.dur>1?a.dur+" ngày":""].filter(Boolean).join(" · ")||"Chưa chọn mẫu bài"}
+function renderWeek(){if(!me)return;const today=wkDow(new Date());
+  $("#wkGrid").innerHTML=WK_DAYS.map((d,i)=>{const day=i+1,list=weekActs.filter(a=>(a.days||[]).includes(day));
+    return `<div class="wk-day${day===today?" today":""}"><h3>${WK_FULL[i]}${day===today?" <small>hôm nay</small>":""}<button type="button" class="add" data-wkadd="${day}" title="Thêm hoạt động ${WK_FULL[i]}">+</button></h3>
+      ${list.map(a=>{const im=wkImgOf(a);return `<button type="button" class="wk-act" data-wkedit="${a.id}">${im?`<img src="${esc(im.url)}" alt="" loading="lazy">`:""}<div class="b">${a.time?`<span class="t">${esc(a.time)}</span>`:""}<b>${esc(a.name)}</b><span>${esc(wkMeta(a))}</span></div></button>`}).join("")||'<p class="sug-empty">Trống</p>'}</div>`}).join("")}
+$("#wkGrid").onclick=e=>{const b=e.target.closest("button");if(!b)return;
+  if(b.dataset.wkadd)openWk(null,+b.dataset.wkadd);if(b.dataset.wkedit)openWk(weekActs.find(a=>a.id===b.dataset.wkedit))};
+$("#wkNew").onclick=()=>openWk(null,wkDow(new Date()));
+let wkEditing=null;
+function fillWkSelects(a){
+  $("#wkTpl").innerHTML='<option value="">Không dùng mẫu</option>'+templates.map(t=>`<option value="${esc(t.id)}">${esc(t.name)}</option>`).join("");
+  $("#wkSrc").innerHTML='<option value="">Không dùng sheet</option>'+savedSheets.map(x=>`<option value="${esc(x.id)}">${esc(x.name||"Sheet")}</option>`).join("");
+  $("#wkImg").innerHTML='<option value="">Không gắn ảnh</option>'+
+    (actImgs.length?`<optgroup label="Ảnh hoạt động">${actImgs.map(x=>`<option value="${x.id}">${esc(x.name||"Ảnh hoạt động")}</option>`).join("")}</optgroup>`:"")+
+    (artworks.length?`<optgroup label="Kho ảnh">${artworks.map(x=>`<option value="${x.id}">${esc(x.name||"Ảnh")}</option>`).join("")}</optgroup>`:"");
+  $("#wkMotif").innerHTML='<option value="">Không dùng</option>'+artStyles.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join("");
+  $("#wkTpl").value=a?.tplId&&templates.some(t=>t.id===a.tplId)?a.tplId:a?"":(templates[0]?.id||"");
+  $("#wkSrc").value=savedSheets.some(x=>x.id===a?.srcId)?a.srcId:"";
+  $("#wkImg").value=wkImgOf(a)?a.imgId:"";$("#wkMotif").value=artStyles.some(x=>x.id===a?.motifId)?a.motifId:"";wkPrev()}
+function wkPrev(){const im=wkImgOf({imgId:$("#wkImg").value});$("#wkImgPrev").classList.toggle("hidden",!im);if(im)$("#wkImgPrev").src=im.url}
+$("#wkImg").onchange=wkPrev;
+function openWk(a,day){wkEditing=a?.id||null;$("#wkTitle").textContent=a?"Sửa hoạt động":"Hoạt động mới";$("#wkErr").textContent="";
+  const days=a?.days||(day?[day]:[]);
+  $("#wkDays").innerHTML=WK_DAYS.map((d,i)=>`<label><input type="checkbox" value="${i+1}"${days.includes(i+1)?" checked":""}>${d}</label>`).join("");
+  $("#wkName").value=a?.name||"";$("#wkTime").value=a?.time||"";$("#wkDur").value=a?.dur||1;$("#wkReward").value=a?.reward||"";$("#wkVary").checked=!!a?.vary;
+  fillWkSelects(a);$("#wkDel").classList.toggle("hidden",!a||!can("delete"));$("#wkDlg").showModal();$("#wkName").focus()}
+$("#wkClose").onclick=$("#wkCancel").onclick=()=>$("#wkDlg").close();
+$("#wkForm").onsubmit=async e=>{e.preventDefault();
+  const days=[...$("#wkDays").querySelectorAll("input:checked")].map(x=>+x.value);
+  if(!days.length){$("#wkErr").textContent="Chọn ít nhất một ngày trong tuần.";return}
+  if(!$("#wkTpl").value&&!$("#wkSrc").value){$("#wkErr").textContent="Chọn mẫu bài viết hoặc sheet để AI có nội dung viết bài.";return}
+  const data={kind:"weekact",name:$("#wkName").value.trim(),days,time:$("#wkTime").value,dur:Math.max(1,Math.min(30,parseInt($("#wkDur").value)||1)),
+    tplId:$("#wkTpl").value,srcId:$("#wkSrc").value,imgId:$("#wkImg").value,motifId:$("#wkMotif").value,reward:$("#wkReward").value.trim(),vary:$("#wkVary").checked,updated:Date.now(),by:me.id};
+  try{if(wkEditing)await db.doc("templates/"+wkEditing).set(data);else await db.collection("templates").add(data);$("#wkDlg").close();toast("Đã lưu “"+data.name+"” vào lịch tuần")}
+  catch(err){$("#wkErr").textContent="Không lưu được: "+errMsg(err)}};
+$("#wkDel").onclick=async()=>{if(!wkEditing||!confirm("Xóa hoạt động này khỏi lịch tuần?"))return;
+  try{await db.doc("templates/"+wkEditing).delete();$("#wkDlg").close();toast("Đã xóa khỏi lịch tuần")}catch(err){toast("Không xóa được: "+errMsg(err))}};
+
+/* suggestion boxes above the Viết bài nhanh form: pick a day (today … 6 days ahead), click a box to write */
+let sugDate=null,sugBusy=false;
+function renderSug(){if(!me)return;const box=$("#wSug");
+  if(!weekActs.length){box.innerHTML=`<h4>Gợi ý theo lịch tuần<a data-sgo="1">Đặt lịch →</a></h4><p class="sug-empty">Chưa có lịch tuần. Vào tab Lịch tuần để đặt sẵn mỗi ngày có hoạt động gì, lần sau chỉ cần bấm vào ô gợi ý là có bài.</p>`;return}
+  const today=new Date(),dates=Array.from({length:7},(_,i)=>addDays(today,i));
+  if(!dates.some(d=>ymd(d)===sugDate))sugDate=ymd(today);
+  const cur=dates.find(d=>ymd(d)===sugDate),list=weekActs.filter(a=>(a.days||[]).includes(wkDow(cur)));
+  box.innerHTML=`<h4>Gợi ý theo lịch tuần<a data-sgo="1">Sửa lịch →</a></h4>
+    <div class="sug-days">${dates.map((d,i)=>{const n=weekActs.filter(a=>(a.days||[]).includes(wkDow(d))).length;
+      return `<button type="button" data-sday="${ymd(d)}" aria-pressed="${ymd(d)===sugDate}">${i===0?"Hôm nay":i===1?"Ngày mai":WK_DAYS[wkDow(d)-1]} ${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}${n?`<i>${n}</i>`:""}</button>`}).join("")}</div>
+    ${list.length?`<div class="sug-list">${list.map(a=>{const im=wkImgOf(a);return `<button type="button" class="sug-card" data-sact="${a.id}"${sugBusy?" disabled":""} title="Bấm để AI viết bài ${esc(a.name)} ngày ${fmtDT(sugDate)}">${im?`<img src="${esc(im.url)}" alt="" loading="lazy">`:'<div class="noimg"></div>'}<div class="b"><b>${esc(a.name)}</b><span>${a.time?esc(a.time)+" · ":""}${esc(wkMeta(a))}</span></div></button>`}).join("")}</div>`
+      :`<p class="sug-empty">${WK_FULL[wkDow(cur)-1]} chưa có hoạt động nào.</p>`}`}
+$("#wSug").onclick=e=>{const t=e.target.closest("[data-sgo],[data-sday],[data-sact]");if(!t)return;
+  if(t.dataset.sgo){show("week");return}
+  if(t.dataset.sday){sugDate=t.dataset.sday;renderSug();return}
+  if(sugBusy||!$("#wStop").classList.contains("hidden")){toast("AI đang viết, chờ xong hoặc bấm Dừng");return}
+  const a=weekActs.find(x=>x.id===t.dataset.sact);if(a)writeWeekAct(a,sugDate)};
+/* fill the form from the schedule entry, attach its picture, then let the AI write */
+async function writeWeekAct(a,date){if($("#wPost").value.trim()&&!confirm("Bài đang viết sẽ được thay bằng bài mới cho “"+a.name+"”. Tiếp tục?"))return;
+  const tpl=templates.find(x=>x.id===a.tplId),sh=savedSheets.find(x=>x.id===a.srcId);
+  if(!tpl&&!sh){toast("Hoạt động này chưa có mẫu bài hoặc sheet, hãy sửa lại ở Lịch tuần");return}
+  if([...$("#wTpl").options].some(o=>o.value===(tpl?.id||"")))$("#wTpl").value=tpl?.id||"";
+  $("#wSrc").value=sh?.id||"";wTplHint();srcHint();
+  $("#wFrom").value=date;$("#wTime").value=a.time||"";$("#wTo").value=a.dur>1?ymd(addDays(new Date(date+"T00:00"),a.dur-1)):"";
+  $("#wReward").value=a.reward||"";autoGrow($("#wReward"));$("#wVary").checked=!!a.vary;
+  wSubTouched=false;$("#wSub").value=timeText();$("#wHead").value="";$("#wPost").value="";
+  const st=artStyles.find(x=>x.id===a.motifId);if(st){$("#wMotifSel").value=st.id;$("#wMotif").value=st.desc||""}
+  const im=wkImgOf(a);showAiImg(im?im.url:"",im?.act);
+  sugBusy=true;renderSug();try{await $("#wGen").onclick()}finally{sugBusy=false;renderSug()}}
+
 /* ---------- templates ---------- */
 let tEditing=null;
 function renderTemplates(){$("#tList").innerHTML=templates.length?templates.map(t=>`<div class="tpl"><div class="n">${esc(t.name)}</div>
@@ -1468,7 +1622,7 @@ async function loadArt(){if(!sb)return;const {data,error}=await sb.from("artwork
   const rows=error?[]:data.map(r=>({id:r.id,...(r.data||{}),createdBy:r.created_by}));artReady=!error;
   /* finished activity pictures share the table, marked kind:"activity"; backgrounds have no kind */
   artworks=rows.filter(a=>!a.kind);actImgs=rows.filter(a=>a.kind==="activity");
-  if(me){renderArt();renderActs();renderActPicker();renderHome();fillArtSelect();renderPicker()}}
+  if(me){renderArt();renderActs();renderActPicker();renderHome();fillArtSelect();renderPicker();renderWeek();renderSug()}}
 function renderActs(){$("#actDrop").classList.toggle("hidden",!artReady);$("#actPick").disabled=!artReady;
   $("#actGrid").innerHTML=!artReady?'<div class="empty">Cần bật Kho ảnh trước: chạy file <code>supabase/kho-anh.sql</code> trong Supabase → SQL Editor.</div>':actImgs.length?actImgs.map(a=>`<div class="art"><img src="${esc(a.url)}" alt="${esc(a.name||"")}" loading="lazy">
     <div class="b"><div class="n">${esc(a.name||"Ảnh hoạt động")}</div><div class="d">${new Date(a.created||Date.now()).toLocaleDateString("vi-VN")}</div>
