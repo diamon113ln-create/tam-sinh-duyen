@@ -63,8 +63,16 @@ alter table public.templates enable row level security;
 
 -- Người có hồ sơ trong app mới được đọc/ghi
 drop policy if exists "profiles read" on public.profiles;
+-- Chỉ Admin đọc được cả bảng (tên đăng nhập, vai trò); người khác chỉ đọc hồ sơ của mình
 create policy "profiles read" on public.profiles for select to authenticated
-  using (public.my_role() is not null);
+  using (id = auth.uid() or public.my_role() = 'admin');
+-- Tên hiển thị của mọi người (để giao việc) cho thành viên, không lộ tên đăng nhập / vai trò
+create or replace function public.member_names() returns table (id uuid, name text)
+language sql stable security definer set search_path = public as $$
+  select p.id, p.name from public.profiles p where public.my_role() is not null
+$$;
+revoke all on function public.member_names() from public, anon;
+grant execute on function public.member_names() to authenticated;
 -- Tạo/sửa/xóa tài khoản chỉ qua hàm admin-users (dùng khóa bí mật phía máy chủ)
 
 drop policy if exists "tasks read"   on public.tasks;

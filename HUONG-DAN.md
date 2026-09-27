@@ -52,6 +52,11 @@ Làm lần lượt từ trên xuống. Tổng thời gian khoảng 30–45 phút
 4. Vào web → Viết bài nhanh → **AI vẽ tranh mới**. Tranh vẽ xong tự lưu vào Kho ảnh.
 - Tùy chọn Secrets: `OPENAI_IMAGE_QUALITY` = `low` (rẻ nhất) / `medium` (mặc định) / `high`; `OPENAI_IMAGE_MODEL` để đổi model.
 
+## Chỉ Admin xem danh sách tài khoản (làm 1 lần)
+
+Supabase → **SQL Editor → New query**, dán toàn bộ file `supabase/chi-admin-xem-tai-khoan.sql` → **Run**.
+Sau đó Thành viên / Trưởng nhóm chỉ thấy tên hiển thị của mọi người (để giao việc), không xem được tên đăng nhập và vai trò; tab **Tài khoản** chỉ Admin thấy.
+
 ## Lịch tuần (viết bài theo lịch)
 
 1. Vào tab **Lịch tuần** → **Thêm hoạt động** (hoặc bấm **+** ở ngày muốn thêm).
