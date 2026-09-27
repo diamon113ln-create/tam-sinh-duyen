@@ -73,6 +73,8 @@ Làm lần lượt từ trên xuống. Tổng thời gian khoảng 30–45 phút
 1. Trong Google Sheet chứa mã: **Chia sẻ → Quyền truy cập chung → Bất kỳ ai có đường liên kết (Người xem)**. Mở đúng trang tính có mã rồi copy link.
 2. Vào tab **Phát code → Thêm đợt code**: đặt tên, dán link sheet (hoặc chọn file Excel/CSV, hoặc dán danh sách mã), sửa **tin nhắn mẫu** (`{code}` là chỗ điền mã) → **Lưu**.
    - Web tự tìm cột mã. Nếu sheet có cột ô tick (TRUE/FALSE) thì mã đã tick được coi là đã phát.
+   - Muốn chọn đúng cột: bấm **📑 Đọc sheet & chọn cột**, chọn **Cột chứa mã**, **Cột tick** và **dòng bắt đầu**, xem trước 5 mã đầu rồi Lưu. Lựa chọn được nhớ cho lần lấy mã mới.
+   - Đã lỡ lấy sai cột: bấm **Chọn lại cột mã** ở tab Phát code, chọn lại cột rồi Lưu (tự tích *Thay toàn bộ danh sách*; mã đã phát vẫn giữ trạng thái).
 3. Mỗi lần bấm **📋 Copy mã tiếp theo**: web copy 1 mã chưa tick (từ trên xuống) kèm tin nhắn và tự tick mã đó. Dán vào tin nhắn gửi mem.
    - Lỡ bấm mà chưa gửi: bấm **Hoàn tác** để trả mã lại.
    - Cả nhóm dùng chung, 2 người bấm cùng lúc cũng không bị trùng mã (web báo nếu mã vừa bị người khác lấy).
