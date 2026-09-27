@@ -240,7 +240,7 @@ details.imgmore summary{cursor:pointer;font-weight:600;font-size:13px;color:var(
 .portal{position:relative;aspect-ratio:3/4;border:0;padding:0;border-radius:18px;overflow:hidden;cursor:pointer;text-align:left;color:#fff;background:#1a0f1c;
   box-shadow:0 10px 26px rgba(20,10,22,.35),inset 0 0 0 1px rgba(217,178,106,.55);transform-style:preserve-3d;
   transition:transform .35s cubic-bezier(.2,.8,.2,1),box-shadow .35s;opacity:0;animation:portalin .7s ease-out forwards}
-.portal:nth-child(1){animation-delay:.35s}.portal:nth-child(2){animation-delay:.45s}.portal:nth-child(3){animation-delay:.55s}.portal:nth-child(4){animation-delay:.65s}.portal:nth-child(5){animation-delay:.75s}.portal:nth-child(6){animation-delay:.85s}.portal:nth-child(7){animation-delay:.95s}.portal:nth-child(8){animation-delay:1.05s}.portal:nth-child(9){animation-delay:1.15s}.portal:nth-child(10){animation-delay:1.25s}.portal:nth-child(11){animation-delay:1.35s}
+.portal:nth-child(1){animation-delay:.35s}.portal:nth-child(2){animation-delay:.45s}.portal:nth-child(3){animation-delay:.55s}.portal:nth-child(4){animation-delay:.65s}.portal:nth-child(5){animation-delay:.75s}.portal:nth-child(6){animation-delay:.85s}.portal:nth-child(7){animation-delay:.95s}.portal:nth-child(8){animation-delay:1.05s}.portal:nth-child(9){animation-delay:1.15s}.portal:nth-child(10){animation-delay:1.25s}.portal:nth-child(11){animation-delay:1.35s}.portal:nth-child(12){animation-delay:1.45s}
 .portal .art{position:absolute;inset:0;background:url(assets/bg.jpg) var(--pos,center)/auto 170% no-repeat;transition:transform .6s cubic-bezier(.2,.8,.2,1)}
 .portal::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(0deg,rgba(26,12,28,.95) 0%,rgba(26,12,28,.25) 55%,rgba(26,12,28,0) 80%)}
 .portal::after{content:"";position:absolute;inset:0;z-index:2;background:linear-gradient(115deg,transparent 30%,rgba(255,236,200,.35) 48%,transparent 62%);
@@ -282,6 +282,29 @@ aside.side .logo{cursor:pointer}
 .wk-days label:has(input:checked){background:var(--crimson);border-color:var(--crimson);color:#fff}
 .wk-days input{width:auto;margin:0;accent-color:var(--crimson)}
 #wkImgPrev{width:100%;max-height:220px;object-fit:contain;border-radius:10px;border:1px solid var(--line);margin-top:8px;background:var(--mist)}
+/* Phát code */
+.cb-two{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.cb-stat{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;margin:14px 0 10px}
+.cb-stat b{font:700 40px/1 var(--serif);color:var(--crimson)}
+.cb-stat span{color:var(--ink-soft)}
+.cb-stat .bar{flex-basis:100%;height:8px;border-radius:4px;background:var(--blossom-soft);overflow:hidden}
+.cb-stat .bar i{display:block;height:100%;background:var(--crimson)}
+.cb-go{width:100%;padding:18px;font-size:19px}
+.cb-last{margin-top:12px;border:1px solid var(--ok);border-radius:12px;padding:10px 12px;background:color-mix(in srgb,var(--ok) 8%,var(--paper))}
+.cb-last .h{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px}
+.cb-last .h b{font-family:ui-monospace,Consolas,monospace;color:var(--ok)}
+.cb-last .h span{flex:1}
+.cb-pre{white-space:pre-wrap;margin:8px 0 0;font:14px/1.6 var(--sans);user-select:all}
+.cb-prev{white-space:pre-wrap;margin:6px 0 0;font:13px/1.6 var(--sans);color:var(--ink-soft);background:var(--mist);border:1px dashed var(--line);border-radius:10px;padding:8px 10px}
+.cb-table{max-height:min(66vh,680px);overflow:auto}
+.cb-table td{padding:5px 8px;vertical-align:middle}
+.cb-table td.n{color:var(--ink-soft);font-size:12px;width:48px;text-align:right}
+.cb-table td.c{font:14px ui-monospace,SFMono-Regular,Consolas,monospace}
+.cb-table td.w{font-size:12px;color:var(--ink-soft)}
+.cb-table input{width:18px;height:18px;accent-color:var(--crimson);cursor:pointer}
+.cb-table tr.used td.c{text-decoration:line-through;color:var(--ink-soft)}
+.cb-table tr.next td{background:var(--blossom-soft)}
+.cb-table tr.next td.w{color:var(--crimson);font-weight:700}
 /* Hỏi AI */
 .ask-two{grid-template-columns:minmax(0,1fr) minmax(0,1.25fr)}
 .ask-right{display:grid;gap:16px;position:sticky;top:12px}
@@ -334,6 +357,7 @@ button.ask-a:hover{border-color:var(--crimson)}
 @media (max-width:860px){
   .wk{grid-template-columns:1fr}
   .ask-two{grid-template-columns:1fr}
+  .cb-two{grid-template-columns:1fr}
   .ask-right{position:static}
   #askSent{min-height:160px}
   .wk-day{min-height:0}
@@ -392,6 +416,7 @@ button.ask-a:hover{border-color:var(--crimson)}
       <button data-view="write"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/></svg><span>Viết bài nhanh</span></button>
       <button data-view="week"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M7.5 14h2M11 14h2M14.5 14h2M7.5 17.5h2M11 17.5h2"/></svg><span>Lịch tuần</span></button>
       <button data-view="ask"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path d="M9.5 9a2.5 2.5 0 1 1 3.2 2.4c-.5.2-.7.6-.7 1.1"/><path d="M12 14.5h.01"/></svg><span>Hỏi AI</span></button>
+      <button data-view="codes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8a2 2 0 0 0 2-2h14a2 2 0 0 0 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2v-2a2 2 0 0 0 0-4z"/><path d="M14 6v12" stroke-dasharray="2 2"/></svg><span>Phát code</span></button>
       <button data-view="board"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="5" height="16" rx="1"/><rect x="10" y="4" width="5" height="10" rx="1"/><rect x="17" y="4" width="4" height="13" rx="1"/></svg><span>Công việc</span></button>
       <button data-view="templates"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/></svg><span>Mẫu bài viết</span></button>
       <button data-view="formats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="M21 16l-5-5-8 8"/></svg><span>Format ảnh</span></button>
@@ -539,6 +564,30 @@ button.ask-a:hover{border-color:var(--crimson)}
           <textarea id="askSent" style="margin-top:8px" placeholder="TSDFAN01&#10;TSDFAN02&#10;…"></textarea>
           <div class="row"><button type="button" class="btn small" id="askSentSave" disabled>Lưu danh sách</button></div>
         </details>
+        </div>
+      </div>
+    </div>
+
+    <div id="viewCodes" class="hidden">
+      <div class="strip"><h2>Phát code cho mem</h2><button class="btn" id="cbNew">Thêm đợt code</button></div>
+      <div class="two cb-two">
+        <div class="panel">
+          <label for="cbSel" style="margin-top:0">Đợt code</label><select id="cbSel"></select>
+          <div id="cbEmpty" class="empty hidden" style="margin-top:12px">Chưa có đợt code nào. Bấm <b>Thêm đợt code</b>, dán link Google Sheet chứa mã (hoặc tải file Excel/CSV, hoặc dán danh sách mã) và tin nhắn mẫu.<div class="row"><button type="button" class="btn small" id="cbNew2">Thêm đợt code</button></div></div>
+          <div id="cbMain">
+            <div class="cb-stat" id="cbStat"></div>
+            <button type="button" class="btn cb-go" id="cbNext">📋 Copy mã tiếp theo</button>
+            <p class="hint" style="font-size:13px;color:var(--ink-soft);margin:8px 0 0">Mỗi lần bấm: copy <b>1 mã chưa tick</b> (từ trên xuống) kèm tin nhắn mẫu và tự tick mã đó. Dán (Ctrl+V) vào tin nhắn gửi mem. Cả nhóm dùng chung nên không ai phát trùng mã.</p>
+            <div class="cb-last hidden" id="cbLast"><div class="h"><span>✅ Vừa copy mã <b id="cbLastCode"></b></span><button type="button" class="btn ghost small" id="cbRecopy">Copy lại</button><button type="button" class="btn ghost small" id="cbUndo" title="Bỏ tick nếu chưa gửi mã này">Hoàn tác</button></div><pre class="cb-pre" id="cbLastMsg"></pre></div>
+            <label>Tin nhắn mẫu (xem trước với mã tiếp theo)</label><pre class="cb-prev" id="cbMsgPrev"></pre>
+            <div class="row"><button type="button" class="btn ghost small" id="cbEdit">Sửa tin nhắn / nguồn mã</button><button type="button" class="btn ghost small hidden" id="cbReload">🔄 Lấy mã mới từ Google Sheet</button></div>
+          </div>
+        </div>
+        <div class="panel" id="cbListBox">
+          <div class="row" style="margin:0"><h4 style="margin:0;font:700 17px var(--serif);flex:1">Danh sách mã</h4><select id="cbFilter" style="width:auto"><option value="all">Tất cả</option><option value="left">Chưa phát</option><option value="used">Đã phát</option></select></div>
+          <div class="tablewrap cb-table"><table><thead><tr><th>#</th><th>Mã</th><th>Tick</th><th>Người phát · thời gian</th></tr></thead><tbody id="cbRows"></tbody></table></div>
+          <div class="row"><button type="button" class="btn ghost small" id="cbCopyUsed">Copy các mã đã phát</button><button type="button" class="btn ghost small" id="cbXlsx">Tải Excel</button></div>
+          <p class="hint" style="font-size:12px;color:var(--ink-soft);margin:6px 0 0">Web không tự sửa được file Google Sheet của bạn; tick được lưu trên web. Muốn cập nhật lại sheet thì dùng <b>Copy các mã đã phát</b> hoặc <b>Tải Excel</b>.</p>
         </div>
       </div>
     </div>
@@ -717,6 +766,23 @@ button.ask-a:hover{border-color:var(--crimson)}
     <span class="hint">Mẹo: chuột phải vào ảnh → Sao chép hình ảnh. Phím ← → để chuyển ảnh, Esc để đóng.</span></div>
 </dialog>
 
+<dialog id="cbDlg" style="width:min(640px,96vw)">
+  <form id="cbForm">
+    <div class="dlg-head"><h3 id="cbTitle">Đợt code mới</h3><button type="button" class="btn ghost small" id="cbClose">Đóng</button></div>
+    <div class="dlg-body">
+      <label for="cbName">Tên đợt</label><input id="cbName" required placeholder="Ví dụ: Code S4 Thánh Long Open Beta">
+      <label for="cbUrl">Link Google Sheet chứa mã</label><input id="cbUrl" placeholder="https://docs.google.com/spreadsheets/d/…">
+      <p class="hint" style="font-size:12px;color:var(--ink-soft);margin:4px 0 0">Sheet cần chia sẻ <b>“Bất kỳ ai có đường liên kết” – Người xem</b>. Web tự tìm cột mã; nếu sheet có cột tick (ô đánh dấu) thì mã đã tick được bỏ qua. Mở đúng trang tính rồi copy link để lấy đúng trang.</p>
+      <label for="cbFile">Hoặc chọn file Excel / CSV</label><input id="cbFile" type="file" accept=".xlsx,.xls,.csv">
+      <label for="cbPaste">Hoặc dán danh sách mã (mỗi dòng một mã)</label><textarea id="cbPaste" style="min-height:70px" placeholder="TSD8K2P9Q&#10;TSD4M7X1Z"></textarea>
+      <p class="hint" id="cbSrcHint" style="font-size:12px;color:var(--ink-soft);margin:4px 0 0"></p>
+      <label for="cbText">Tin nhắn mẫu (<b>{code}</b> là chỗ điền mã)</label><textarea id="cbText" style="min-height:130px"></textarea>
+      <div class="row"><button class="btn" id="cbSave">Lưu</button><button type="button" class="btn ghost" id="cbCancel">Hủy</button><button type="button" class="btn ghost hidden" id="cbDel" style="margin-left:auto">Xóa đợt</button></div>
+      <div class="err" id="cbErr"></div>
+    </div>
+  </form>
+</dialog>
+
 <dialog id="wkDlg" style="width:min(640px,96vw)">
   <form id="wkForm">
     <div class="dlg-head"><h3 id="wkTitle">Hoạt động mới</h3><button type="button" class="btn ghost small" id="wkClose">Đóng</button></div>
@@ -760,13 +826,13 @@ const STATUSES=[["todo","Chưa làm","#9A8FA8"],["doing","Đang làm","#B4661C"]
 const ROLE_NAME={admin:"Admin",lead:"Trưởng nhóm",member:"Thành viên"};
 const $=s=>document.querySelector(s);
 const sample=true, downloads=true;
-let templates=[],savedSheets=[],artStyles=[],weekActs=[],askCards=[],askMemo=null;
+let templates=[],savedSheets=[],artStyles=[],weekActs=[],askCards=[],askMemo=null,codeBatches=[];
 const STYLES=["Ngắn gọn, rõ ý","Kiếm hiệp mạnh mẽ","Cổ phong lãng mạn","Hài hước, gần gũi","Thông báo trang trọng"];
 const LENS=[["ngắn (80–120 chữ)","Ngắn"],["vừa (150–220 chữ)","Vừa"],["dài (250–350 chữ)","Dài"]];
 let accounts=[], tasks=[], me=null, editing=null, sheet=null, abortCtl=null, mobileCol="todo";
 const bgImg=new Image(); bgImg.src=BG; const logoImg=new Image(); logoImg.src=LOGO;
 
-function toast(m){const t=document.createElement("div");t.className="toast";t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2400)}
+function toast(m){document.querySelectorAll(".toast").forEach(x=>x.remove());const t=document.createElement("div");t.className="toast";t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2400)}
 function esc(s){const d=document.createElement("div");d.textContent=s??"";return d.innerHTML}
 function can(action){ if(!me) return false; if(me.role==="admin") return true;
   if(action==="approve"||action==="delete") return me.role==="lead"; return true; }
@@ -793,7 +859,9 @@ async function refresh(name){try{
     /* Hỏi AI: saved question cards (kind:"askcard") and the one shared "đã gửi" list (kind:"askmemo") */
     askCards=all.filter(x=>x.kind==="askcard").sort((a,b)=>(a.name||"").localeCompare(b.name||"","vi"));
     askMemo=all.filter(x=>x.kind==="askmemo").sort((a,b)=>(b.updated||0)-(a.updated||0))[0]||null;
-    templates=all.filter(x=>!x.kind).sort((a,b)=>(a.name||"").localeCompare(b.name||"","vi"));if(me){renderTemplates();fillTplSelects();renderHome();renderSaved();fillSrcSelect();renderStyles();fillStyleSel();renderWeek();renderSug();renderAskCards();renderAskMemo()}}
+    /* Phát code: code lists with their ticks, kind:"codebatch" */
+    codeBatches=all.filter(x=>x.kind==="codebatch").sort((a,b)=>(b.created||0)-(a.created||0));
+    templates=all.filter(x=>!x.kind).sort((a,b)=>(a.name||"").localeCompare(b.name||"","vi"));if(me){renderTemplates();fillTplSelects();renderHome();renderSaved();fillSrcSelect();renderStyles();fillStyleSel();renderWeek();renderSug();renderAskCards();renderAskMemo();renderCodes()}}
 }catch(e){toast("Lỗi tải dữ liệu: "+errMsg(e))}}
 const db={
   collection:name=>({async add(obj){const {data,error}=await sb.from(name).insert({data:obj}).select("id").single();if(error)throw error;refresh(name);return{id:data.id}}}),
@@ -859,7 +927,7 @@ function renderShell(){$("#meName").textContent=me.name;$("#meRole").textContent
   $("#tabAcc").classList.toggle("hidden",me.role!=="admin");if(me.role==="admin")renderAccounts()}
 $("#tabs").onclick=e=>{const b=e.target.closest("button");if(b)show(b.dataset.view)};
 $("aside.side .logo").onclick=()=>show("home");
-const VIEWS={home:"#viewHome",write:"#viewWrite",week:"#viewWeek",ask:"#viewAsk",board:"#viewBoard",templates:"#viewTemplates",sheet:"#viewSheet",formats:"#viewFormats",art:"#viewArt",acts:"#viewActs",accounts:"#viewAccounts"};
+const VIEWS={home:"#viewHome",write:"#viewWrite",week:"#viewWeek",ask:"#viewAsk",codes:"#viewCodes",board:"#viewBoard",templates:"#viewTemplates",sheet:"#viewSheet",formats:"#viewFormats",art:"#viewArt",acts:"#viewActs",accounts:"#viewAccounts"};
 function show(v){if(v==="accounts"&&me.role!=="admin")v="home";
   document.querySelectorAll("#tabs button").forEach(b=>b.setAttribute("aria-current",b.dataset.view===v));
   if(v==="write")renderSug();if(v==="week")renderWeek();
@@ -870,6 +938,7 @@ const PORTALS=[
   {v:"write",t:"Viết bài nhanh",s:"Viết bài theo mẫu, copy đăng Facebook",pos:"20% 40%",n:()=>""},
   {v:"week",t:"Lịch tuần",s:"hoạt động đặt sẵn trong tuần",pos:"55% 45%",n:()=>weekActs.length},
   {v:"ask",t:"Hỏi AI",s:"Hỏi nhanh, tạo code không trùng",pos:"30% 55%",n:()=>""},
+  {v:"codes",t:"Phát code",s:"mã chưa phát",pos:"65% 40%",n:()=>codeBatches.reduce((n,b)=>n+cbLeft(b),0)},
   {v:"board",t:"Công việc",s:"việc đang chờ xử lý",pos:"42% 70%",n:()=>tasks.filter(t=>t.status!=="done").length},
   {v:"templates",t:"Mẫu bài viết",s:"mẫu đã lưu",pos:"78% 55%",n:()=>templates.length},
   {v:"formats",t:"Format ảnh",s:"Chọn kiểu ảnh AI thiết kế",pos:"35% 15%",n:()=>""},
@@ -1440,6 +1509,122 @@ $("#askCards").onclick=async e=>{const del=e.target.closest("[data-acdel]");
     try{await db.collection("templates").add({kind:"askcard",name:name.trim(),question:q,updated:Date.now(),by:me.id});toast("Đã lưu thẻ “"+name.trim()+"”")}catch(err){toast("Không lưu được: "+errMsg(err))}return}
   const c=askCards.find(x=>x.id===b.dataset.acard);if(c)ask(c.question)};
 renderAsk();
+
+/* ---------- Phát code: one code per click from a Google Sheet list, copied inside a message; shared ticks so nobody hands out a code twice ---------- */
+const CB_MSG=`🌺 Giftcode máy chủ S4- Thánh Long Open Beta  19h00 19/09/2026
+📥 Nhập tại: Tổng Quản Sự Kiện ở Tuyền Châu (180/175) gần dã tẩu ➜  Nhập Giftcode
+⚔️ Chúc anh hành tẩu Tam Sinh Duyên thật nhiều may mắn!
+🎁 GiftCode: {code}`;
+let cbSelId=null,cbFilter="all",cbLast=null,cbBusy=false,cbEditing=null;
+try{cbSelId=localStorage.getItem("tsd.cb")}catch(e){}
+function cbCur(){return codeBatches.find(b=>b.id===cbSelId)||codeBatches[0]||null}
+function cbMsg(b,code){const t=b.msg||CB_MSG;return /\{code\}/i.test(t)?t.replace(/\{code\}/gi,code):t.replace(/\s+$/,"")+" "+code}
+function cbLeft(b){return (b?.codes||[]).filter(x=>!x.u).length}
+function cbWhen(x){if(!x.u)return "";if(!x.t)return "tick từ sheet";const d=new Date(x.t);
+  return `${nameOf(x.b)} · ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")} ${d.toLocaleDateString("vi-VN")}`}
+function renderCodes(){if(!me)return;const b=cbCur();
+  $("#cbSel").innerHTML=codeBatches.length?codeBatches.map(x=>`<option value="${x.id}">${esc(x.name)} (còn ${cbLeft(x)}/${(x.codes||[]).length})</option>`).join(""):'<option value="">Chưa có đợt code nào</option>';
+  if(b)$("#cbSel").value=b.id;
+  $("#cbMain").classList.toggle("hidden",!b);$("#cbEmpty").classList.toggle("hidden",!!b);$("#cbListBox").classList.toggle("hidden",!b);
+  if(!b)return;
+  const total=(b.codes||[]).length,left=cbLeft(b);
+  $("#cbStat").innerHTML=`<b>${left}</b><span>mã chưa phát / ${total} mã</span><div class="bar"><i style="width:${total?Math.round((total-left)/total*100):0}%"></i></div>`;
+  $("#cbNext").disabled=!left;$("#cbNext").textContent=left?"📋 Copy mã tiếp theo":"Đã phát hết mã";
+  $("#cbMsgPrev").textContent=cbMsg(b,(b.codes||[]).find(x=>!x.u)?.c||"XXXXXXXX");
+  const L=cbLast&&cbLast.id===b.id?cbLast:null;$("#cbLast").classList.toggle("hidden",!L);
+  if(L){$("#cbLastCode").textContent=L.c;$("#cbLastMsg").textContent=L.msg}
+  $("#cbReload").classList.toggle("hidden",!b.sheetUrl);
+  const next=(b.codes||[]).findIndex(x=>!x.u);
+  const rows=(b.codes||[]).map((x,i)=>({x,i})).filter(({x})=>cbFilter==="all"||(cbFilter==="left"?!x.u:x.u));
+  $("#cbRows").innerHTML=rows.length?rows.map(({x,i})=>`<tr class="${x.u?"used":""}${i===next?" next":""}"><td class="n">${i+1}</td><td class="c">${esc(x.c)}</td><td><input type="checkbox" data-cbtick="${i}"${x.u?" checked":""} aria-label="Đã phát ${esc(x.c)}"></td><td class="w">${i===next?"⬅ mã tiếp theo":esc(cbWhen(x))}</td></tr>`).join("")
+    :`<tr><td colspan="4" class="w" style="text-align:center;padding:16px">Không có mã nào</td></tr>`}
+$("#cbSel").onchange=()=>{cbSelId=$("#cbSel").value;try{localStorage.setItem("tsd.cb",cbSelId)}catch(e){}renderCodes()};
+$("#cbFilter").onchange=()=>{cbFilter=$("#cbFilter").value;renderCodes()};
+/* read the row fresh, change it, write it back; mutate returns false to abort (e.g. someone else already took that code) */
+async function cbPersist(id,mutate){const {data:row,error}=await sb.from("templates").select("data").eq("id",id).single();if(error)throw error;
+  const d=row.data||{};d.codes=d.codes||[];if(mutate(d.codes,d)===false)return false;d.updated=Date.now();
+  const {error:e2}=await sb.from("templates").update({data:d}).eq("id",id);if(e2)throw e2;refresh("templates");return true}
+async function cbClip(text){try{await navigator.clipboard.writeText(text);return true}catch(e){return false}}
+$("#cbNext").onclick=async()=>{const b=cbCur();if(!b||cbBusy)return;const x=(b.codes||[]).find(y=>!y.u);if(!x){toast("Đã phát hết mã");return}
+  const code=x.c,msg=cbMsg(b,code),ok=await cbClip(msg);/* copy first: the browser only allows it right after the click */
+  Object.assign(x,{u:1,t:Date.now(),b:me.id});cbLast={id:b.id,c:code,msg};renderCodes();
+  toast(ok?`Đã copy mã ${code}, dán (Ctrl+V) vào tin nhắn`:"Chưa copy tự động được, hãy bôi đen tin nhắn bên dưới rồi Ctrl+C");
+  cbBusy=true;$("#cbNext").disabled=true;
+  try{const saved=await cbPersist(b.id,codes=>{const y=codes.find(z=>z.c===code);if(!y||y.u)return false;Object.assign(y,{u:1,t:x.t,b:me.id})});
+    if(!saved){cbLast=null;toast(`Mã ${code} vừa được người khác phát! Đừng gửi mã này, bấm lại để lấy mã khác`);await refresh("templates")}}
+  catch(e){Object.assign(x,{u:0,t:0,b:""});cbLast=null;toast("Không lưu được trạng thái, đừng gửi mã này: "+errMsg(e))}
+  finally{cbBusy=false;renderCodes()}};
+$("#cbRecopy").onclick=async()=>{if(cbLast)toast(await cbClip(cbLast.msg)?"Đã copy lại":"Không copy được")};
+$("#cbUndo").onclick=async()=>{if(!cbLast)return;const {id,c}=cbLast;
+  try{await cbPersist(id,codes=>{const y=codes.find(z=>z.c===c);if(!y)return false;Object.assign(y,{u:0,t:0,b:""})});cbLast=null;toast(`Đã bỏ tick mã ${c}, mã sẽ được phát lại`);renderCodes()}
+  catch(e){toast("Không hoàn tác được: "+errMsg(e))}};
+$("#cbRows").onchange=async e=>{const cb=e.target.closest("[data-cbtick]");const b=cbCur();if(!cb||!b)return;const x=b.codes[+cb.dataset.cbtick],on=cb.checked;
+  try{await cbPersist(b.id,codes=>{const y=codes.find(z=>z.c===x.c);if(!y)return false;Object.assign(y,on?{u:1,t:Date.now(),b:me.id}:{u:0,t:0,b:""})})}
+  catch(err){cb.checked=!on;toast("Không lưu được: "+errMsg(err))}};
+$("#cbCopyUsed").onclick=async()=>{const b=cbCur();const list=(b?.codes||[]).filter(x=>x.u).map(x=>x.c);if(!list.length){toast("Chưa phát mã nào");return}
+  toast(await cbClip(list.join("\n"))?`Đã copy ${list.length} mã đã phát (mỗi dòng một mã)`:"Không copy được")};
+$("#cbXlsx").onclick=()=>{const b=cbCur();if(!b)return;
+  exportXlsx({columns:["STT","Mã","Đã phát","Người phát","Thời gian"],rows:b.codes.map((x,i)=>[String(i+1),x.c,x.u?"Đã phát":"",x.u&&x.t?nameOf(x.b):x.u?"tick từ sheet":"",x.t?new Date(x.t).toLocaleString("vi-VN"):""])},b.name)};
+
+/* ---- reading codes from a Google Sheet link, an Excel/CSV file or pasted text ---- */
+function parseCSV(t){const rows=[];let row=[],f="",q=false;
+  for(let i=0;i<t.length;i++){const ch=t[i];
+    if(q){if(ch==='"'){if(t[i+1]==='"'){f+='"';i++}else q=false}else f+=ch;continue}
+    if(ch==='"')q=true;else if(ch===","){row.push(f);f=""}else if(ch==="\n"){row.push(f);rows.push(row);row=[];f=""}else if(ch!=="\r")f+=ch}
+  if(f||row.length){row.push(f);rows.push(row)}return rows}
+const CB_CODE=/^[A-Za-z0-9][A-Za-z0-9_\-]{3,39}$/,CB_BOOL=/^(true|false)$/i,CB_YES=/^(true|x|✓|✔|✅|v|yes|1|rồi|đã.*)$/i;
+function codesFromRows(rows){rows=rows.map(r=>r.map(v=>String(v??"").trim())).filter(r=>r.some(Boolean));if(!rows.length)return [];
+  const width=Math.max(...rows.map(r=>r.length)),col=i=>rows.map(r=>r[i]||"");
+  let codeCol=-1,tickCol=-1,start=0;const head=rows[0];
+  const hc=head.findIndex(v=>/code|mã/i.test(v)&&(/\s|[^\x00-\x7F]/.test(v)||/^(gift)?codes?$/i.test(v)));
+  if(hc>=0){codeCol=hc;start=1;tickCol=head.findIndex((v,i)=>i!==hc&&/tick|đã|gửi|phát|trạng|check|status|used/i.test(v))}
+  if(codeCol<0){let best=-1;for(let i=0;i<width;i++){const vals=col(i).filter(Boolean),n=vals.filter(v=>CB_CODE.test(v)&&!CB_BOOL.test(v)).length;if(n>best){best=n;codeCol=i}}
+    if(!CB_CODE.test(head[codeCol]||""))start=1}
+  if(tickCol<0)for(let i=0;i<width;i++){if(i===codeCol)continue;const vals=col(i).slice(start).filter(Boolean);if(vals.length&&vals.filter(v=>CB_BOOL.test(v)).length>=vals.length*.6){tickCol=i;break}}
+  const seen=new Set(),out=[];
+  for(const r of rows.slice(start)){const c=(r[codeCol]||"").trim();if(!c||/\s/.test(c)||seen.has(c.toUpperCase()))continue;seen.add(c.toUpperCase());
+    out.push({c,u:tickCol>=0&&CB_YES.test(r[tickCol]||"")?1:0,t:0,b:""})}
+  return out}
+function sheetCsvUrl(link){const m=String(link).match(/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);if(!m)return null;const g=String(link).match(/[#&?]gid=(\d+)/);
+  return `https://docs.google.com/spreadsheets/d/${m[1]}/export?format=csv${g?"&gid="+g[1]:""}`}
+async function codesFromSheet(link){const url=sheetCsvUrl(link);if(!url)throw new Error("Link Google Sheet không đúng. Mở sheet, copy link trên thanh địa chỉ rồi dán vào.");
+  let txt;try{const r=await fetch(url);if(!r.ok)throw 0;txt=await r.text()}catch(e){txt=null}
+  if(txt===null||/^\s*<(!doctype|html)/i.test(txt))throw new Error("Không đọc được sheet. Trong Google Sheet bấm Chia sẻ → Quyền truy cập chung: “Bất kỳ ai có đường liên kết” (Người xem), rồi thử lại.");
+  return codesFromRows(parseCSV(txt))}
+async function codesFromFile(f){if(/\.csv$/i.test(f.name))return codesFromRows(parseCSV(await f.text()));
+  if(!window.XLSX)throw new Error("Chưa tải được thư viện Excel, hãy thử lại");const wb=XLSX.read(await f.arrayBuffer(),{type:"array"});
+  return codesFromRows(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:false,defval:""}))}
+/* new codes go to the end; a code ticked in the sheet becomes ticked here; ticks made here are never undone by a reload */
+function mergeCodes(old,inc){const out=(old||[]).map(x=>({...x})),idx=new Map(out.map((x,i)=>[x.c.toUpperCase(),i]));let add=0,tick=0;
+  for(const y of inc){const i=idx.get(y.c.toUpperCase());if(i===undefined){out.push(y);idx.set(y.c.toUpperCase(),out.length-1);add++}else if(y.u&&!out[i].u){Object.assign(out[i],{u:1,t:0,b:""});tick++}}
+  return {codes:out,add,tick}}
+function openCb(b){cbEditing=b?.id||null;$("#cbTitle").textContent=b?"Sửa đợt code":"Đợt code mới";$("#cbErr").textContent="";
+  $("#cbName").value=b?.name||"";$("#cbUrl").value=b?.sheetUrl||"";$("#cbPaste").value="";$("#cbFile").value="";$("#cbText").value=b?.msg||CB_MSG;
+  $("#cbSrcHint").textContent=b?`Đang có ${(b.codes||[]).length} mã. Mã mới trong nguồn được thêm vào cuối; mã đã tick giữ nguyên.`:"";
+  $("#cbDel").classList.toggle("hidden",!b||!can("delete"));$("#cbDlg").showModal();$("#cbName").focus()}
+$("#cbNew").onclick=$("#cbNew2").onclick=()=>openCb(null);$("#cbEdit").onclick=()=>openCb(cbCur());
+$("#cbClose").onclick=$("#cbCancel").onclick=()=>$("#cbDlg").close();
+$("#cbForm").onsubmit=async e=>{e.preventDefault();const btn=$("#cbSave");$("#cbErr").textContent="";
+  const url=$("#cbUrl").value.trim(),file=$("#cbFile").files[0],paste=$("#cbPaste").value.trim(),old=codeBatches.find(b=>b.id===cbEditing);
+  btn.disabled=true;btn.textContent="Đang đọc mã…";
+  try{let inc=[];
+    if(url)inc=inc.concat(await codesFromSheet(url));
+    if(file)inc=inc.concat(await codesFromFile(file));
+    if(paste)inc=inc.concat(codesFromRows(paste.split("\n").map(l=>l.split(/\t|,|;/))));
+    if(!old&&!inc.length)throw new Error("Chưa có mã nào. Dán link Google Sheet, chọn file hoặc dán danh sách mã.");
+    if((url||file||paste)&&!inc.length)throw new Error("Không tìm thấy mã nào trong nguồn đã chọn.");
+    const m=mergeCodes(old?.codes,inc),name=$("#cbName").value.trim()||"Đợt code",msg=$("#cbText").value.trim()||CB_MSG;
+    if(old){await cbPersist(old.id,(codes,d)=>{const mm=mergeCodes(codes,inc);d.codes=mm.codes;d.name=name;d.msg=msg;d.sheetUrl=url||d.sheetUrl||""})}
+    else{const r=await db.collection("templates").add({kind:"codebatch",name,msg,sheetUrl:url,codes:m.codes,created:Date.now(),updated:Date.now(),by:me.id});cbSelId=r.id;try{localStorage.setItem("tsd.cb",r.id)}catch(err){}}
+    $("#cbDlg").close();toast(old?`Đã lưu. Thêm ${m.add} mã mới${m.tick?`, tick ${m.tick} mã theo sheet`:""}`:`Đã tạo đợt “${name}” với ${m.codes.length} mã${m.codes.some(x=>x.u)?` (${m.codes.filter(x=>x.u).length} mã đã tick sẵn trong sheet)`:""}`)}
+  catch(err){$("#cbErr").textContent=errMsg(err)}
+  finally{btn.disabled=false;btn.textContent="Lưu"}};
+$("#cbReload").onclick=async()=>{const b=cbCur();if(!b?.sheetUrl)return;const btn=$("#cbReload");btn.disabled=true;
+  try{const inc=await codesFromSheet(b.sheetUrl);let add=0,tick=0;await cbPersist(b.id,(codes,d)=>{const m=mergeCodes(codes,inc);d.codes=m.codes;add=m.add;tick=m.tick});
+    toast(add||tick?`Đã cập nhật: thêm ${add} mã mới, tick ${tick} mã theo sheet`:"Sheet không có gì mới")}
+  catch(e){toast(errMsg(e))}finally{btn.disabled=false}};
+$("#cbDel").onclick=async()=>{if(!cbEditing||!confirm("Xóa đợt code này? Trạng thái đã phát cũng bị xóa."))return;
+  try{await db.doc("templates/"+cbEditing).delete();$("#cbDlg").close();toast("Đã xóa đợt code")}catch(err){toast("Không xóa được: "+errMsg(err))}};
 
 /* ---------- templates ---------- */
 let tEditing=null;
