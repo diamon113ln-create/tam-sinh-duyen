@@ -296,6 +296,8 @@ aside.side .logo{cursor:pointer}
 .ask-items li::before{content:counter(it);display:inline-block;min-width:32px;margin-right:6px;font:600 11px var(--sans);color:var(--ink-soft);text-align:right}
 .ask-out .note{margin:8px 0 0;font-size:12px;color:var(--warn)}
 .ask-sent summary{cursor:pointer;list-style:none}
+.ask-savepost{border-top:1px dashed var(--line);padding-top:10px}
+.ask-savepost .hint{flex:1;min-width:200px;font-size:12px;color:var(--ink-soft)}
 .ask-sent summary::-webkit-details-marker{display:none}
 .ask-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
 .ask-chip{border:1px solid var(--line);background:var(--mist);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
@@ -529,6 +531,7 @@ button.ask-a:hover{border-color:var(--crimson)}
           <h4 style="margin:0 0 8px;font:700 17px var(--serif)">Kết quả</h4>
           <div class="ask-out" id="askOut"></div>
           <div class="row hidden" id="askOutBar"><button type="button" class="btn" id="askCopy">Copy</button><button type="button" class="btn ghost hidden" id="askCopyPlain" title="Mỗi dòng một mục, không icon">Copy chỉ danh sách</button><button type="button" class="btn ghost small hidden" id="askKeep"></button></div>
+          <div class="row hidden ask-savepost" id="askSaveRow"><button type="button" class="btn ghost" id="askSavePost">💾 Lưu bài viết</button><span class="hint">Lưu thành mẫu bài viết; qua <b>Viết bài nhanh</b> chọn mẫu này, đổi ngày rồi bấm Viết bài.</span></div>
         </div>
         <details class="panel ask-sent" open>
           <summary class="row" style="margin:0;justify-content:space-between"><h4 style="margin:0;font:700 17px var(--serif);display:inline">Đã gửi / đã dùng</h4><span class="hint" id="askSentN" style="font-size:12px;color:var(--ink-soft)"></span></summary>
@@ -1377,6 +1380,8 @@ function renderAskOut(){const m=askLog[askCur()],o=$("#askOut");
   o.innerHTML=(q?`<div class="ask-for">Hỏi: ${esc(q.text)}</div>`:"")+(m.text?`<div class="ask-text">${esc(m.text)}</div>`:"")+
     (m.items?.length?`<div class="ask-items-h">${m.items.length} mục</div><ol class="ask-items">${m.items.map(x=>`<li>${esc(x)}</li>`).join("")}</ol>`:"")+(m.note?`<p class="note">${esc(m.note)}</p>`:"");
   const has=!!m.items?.length;$("#askCopyPlain").classList.toggle("hidden",!has);$("#askKeep").classList.toggle("hidden",!has);
+  const post=!!m.text&&!m.err&&m.text!=="Đã dừng.";$("#askSaveRow").classList.toggle("hidden",!post);
+  $("#askSavePost").textContent=m.tplId&&templates.some(t=>t.id===m.tplId)?"✏️ Đã lưu · Mở ở Viết bài nhanh":"💾 Lưu bài viết";
   $("#askKeep").disabled=!!m.kept;$("#askKeep").textContent=m.kept?"Đã thêm vào danh sách đã gửi":`Thêm ${m.items?.length||0} mục vào danh sách đã gửi`}
 function askPrompt(q,extraAvoid,need){const sent=sentLines(),recent=askLog.slice(-9,-1).map(m=>(m.role==="user"?"NGƯỜI DÙNG: ":"AI: ")+(m.text||"")+(m.items?.length?"\n"+m.items.join("\n"):"")).join("\n").slice(-5000);
   let avoid=sent.join("\n");if(avoid.length>9000)avoid=avoid.slice(-9000);/* newest lines are at the end */
@@ -1403,7 +1408,7 @@ async function ask(q){q=q.trim();if(!q||askBusy)return;
     if(dup.length&&my===askRun){const r2=await aiJson(askPrompt(q,[...dup,...out],dup.length));take((Array.isArray(r2.items)?r2.items:[]).filter(x=>String(x).length<=150))}
     if(my!==askRun)return;const removed=dup.length;
     askLog.push({role:"ai",text,items:out,note:removed?`Đã tự loại ${removed} mục trùng với danh sách đã gửi${out.length?" và tạo bù":""}.`:""});
-  }catch(e){if(my===askRun)askLog.push({role:"ai",text:aiErrMsg(e),items:[]})}
+  }catch(e){if(my===askRun)askLog.push({role:"ai",text:aiErrMsg(e),items:[],err:true})}
   finally{if(my===askRun){askBusy=false;askSel=-1;askSave();renderAsk()}}}
 $("#askForm").onsubmit=e=>{e.preventDefault();ask($("#askQ").value)};
 $("#askQ").onkeydown=e=>{if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)){e.preventDefault();ask($("#askQ").value)}};
@@ -1413,6 +1418,16 @@ $("#askLog").onclick=e=>{const b=e.target.closest("[data-asel]");if(!b)return;as
   if(matchMedia("(max-width:860px)").matches)$("#askOutBox").scrollIntoView({behavior:"smooth",block:"start"})};
 async function askCopy(plain){const m=askLog[askCur()];if(!m)return;
   try{await navigator.clipboard.writeText(askCopyText(m,plain));toast(plain?"Đã copy danh sách, mỗi dòng một mục":"Đã copy")}catch(err){toast("Không copy được")}}
+/* a post from Hỏi AI becomes a Mẫu bài viết, so Viết bài nhanh can rewrite it for another date */
+function openTplInWrite(id){fillTplSelects();$("#wTpl").value=id;wTplHint();srcHint();show("write");$("#wFrom").focus()}
+$("#askSavePost").onclick=async()=>{const m=askLog[askCur()];if(!m?.text)return;
+  if(m.tplId&&templates.some(t=>t.id===m.tplId)){openTplInWrite(m.tplId);return}
+  const first=m.text.split("\n").map(l=>l.replace(/[^\p{L}\p{N}\s:–-]/gu,"").trim()).filter(Boolean).find(l=>!/:$/.test(l))||"Bài viết";
+  const name=prompt("Tên bài viết (hiện ở ô Mẫu bài viết khi Viết bài nhanh):",first.slice(0,50));if(!name?.trim())return;
+  try{const r=await db.collection("templates").add({name:name.trim(),style:STYLES[0],len:LENS[1][0],sample:askCopyText(m,false).replace(/^[^\n]{0,60}:\s*\n+/,"").trim(),/* drop a lead-in like "Dạ đây là bài:" */fixed:"",headline:"",updated:Date.now(),by:me.id});
+    m.tplId=r.id;askSave();await refresh("templates");renderAskOut();
+    if(confirm(`Đã lưu “${name.trim()}” vào Mẫu bài viết.\nMở Viết bài nhanh để chọn ngày mới ngay?`))openTplInWrite(r.id);else toast("Đã lưu vào Mẫu bài viết")}
+  catch(err){toast("Không lưu được: "+errMsg(err))}};
 $("#askCopy").onclick=()=>askCopy(false);$("#askCopyPlain").onclick=()=>askCopy(true);
 $("#askKeep").onclick=async()=>{const m=askLog[askCur()];if(!m?.items?.length)return;const cur=sentLines(),have=new Set(cur.map(askNorm)),add=m.items.filter(x=>!have.has(askNorm(x)));
   try{await saveAskMemo([...cur,...add].join("\n"));m.kept=true;askMemoDirty=false;askSave();renderAsk();renderAskMemo();toast(`Đã thêm ${add.length} mục vào danh sách đã gửi`)}catch(err){toast("Không lưu được: "+errMsg(err))}};
