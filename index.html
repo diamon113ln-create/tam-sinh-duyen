@@ -304,6 +304,8 @@ aside.side .logo{cursor:pointer}
 .cb-table input{width:18px;height:18px;accent-color:var(--crimson);cursor:pointer}
 .cb-table tr.used td.c{text-decoration:line-through;color:var(--ink-soft)}
 .cb-table tr.next td{background:var(--blossom-soft)}
+.cb-table tr.bad td.c{color:var(--ink-soft);text-decoration:line-through}
+.cb-table tr.bad small{font:11px var(--sans);text-decoration:none}
 .cb-table tr.next td.w{color:var(--crimson);font-weight:700}
 .cb-map{margin-top:8px;border:1px solid var(--line);border-radius:12px;padding:4px 12px 10px;background:var(--mist)}
 .cb-prev-codes{margin:8px 0 0;font-size:13px}
@@ -587,7 +589,7 @@ button.ask-a:hover{border-color:var(--crimson)}
           </div>
         </div>
         <div class="panel" id="cbListBox">
-          <div class="row" style="margin:0"><h4 style="margin:0;font:700 17px var(--serif);flex:1">Danh sách mã</h4><select id="cbFilter" style="width:auto"><option value="all">Tất cả</option><option value="left">Chưa phát</option><option value="used">Đã phát</option></select></div>
+          <div class="row" style="margin:0"><h4 style="margin:0;font:700 17px var(--serif);flex:1">Danh sách mã<small id="cbSrcInfo" style="display:block;font:500 12px var(--sans);color:var(--ink-soft)"></small></h4><select id="cbFilter" style="width:auto"><option value="all">Tất cả</option><option value="left">Chưa phát</option><option value="used">Đã phát</option></select></div>
           <div class="tablewrap cb-table"><table><thead><tr><th>#</th><th>Mã</th><th>Tick</th><th>Người phát · thời gian</th></tr></thead><tbody id="cbRows"></tbody></table></div>
           <div class="row"><button type="button" class="btn ghost small" id="cbCopyUsed">Copy các mã đã phát</button><button type="button" class="btn ghost small" id="cbXlsx">Tải Excel</button></div>
           <p class="hint" style="font-size:12px;color:var(--ink-soft);margin:6px 0 0">Web không tự sửa được file Google Sheet của bạn; tick được lưu trên web. Muốn cập nhật lại sheet thì dùng <b>Copy các mã đã phát</b> hoặc <b>Tải Excel</b>.</p>
@@ -1532,7 +1534,10 @@ let cbSelId=null,cbFilter="all",cbLast=null,cbBusy=false,cbEditing=null;
 try{cbSelId=localStorage.getItem("tsd.cb")}catch(e){}
 function cbCur(){return codeBatches.find(b=>b.id===cbSelId)||codeBatches[0]||null}
 function cbMsg(b,code){const t=b.msg||CB_MSG;return /\{code\}/i.test(t)?t.replace(/\{code\}/gi,code):t.replace(/\s+$/,"")+" "+code}
-function cbLeft(b){return (b?.codes||[]).filter(x=>!x.u).length}
+/* a tick mark ("x", TRUE, ✓…) or a too-short value is never handed out as a code, even if an old list still contains one */
+function cbOk(c){c=String(c||"");return c.length>=4&&!/\s/.test(c)&&!CB_BOOL.test(c)&&!CB_YES.test(c)}
+const cbAvail=x=>!x.u&&cbOk(x.c);
+function cbLeft(b){return (b?.codes||[]).filter(cbAvail).length}
 function cbWhen(x){if(!x.u)return "";if(!x.t)return "tick từ sheet";const d=new Date(x.t);
   return `${nameOf(x.b)} · ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")} ${d.toLocaleDateString("vi-VN")}`}
 function renderCodes(){if(!me)return;const b=cbCur();
@@ -1543,13 +1548,14 @@ function renderCodes(){if(!me)return;const b=cbCur();
   const total=(b.codes||[]).length,left=cbLeft(b);
   $("#cbStat").innerHTML=`<b>${left}</b><span>mã chưa phát / ${total} mã</span><div class="bar"><i style="width:${total?Math.round((total-left)/total*100):0}%"></i></div>`;
   $("#cbNext").disabled=!left;$("#cbNext").textContent=left?"📋 Copy mã tiếp theo":"Đã phát hết mã";
-  $("#cbMsgPrev").textContent=cbMsg(b,(b.codes||[]).find(x=>!x.u)?.c||"XXXXXXXX");
+  $("#cbMsgPrev").textContent=cbMsg(b,(b.codes||[]).find(cbAvail)?.c||"XXXXXXXX");
   const L=cbLast&&cbLast.id===b.id?cbLast:null;$("#cbLast").classList.toggle("hidden",!L);
   if(L){$("#cbLastCode").textContent=L.c;$("#cbLastMsg").textContent=L.msg}
   $("#cbReload").classList.toggle("hidden",!b.sheetUrl);
-  const next=(b.codes||[]).findIndex(x=>!x.u);
+  const next=(b.codes||[]).findIndex(cbAvail);const mp=b.map;
+  $("#cbSrcInfo").textContent=mp?`Mã lấy từ cột ${colName(mp.codeCol)}${mp.tickCol>=0?` · tick theo cột ${colName(mp.tickCol)}`:""} · từ dòng ${(mp.start||0)+1}`:"";
   const rows=(b.codes||[]).map((x,i)=>({x,i})).filter(({x})=>cbFilter==="all"||(cbFilter==="left"?!x.u:x.u));
-  $("#cbRows").innerHTML=rows.length?rows.map(({x,i})=>`<tr class="${x.u?"used":""}${i===next?" next":""}"><td class="n">${i+1}</td><td class="c">${esc(x.c)}</td><td><input type="checkbox" data-cbtick="${i}"${x.u?" checked":""} aria-label="Đã phát ${esc(x.c)}"></td><td class="w">${i===next?"⬅ mã tiếp theo":esc(cbWhen(x))}</td></tr>`).join("")
+  $("#cbRows").innerHTML=rows.length?rows.map(({x,i})=>`<tr class="${x.u?"used":""}${i===next?" next":""}${cbOk(x.c)?"":" bad"}"><td class="n">${i+1}</td><td class="c">${esc(x.c)}${cbOk(x.c)?"":' <small>(không phải mã, bỏ qua)</small>'}</td><td><input type="checkbox" data-cbtick="${i}"${x.u?" checked":""} aria-label="Đã phát ${esc(x.c)}"></td><td class="w">${i===next?"⬅ mã tiếp theo":esc(cbWhen(x))}</td></tr>`).join("")
     :`<tr><td colspan="4" class="w" style="text-align:center;padding:16px">Không có mã nào</td></tr>`}
 $("#cbSel").onchange=()=>{cbSelId=$("#cbSel").value;try{localStorage.setItem("tsd.cb",cbSelId)}catch(e){}renderCodes()};
 $("#cbFilter").onchange=()=>{cbFilter=$("#cbFilter").value;renderCodes()};
@@ -1558,7 +1564,7 @@ async function cbPersist(id,mutate){const {data:row,error}=await sb.from("templa
   const d=row.data||{};d.codes=d.codes||[];if(mutate(d.codes,d)===false)return false;d.updated=Date.now();
   const {error:e2}=await sb.from("templates").update({data:d}).eq("id",id);if(e2)throw e2;refresh("templates");return true}
 async function cbClip(text){try{await navigator.clipboard.writeText(text);return true}catch(e){return false}}
-$("#cbNext").onclick=async()=>{const b=cbCur();if(!b||cbBusy)return;const x=(b.codes||[]).find(y=>!y.u);if(!x){toast("Đã phát hết mã");return}
+$("#cbNext").onclick=async()=>{const b=cbCur();if(!b||cbBusy)return;const x=(b.codes||[]).find(cbAvail);if(!x){toast("Đã phát hết mã");return}
   const code=x.c,msg=cbMsg(b,code),ok=await cbClip(msg);/* copy first: the browser only allows it right after the click */
   Object.assign(x,{u:1,t:Date.now(),b:me.id});cbLast={id:b.id,c:code,msg};renderCodes();
   toast(ok?`Đã copy mã ${code}, dán (Ctrl+V) vào tin nhắn`:"Chưa copy tự động được, hãy bôi đen tin nhắn bên dưới rồi Ctrl+C");
@@ -1599,10 +1605,10 @@ function guessMap(rows){const width=Math.max(0,...rows.map(r=>r.length)),col=(i,
     tickCol=head.findIndex((v,i)=>i!==codeCol&&/tick|đã|gửi|phát|trạng|check|status|used/i.test(v))}
   if(codeCol<0){let best=-1;for(let i=0;i<width;i++){const vals=col(i,0).filter(Boolean),n=vals.filter(v=>CB_CODE.test(v)&&!CB_BOOL.test(v)).length;if(n>best){best=n;codeCol=i}}
     start=rows.findIndex(r=>CB_CODE.test(r[codeCol]||""));if(start<0)start=0}
-  if(tickCol<0)for(let i=0;i<width;i++){if(i===codeCol)continue;const vals=col(i,start).filter(Boolean);if(vals.length&&vals.filter(v=>CB_BOOL.test(v)).length>=vals.length*.6){tickCol=i;break}}
+  if(tickCol<0)for(let i=0;i<width;i++){if(i===codeCol)continue;const vals=col(i,start).filter(Boolean);if(vals.length&&vals.filter(v=>CB_BOOL.test(v)||CB_YES.test(v)).length>=vals.length*.6){tickCol=i;break}}
   return {codeCol:Math.max(0,codeCol),tickCol,start}}
 function codesFromRows(rows,map){rows=cleanRows(rows);map=map||guessMap(rows);const seen=new Set(),out=[];
-  for(const r of rows.slice(map.start||0)){const c=(r[map.codeCol]||"").trim();if(!c||/\s/.test(c)||seen.has(c.toUpperCase()))continue;seen.add(c.toUpperCase());
+  for(const r of rows.slice(map.start||0)){const c=(r[map.codeCol]||"").trim();if(!cbOk(c)||seen.has(c.toUpperCase()))continue;seen.add(c.toUpperCase());
     out.push({c,u:map.tickCol>=0&&CB_YES.test(r[map.tickCol]||"")?1:0,t:0,b:""})}
   return out}
 function sheetCsvUrl(link){const m=String(link).match(/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);if(!m)return null;const g=String(link).match(/[#&?]gid=(\d+)/);
@@ -1615,7 +1621,7 @@ async function rowsFromFile(f){if(/\.csv$/i.test(f.name))return cleanRows(parseC
   if(!window.XLSX)throw new Error("Chưa tải được thư viện Excel, hãy thử lại");const wb=XLSX.read(await f.arrayBuffer(),{type:"array"});
   return cleanRows(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:false,defval:"",blankrows:true}))}
 /* new codes go to the end; a code ticked in the sheet becomes ticked here; ticks made here are never undone by a reload */
-function mergeCodes(old,inc){const out=(old||[]).map(x=>({...x})),idx=new Map(out.map((x,i)=>[x.c.toUpperCase(),i]));let add=0,tick=0;
+function mergeCodes(old,inc){const out=(old||[]).filter(x=>x.u||cbOk(x.c)).map(x=>({...x})),idx=new Map(out.map((x,i)=>[x.c.toUpperCase(),i]));let add=0,tick=0;
   for(const y of inc){const i=idx.get(y.c.toUpperCase());if(i===undefined){out.push(y);idx.set(y.c.toUpperCase(),out.length-1);add++}else if(y.u&&!out[i].u){Object.assign(out[i],{u:1,t:0,b:""});tick++}}
   return {codes:out,add,tick}}
 /* replace the whole list (after picking the wrong column), keeping who/when for codes that were already handed out */
@@ -1659,6 +1665,7 @@ $("#cbForm").onsubmit=async e=>{e.preventDefault();const btn=$("#cbSave");$("#cb
     const rows=await cbReadSrc();
     if(rows){map=!$("#cbMap").classList.contains("hidden")?cbMapNow():(old?.map&&old.sheetUrl===url?old.map:guessMap(rows));inc=codesFromRows(rows,map)}
     if(paste)inc=inc.concat(codesFromRows(paste.split("\n").map(l=>[l.split(/\t|,|;/)[0]]),{codeCol:0,tickCol:-1,start:0}));
+    if(rows&&map.tickCol>=0&&map.tickCol===map.codeCol)throw new Error("Cột chứa mã và cột tick đang trùng nhau, hãy chọn lại.");
     if(!old&&!inc.length)throw new Error("Chưa có mã nào. Dán link Google Sheet, chọn file hoặc dán danh sách mã.");
     if((rows||paste)&&!inc.length)throw new Error("Không tìm thấy mã nào. Bấm “Đọc sheet & chọn cột” để chọn đúng cột chứa mã.");
     if(replace&&!inc.length)throw new Error("Muốn thay toàn bộ danh sách thì cần có nguồn mã (link sheet, file hoặc dán mã).");
