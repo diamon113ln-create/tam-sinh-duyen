@@ -307,6 +307,13 @@ aside.side .logo{cursor:pointer}
 .cb-table tr.bad td.c{color:var(--ink-soft);text-decoration:line-through}
 .cb-table tr.bad small{font:11px var(--sans);text-decoration:none}
 .cb-table tr.next td.w{color:var(--crimson);font-weight:700}
+.cb-hot{margin-top:10px;border:1px dashed var(--line);border-radius:12px;padding:8px 12px;font-size:13px}
+.cb-hot>label{margin:0;display:flex;gap:8px;align-items:center;font-weight:600;color:var(--ink);font-size:14px}
+.cb-hot>label input{width:auto}
+.cb-hot details{margin-top:6px}
+.cb-hot summary{cursor:pointer;color:var(--crimson);font-weight:600}
+.cb-hot p{margin:6px 0}
+kbd{font:600 12px ui-monospace,Consolas,monospace;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:0 5px;background:var(--paper)}
 .cb-sheet{margin-top:8px;font-size:13px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .cb-sheet.err{color:var(--crimson)}
 details input,details select,details textarea{box-sizing:border-box}
@@ -587,6 +594,20 @@ button.ask-a:hover{border-color:var(--crimson)}
           <div id="cbMain">
             <div class="cb-stat" id="cbStat"></div>
             <button type="button" class="btn cb-go" id="cbNext">📋 Copy mã tiếp theo</button>
+            <div class="cb-hot">
+              <label><input type="checkbox" id="cbHot"> ⌨️ Bật phím tắt <kbd>Alt</kbd> + <kbd>Shift</kbd> + <kbd>C</kbd> để copy mã tiếp theo</label>
+              <details><summary>Dùng phím tắt khi đang ở tab khác (Vpage, Messenger…)</summary>
+                <p>Trang web chỉ nhận phím khi đang mở. Muốn bấm phím ở tab khác, cài <b>tiện ích Chrome “Phát code nhanh”</b> (làm 1 lần, dùng được cho Chrome, Cốc Cốc, Edge):</p>
+                <ol class="cb-steps">
+                  <li><a href="tien-ich-phat-code.zip" download>⬇️ Tải tiện ích</a> rồi giải nén (chuột phải → Giải nén tất cả).</li>
+                  <li>Mở trang <code>chrome://extensions</code> (Cốc Cốc: <code>coccoc://extensions</code>), bật <b>Chế độ dành cho nhà phát triển</b> ở góc phải.</li>
+                  <li>Bấm <b>Tải tiện ích đã giải nén</b> → chọn thư mục vừa giải nén.</li>
+                  <li>Giữ 1 tab web Tam Sinh Duyên đang mở (ở tab Phát code, chọn đúng đợt code) và tích ô <b>Bật phím tắt</b> ở trên.</li>
+                  <li>Ở bất kỳ tab nào bấm <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>C</kbd> → mã tiếp theo kèm tin nhắn đã nằm sẵn trong bộ nhớ, bấm <kbd>Ctrl</kbd>+<kbd>V</kbd> để dán. Góc màn hình hiện thông báo mã vừa copy và số mã còn lại.</li>
+                </ol>
+                <p>Đổi phím tắt: mở <code>chrome://extensions/shortcuts</code>. Bấm biểu tượng tiện ích trên thanh công cụ cũng copy mã được.</p>
+              </details>
+            </div>
             <p class="hint" style="font-size:13px;color:var(--ink-soft);margin:8px 0 0">Mỗi lần bấm: copy <b>1 mã chưa tick</b> (từ trên xuống) kèm tin nhắn mẫu và tự tick mã đó. Dán (Ctrl+V) vào tin nhắn gửi mem. Cả nhóm dùng chung nên không ai phát trùng mã.</p>
             <div class="cb-last hidden" id="cbLast"><div class="h"><span>✅ Vừa copy mã <b id="cbLastCode"></b></span><button type="button" class="btn ghost small" id="cbRecopy">Copy lại</button><button type="button" class="btn ghost small" id="cbUndo" title="Bỏ tick nếu chưa gửi mã này">Hoàn tác</button></div><pre class="cb-pre" id="cbLastMsg"></pre><div class="cb-sheet hidden" id="cbLastSheet"></div></div>
             <label>Tin nhắn mẫu (xem trước với mã tiếp theo)</label><pre class="cb-prev" id="cbMsgPrev"></pre>
@@ -1612,16 +1633,31 @@ $("#cbHookTest").onclick=async()=>{const hook=$("#cbHook").value.trim(),msg=$("#
   msg.textContent="Đang thử…";msg.style.color="var(--ink-soft)";
   try{const j=await cbHookCall(hook,{secret:$("#cbHookKey").value.trim(),gid:cbGid({sheetUrl:$("#cbUrl").value}),ping:true});msg.textContent=`✅ Kết nối được, sẽ tick vào trang “${j.sheet}”`;msg.style.color="var(--ok)"}
   catch(e){msg.textContent="❌ "+errMsg(e);msg.style.color="var(--crimson)"}};
-$("#cbNext").onclick=async()=>{const b=cbCur();if(!b||cbBusy)return;const x=(b.codes||[]).find(cbAvail);if(!x){toast("Đã phát hết mã");return}
-  const code=x.c,msg=cbMsg(b,code),ok=await cbClip(msg);/* copy first: the browser only allows it right after the click */
+/* take the next free code: mark it (web list is the source of truth), then tick the sheet.
+   copyFn runs BEFORE saving when called from a click/keypress (the browser allows clipboard only right then);
+   without copyFn (Chrome extension shortcut) the caller copies the returned message after it is saved */
+async function cbTake(copyFn){const b=cbCur();if(!b)return {ok:false,error:"Chưa có đợt code nào"};
+  if(cbBusy)return {ok:false,error:"Đang xử lý mã trước, bấm lại sau 1 giây"};
+  const x=(b.codes||[]).find(cbAvail);if(!x){toast("Đã phát hết mã");return {ok:false,error:"Đợt “"+b.name+"” đã phát hết mã"}}
+  const code=x.c,msg=cbMsg(b,code),ok=copyFn?await copyFn(msg):true;
   Object.assign(x,{u:1,t:Date.now(),b:me.id});cbLast={id:b.id,c:code,msg};renderCodes();
-  toast(ok?`Đã copy mã ${code}, dán (Ctrl+V) vào tin nhắn`:"Chưa copy tự động được, hãy bôi đen tin nhắn bên dưới rồi Ctrl+C");
+  if(copyFn)toast(ok?`Đã copy mã ${code}, dán (Ctrl+V) vào tin nhắn`:"Chưa copy tự động được, hãy bôi đen tin nhắn bên dưới rồi Ctrl+C");
   cbBusy=true;$("#cbNext").disabled=true;
   try{const saved=await cbPersist(b.id,codes=>{const y=codes.find(z=>z.c===code);if(!y||y.u)return false;Object.assign(y,{u:1,t:x.t,b:me.id})});
-    if(!saved){cbLast=null;toast(`Mã ${code} vừa được người khác phát! Đừng gửi mã này, bấm lại để lấy mã khác`);await refresh("templates")}
-    else cbSheetLast(b,cbLast)}
-  catch(e){Object.assign(x,{u:0,t:0,b:""});cbLast=null;toast("Không lưu được trạng thái, đừng gửi mã này: "+errMsg(e))}
-  finally{cbBusy=false;renderCodes()}};
+    if(!saved){cbLast=null;toast(`Mã ${code} vừa được người khác phát! Đừng gửi mã này, bấm lại để lấy mã khác`);await refresh("templates");
+      return {ok:false,error:`Mã ${code} vừa được người khác phát. Bấm phím tắt lần nữa để lấy mã khác.`}}
+    cbSheetLast(b,cbLast);if(!copyFn)toast(`⌨️ Phím tắt: đã lấy mã ${code}`);
+    return {ok:true,code,msg,left:cbLeft(b),batch:b.name}}
+  catch(e){Object.assign(x,{u:0,t:0,b:""});cbLast=null;toast("Không lưu được trạng thái, đừng gửi mã này: "+errMsg(e));return {ok:false,error:"Không lưu được: "+errMsg(e)}}
+  finally{cbBusy=false;renderCodes()}}
+$("#cbNext").onclick=()=>cbTake(cbClip);
+/* ---- phím tắt: Alt+Shift+C on this page; from any other tab through the Chrome extension (tien-ich-phat-code) ---- */
+const cbHotOn=()=>{try{return localStorage.getItem("tsd.cbHot")==="1"}catch(e){return false}};
+$("#cbHot").checked=cbHotOn();
+$("#cbHot").onchange=()=>{try{localStorage.setItem("tsd.cbHot",$("#cbHot").checked?"1":"0")}catch(e){}toast($("#cbHot").checked?"Đã bật phím tắt Alt+Shift+C":"Đã tắt phím tắt")};
+document.addEventListener("keydown",e=>{if(!e.altKey||!e.shiftKey||e.ctrlKey||e.metaKey||e.code!=="KeyC"||!me||!cbHotOn())return;e.preventDefault();cbTake(cbClip)});
+/* called by the extension (chrome.scripting, world MAIN); null = not enabled here, so the extension tells the user to tick the box */
+window.tsdHotkeyNext=async()=>{if(!me||!cbHotOn())return null;return cbTake(null)};
 $("#cbRecopy").onclick=async()=>{if(cbLast)toast(await cbClip(cbLast.msg)?"Đã copy lại":"Không copy được")};
 $("#cbUndo").onclick=async()=>{if(!cbLast)return;const {id,c}=cbLast;
   try{await cbPersist(id,codes=>{const y=codes.find(z=>z.c===c);if(!y)return false;Object.assign(y,{u:0,t:0,b:""})});cbLast=null;renderCodes();

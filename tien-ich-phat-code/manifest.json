@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "Tam Sinh Duyên – Phát code nhanh",
+  "version": "1.0",
+  "description": "Bấm Alt+Shift+C ở bất kỳ tab nào để copy mã tiếp theo (kèm tin nhắn) từ tab Phát code của web Tam Sinh Duyên.",
+  "icons": { "64": "icon.png" },
+  "action": { "default_title": "Copy mã tiếp theo (Alt+Shift+C)", "default_icon": "icon.png" },
+  "background": { "service_worker": "background.js" },
+  "permissions": ["scripting", "offscreen", "notifications", "clipboardWrite"],
+  "host_permissions": ["https://tamsinhduyenpanel.io.vn/*", "https://*.github.io/*"],
+  "commands": {
+    "copy-next-code": {
+      "suggested_key": { "default": "Alt+Shift+C" },
+      "description": "Copy mã tiếp theo"
+    }
+  }
+}

@@ -87,6 +87,10 @@ Làm lần lượt từ trên xuống. Tổng thời gian khoảng 30–45 phút
   - Từ đó mỗi lần Copy mã / Hoàn tác / tick tay, web tự đánh "x" (hoặc tích ô checkbox) vào đúng dòng trong sheet. Mã đã phát từ trước: bấm **📗 Tick lên sheet các mã đã phát**.
   - Đổi mật khẩu thì phải copy lại script và **Triển khai → Quản lý các lần triển khai → Chỉnh sửa → Phiên bản mới**.
   - Nếu không cài: dùng **Copy các mã đã phát** hoặc **Tải Excel** để cập nhật sheet bằng tay.
+- **Phím tắt copy mã**: tích ô **⌨️ Bật phím tắt** trong tab Phát code, rồi bấm `Alt + Shift + C` để copy mã tiếp theo.
+  - Muốn bấm phím khi đang ở tab khác (Vpage, Messenger…): cài tiện ích **Phát code nhanh** (1 lần). Trên web bấm **⬇️ Tải tiện ích** → giải nén → mở `chrome://extensions` (Cốc Cốc: `coccoc://extensions`) → bật **Chế độ dành cho nhà phát triển** → **Tải tiện ích đã giải nén** → chọn thư mục `tien-ich-phat-code`.
+  - Giữ 1 tab web đang mở ở Phát code (đúng đợt code, đã tích Bật phím tắt). Ở tab bất kỳ bấm `Alt + Shift + C` rồi `Ctrl + V` để dán. Góc màn hình báo mã vừa copy và số mã còn lại.
+  - Đổi phím: `chrome://extensions/shortcuts`. Sửa file trong thư mục `tien-ich-phat-code` thì chạy lại lệnh đóng gói zip (hoặc nhờ Claude) để nút Tải tiện ích có bản mới.
 
 ## Sửa code sau này
 
