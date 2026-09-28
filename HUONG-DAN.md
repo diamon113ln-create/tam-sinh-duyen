@@ -63,7 +63,8 @@ Sau đó Thành viên / Trưởng nhóm chỉ thấy tên hiển thị của m�
 2. Mỗi dự án (jx2, Phong Vân…) có 3 ô: **Đã fix**, **Đang fix**, **Việc làm tiếp theo**. Ô để trống sẽ hiện là `Trống`.
 3. Bấm **🔄 Cập nhật** để lưu; khung bên phải hiện report đúng mẫu (`# Report: dd/mm/yyyy` …), bấm **📋 Copy report** để gửi.
 - **📥 Lấy từ report trước**: chép "Đang fix" + "Việc làm tiếp theo" của report gần nhất vào ô "Đang fix" còn trống.
-- Thêm / bỏ dự án bằng các nhãn phía trên (dùng chung cả nhóm). Danh sách **Report đã lưu** xem lại được report của mọi người.
+- **👤 Report của**: mỗi tài khoản có report riêng. Bấm tên một tài khoản để xem report của người đó theo ngày (chỉ xem, copy được); dấu ✅ = đã có report ngày đang chọn. Bấm **Tôi** để quay lại sửa report của mình.
+- Thêm / bỏ dự án bằng các nhãn phía trên (dùng chung cả nhóm). **Report đã lưu** bên phải là lịch sử report của tài khoản đang chọn.
 - **✏️ Sửa mẫu report** (nút cạnh Copy report): sửa tiêu đề, thứ tự, chữ khi để trống. Dùng `{ngay}`, `{thu}`; phần giữa `{moi_du_an}` … `{het}` lặp cho từng dự án, trong đó có `{du_an}`, `{da_fix}`, `{dang_fix}`, `{tiep_theo}`. Có nút Khôi phục mẫu gốc.
 - Bảng việc cũ vẫn ở **📋 Bảng việc fanpage**.
 
