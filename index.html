@@ -295,7 +295,7 @@ aside.side .logo{cursor:pointer}
 .rp-proj{border:1px solid var(--line);border-left:4px solid var(--crimson);border-radius:12px;padding:6px 12px 12px;margin-top:12px;background:var(--mist)}
 .rp-proj h4{margin:6px 0 0;font:700 18px var(--serif)}
 .rp-cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-.rp-cols textarea{min-height:110px;font-size:14px}
+.rp-cols textarea{min-height:110px;font-size:14px;overflow:hidden;resize:none}
 .rp-out{white-space:pre-wrap;margin:10px 0 0;font:13px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;background:var(--mist);border:1px solid var(--line);border-radius:10px;padding:10px 12px;max-height:56vh;overflow:auto}
 .rp-list{display:flex;flex-direction:column;gap:6px;max-height:30vh;overflow:auto}
 .rp-it{display:flex;justify-content:space-between;gap:8px;border:1px solid var(--line);border-radius:10px;background:var(--mist);padding:6px 10px;cursor:pointer;font-size:13px;text-align:left}
@@ -1059,7 +1059,7 @@ $("aside.side .logo").onclick=()=>show("home");
 const VIEWS={home:"#viewHome",write:"#viewWrite",week:"#viewWeek",ask:"#viewAsk",codes:"#viewCodes",board:"#viewBoard",templates:"#viewTemplates",sheet:"#viewSheet",formats:"#viewFormats",art:"#viewArt",acts:"#viewActs",accounts:"#viewAccounts"};
 function show(v){if(v==="accounts"&&me.role!=="admin")v="home";
   document.querySelectorAll("#tabs button").forEach(b=>b.setAttribute("aria-current",b.dataset.view===v));
-  if(v==="write")renderSug();if(v==="week")renderWeek();if(v==="codes"&&Date.now()-cbSyncAt>5000)cbSheetSync(cbCur(),true);
+  if(v==="write")renderSug();if(v==="week")renderWeek();if(v==="codes"&&Date.now()-cbSyncAt>5000)cbSheetSync(cbCur(),true);if(v==="board")requestAnimationFrame(()=>rpGrowAll());
   for(const k in VIEWS)$(VIEWS[k]).classList.toggle("hidden",k!==v);scrollTo(0,0)}
 
 /* ---------- home ---------- */
@@ -1912,9 +1912,14 @@ function renderReport(){if(!me)return;$("#rpDate").value=rpDate;const saved=rpMi
     <div><label>➡️ Việc làm tiếp theo</label><textarea data-f="next" placeholder="Để trống = Trống">${esc(r.next)}</textarea></div></div></div>`).join("");
   const now=rpText(rpDate,rpRows);
   $("#rpState").textContent=!saved?"Chưa lưu report ngày này":saved.text!==now?"Có thay đổi chưa lưu – bấm Cập nhật":`Đã lưu lúc ${new Date(saved.updated).toLocaleTimeString("vi-VN")}`;
-  if(!rpViewId)$("#rpOut").textContent=now;renderRpList()}
+  if(!rpViewId)$("#rpOut").textContent=now;renderRpList();rpGrowAll()}
 function renderRpList(){const list=[...reports].sort((a,b)=>b.date.localeCompare(a.date)||(b.updated||0)-(a.updated||0)).slice(0,60);
   $("#rpList").innerHTML=list.length?list.map(r=>`<button type="button" class="rp-it${r.id===rpViewId?" on":""}" data-rpview="${r.id}"><b>${r.date.split("-").reverse().join("/")}</b><span>${esc(nameOf(r.by))}</span></button>`).join(""):'<p class="hint" style="font-size:13px;color:var(--ink-soft)">Chưa có report nào.</p>'}
+/* the boxes grow with their text instead of scrolling (measured only while visible) */
+function rpGrow(el){if(!el.offsetParent)return;el.style.height="auto";el.style.height=Math.max(110,el.scrollHeight+2)+"px"}
+function rpGrowAll(){document.querySelectorAll("#rpForm textarea").forEach(rpGrow)}
+window.addEventListener("resize",rpGrowAll);
+$("#rpForm").addEventListener("input",e=>{if(e.target.matches("textarea"))rpGrow(e.target)});
 $("#rpForm").addEventListener("input",()=>{rpViewId=null;rpSaveDraft();$("#rpOut").textContent=rpText(rpDate,rpCollect());$("#rpState").textContent="Có thay đổi chưa lưu – bấm Cập nhật";renderRpList()});
 $("#rpDate").onchange=()=>{rpViewId=null;rpLoad($("#rpDate").value||ymd(new Date()))};
 $("#rpToday").onclick=()=>{rpViewId=null;rpLoad(ymd(new Date()))};
@@ -1956,7 +1961,7 @@ $("#rpTplForm").onsubmit=async e=>{e.preventDefault();const tpl=$("#rpTpl").valu
 /* sub tabs inside Công việc */
 function boardTab(t){try{localStorage.setItem("tsd.boardTab",t)}catch(e){}
   document.querySelectorAll("#boardTabs button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.bt===t));
-  $("#rpBox").classList.toggle("hidden",t!=="report");$("#kbBox").classList.toggle("hidden",t!=="kanban");$("#newTask").classList.toggle("hidden",t!=="kanban")}
+  $("#rpBox").classList.toggle("hidden",t!=="report");if(t==="report")requestAnimationFrame(rpGrowAll);$("#kbBox").classList.toggle("hidden",t!=="kanban");$("#newTask").classList.toggle("hidden",t!=="kanban")}
 $("#boardTabs").onclick=e=>{const b=e.target.closest("[data-bt]");if(b)boardTab(b.dataset.bt)};
 boardTab((()=>{try{return localStorage.getItem("tsd.boardTab")||"report"}catch(e){return "report"}})());
 
