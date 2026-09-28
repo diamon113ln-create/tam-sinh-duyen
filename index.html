@@ -772,7 +772,7 @@ button.ask-a:hover{border-color:var(--crimson)}
         <div class="two rp-two">
           <div class="panel">
             <div class="rp-accs" id="rpAccs"></div>
-            <div class="row" style="margin:0"><label for="rpDate" style="margin:0">Ngày report</label><input id="rpDate" type="date" style="width:auto"><button type="button" class="btn ghost small" id="rpToday">Hôm nay</button><button type="button" class="btn ghost small" id="rpPrev" title="Chép Đang fix + Việc tiếp theo của report trước vào ô Đang fix (nếu ô còn trống)">📥 Lấy từ report trước</button></div>
+            <div class="row" style="margin:0"><label for="rpDate" style="margin:0">Ngày report</label><input id="rpDate" type="date" style="width:auto"><button type="button" class="btn ghost small" id="rpToday" title="Ngày report mặc định = hôm nay + 1">Ngày mai</button><button type="button" class="btn ghost small" id="rpPrev" title="Chép Đang fix + Việc tiếp theo của report trước vào ô Đang fix (nếu ô còn trống)">📥 Lấy từ report trước</button></div>
             <div class="rp-chips" id="rpProjChips"></div>
             <div id="rpForm"></div>
             <div class="row"><button type="button" class="btn" id="rpSave">🔄 Cập nhật</button><span class="hint" id="rpState" style="font-size:13px;color:var(--ink-soft)"></span></div>
@@ -1910,7 +1910,9 @@ $("#cbDel").onclick=async()=>{if(!cbEditing||!confirm("Xóa đợt code này? Tr
 
 /* ---------- Report ngày (tab Công việc): per project Đã fix / Đang fix / Việc làm tiếp theo → markdown report ---------- */
 const RP_DEFAULT=["jx2","Phong Vân"],RP_DRAFT="tsd.rpDraft";
-let rpDate=ymd(new Date()),rpRows=[],rpAcc=null;/* rpAcc: whose report is shown; null = mine (editable), others are read-only */
+/* the report is dated the next day (written today, read at tomorrow's check-in): today 29 → report 30 */
+const rpDefault=()=>ymd(addDays(new Date(),1));
+let rpDate=rpDefault(),rpRows=[],rpAcc=null;/* rpAcc: whose report is shown; null = mine (editable), others are read-only */
 const rpIsMe=()=>!rpAcc||rpAcc===me?.id;
 function rpOf(acc,date){return reports.find(r=>r.by===acc&&r.date===date)}
 function rpProjects(){return (reportCfg?.projects?.length?reportCfg.projects:RP_DEFAULT).slice()}
@@ -1975,8 +1977,8 @@ function rpGrowAll(){document.querySelectorAll("#rpForm textarea").forEach(rpGro
 window.addEventListener("resize",rpGrowAll);
 $("#rpForm").addEventListener("input",e=>{if(e.target.matches("textarea"))rpGrow(e.target)});
 $("#rpForm").addEventListener("input",()=>{if(!rpIsMe())return;rpSaveDraft();$("#rpOut").textContent=rpText(rpDate,rpCollect());$("#rpState").textContent="Có thay đổi chưa lưu – bấm Cập nhật";renderRpList()});
-$("#rpDate").onchange=()=>rpLoad($("#rpDate").value||ymd(new Date()));
-$("#rpToday").onclick=()=>rpLoad(ymd(new Date()));
+$("#rpDate").onchange=()=>rpLoad($("#rpDate").value||rpDefault());
+$("#rpToday").onclick=()=>rpLoad(rpDefault());
 $("#rpAccs").onclick=async e=>{const hide=me.role==="admin"&&e.target.closest("[data-rphide]");
   if(hide){const id=hide.dataset.rphide;if(!confirm(`Ẩn ${nameOf(id)} khỏi mục Report của cả nhóm?`))return;if(rpAcc===id)rpAcc=null;await rpSaveCfg({hidden:[...new Set([...rpHidden(),id])]});toast(`Đã ẩn ${nameOf(id)}`);return}
   if(me.role==="admin"&&e.target.closest("[data-rpshow]")){const hid=rpHidden();if(!hid.length)return;
