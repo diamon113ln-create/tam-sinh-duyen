@@ -772,7 +772,7 @@ button.ask-a:hover{border-color:var(--crimson)}
         <div class="two rp-two">
           <div class="panel">
             <div class="rp-accs" id="rpAccs"></div>
-            <div class="row" style="margin:0"><label for="rpDate" style="margin:0">Ngày report</label><input id="rpDate" type="date" style="width:auto"><button type="button" class="btn ghost small" id="rpToday" title="Ngày report mặc định = hôm nay + 1">Ngày mai</button><button type="button" class="btn ghost small" id="rpPrev" title="Chép Đang fix + Việc tiếp theo của report trước vào ô Đang fix (nếu ô còn trống)">📥 Lấy từ report trước</button></div>
+            <div class="row" style="margin:0"><label for="rpDate" style="margin:0">Ngày report</label><input id="rpDate" type="date" style="width:auto"><button type="button" class="btn ghost small" id="rpToday">Hôm nay</button><button type="button" class="btn ghost small" id="rpPrev" title="Chép Đang fix + Việc tiếp theo của report trước vào ô Đang fix (nếu ô còn trống)">📥 Lấy từ report trước</button></div>
             <div class="rp-chips" id="rpProjChips"></div>
             <div id="rpForm"></div>
             <div class="row"><button type="button" class="btn" id="rpSave">🔄 Cập nhật</button><span class="hint" id="rpState" style="font-size:13px;color:var(--ink-soft)"></span></div>
@@ -881,7 +881,7 @@ button.ask-a:hover{border-color:var(--crimson)}
     <div class="dlg-body">
       <p class="hint" style="font-size:13px;color:var(--ink-soft);margin:10px 0 0">Mẫu dùng chung cho cả nhóm. Các chữ trong ngoặc nhọn được tự điền:</p>
       <ul class="rp-help">
-        <li><code>{ngay}</code> ngày report (28/09/2026) · <code>{thu}</code> thứ (Thứ Hai)</li>
+        <li><code>{ngay}</code> ngày ghi trong report = ngày report + 1 (report ngày 29/09 ghi 30/09) · <code>{thu}</code> thứ của ngày đó</li>
         <li><code>{moi_du_an}</code> … <code>{het}</code>: phần ở giữa được lặp lại cho <b>từng dự án</b></li>
         <li>Trong phần lặp: <code>{du_an}</code> tên dự án · <code>{da_fix}</code> Đã fix · <code>{dang_fix}</code> Đang fix · <code>{tiep_theo}</code> Việc làm tiếp theo</li>
       </ul>
@@ -1910,8 +1910,8 @@ $("#cbDel").onclick=async()=>{if(!cbEditing||!confirm("Xóa đợt code này? Tr
 
 /* ---------- Report ngày (tab Công việc): per project Đã fix / Đang fix / Việc làm tiếp theo → markdown report ---------- */
 const RP_DEFAULT=["jx2","Phong Vân"],RP_DRAFT="tsd.rpDraft";
-/* the report is dated the next day (written today, read at tomorrow's check-in): today 29 → report 30 */
-const rpDefault=()=>ymd(addDays(new Date(),1));
+/* the report is filed under today's date; the date written inside it ({ngay}, {thu}) is the next day: today 29 → "# Report: 30/09" */
+const rpDefault=()=>ymd(new Date());
 let rpDate=rpDefault(),rpRows=[],rpAcc=null;/* rpAcc: whose report is shown; null = mine (editable), others are read-only */
 const rpIsMe=()=>!rpAcc||rpAcc===me?.id;
 function rpOf(acc,date){return reports.find(r=>r.by===acc&&r.date===date)}
@@ -1947,7 +1947,8 @@ const rpBody=(t,empty)=>{const v=String(t||"").replace(/\r/g,"").split("\n").map
 function rpText(date,rows,tpl,empty){tpl=(tpl||rpTplNow()).replace(/\r/g,"");empty=empty??rpEmptyNow();
   const one=(b,r)=>b.replace(/\{du_an\}/g,r.name).replace(/\{da_fix\}/g,rpBody(r.fixed,empty)).replace(/\{dang_fix\}/g,rpBody(r.fixing,empty)).replace(/\{tiep_theo\}/g,rpBody(r.next,empty));
   const out=tpl.replace(/\{moi_du_an\}\n?([\s\S]*?)\{het\}\n?/g,(_,b)=>rows.map(r=>one(b,r)).join(""));
-  return out.replace(/\{ngay\}/g,date.split("-").reverse().join("/")).replace(/\{thu\}/g,RP_THU[new Date(date+"T00:00").getDay()]).replace(/\s+$/,"")}
+  const next=addDays(new Date(date+"T00:00"),1);
+  return out.replace(/\{ngay\}/g,ymd(next).split("-").reverse().join("/")).replace(/\{thu\}/g,RP_THU[next.getDay()]).replace(/\s+$/,"")}
 function renderRpAccs(){const list=[...accounts].sort((a,b)=>(b.id===me.id)-(a.id===me.id)||String(a.name).localeCompare(String(b.name),"vi"));
   if(!list.some(a=>a.id===me.id))list.unshift({id:me.id,name:me.name});const cur=rpAcc||me.id;
   /* accounts hidden from the report bar (shared list, only Admin sees and manages it); your own button always shows */

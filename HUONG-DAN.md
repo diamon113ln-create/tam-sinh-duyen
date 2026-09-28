@@ -59,7 +59,7 @@ Sau đó Thành viên / Trưởng nhóm chỉ thấy tên hiển thị của m�
 
 ## Report ngày (tab Công việc)
 
-1. Tab **Công việc → 📝 Report ngày**: chọn ngày (mặc định là **ngày mai** = hôm nay + 1, ví dụ hôm nay 29 thì report ngày 30; nút **Ngày mai** để quay về ngày mặc định).
+1. Tab **Công việc → 📝 Report ngày**: chọn ngày (mặc định hôm nay). Nội dung report tự ghi **ngày hôm sau**: report ngày 29/09 sẽ có dòng `# Report: 30/09/…`.
 2. Mỗi dự án (jx2, Phong Vân…) có 3 ô: **Đã fix**, **Đang fix**, **Việc làm tiếp theo**. Ô để trống sẽ hiện là `Trống`.
 3. Bấm **🔄 Cập nhật** để lưu; khung bên phải hiện report đúng mẫu (`# Report: dd/mm/yyyy` …), bấm **📋 Copy report** để gửi.
 - **📥 Lấy từ report trước**: chép "Đang fix" + "Việc làm tiếp theo" của report gần nhất vào ô "Đang fix" còn trống.
