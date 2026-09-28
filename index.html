@@ -1920,8 +1920,8 @@ function rpText(date,rows,tpl,empty){tpl=(tpl||rpTplNow()).replace(/\r/g,"");emp
   return out.replace(/\{ngay\}/g,date.split("-").reverse().join("/")).replace(/\{thu\}/g,RP_THU[new Date(date+"T00:00").getDay()]).replace(/\s+$/,"")}
 function renderRpAccs(){const list=[...accounts].sort((a,b)=>(b.id===me.id)-(a.id===me.id)||String(a.name).localeCompare(String(b.name),"vi"));
   if(!list.some(a=>a.id===me.id))list.unshift({id:me.id,name:me.name});const cur=rpAcc||me.id;
-  /* accounts hidden from the report bar (shared list, Admin / Trưởng nhóm manage it); your own button always shows */
-  const hid=rpHidden(),shown=list.filter(a=>a.id===me.id||!hid.includes(a.id)),nHid=list.length-shown.length,edit=can("delete");
+  /* accounts hidden from the report bar (shared list, only Admin sees and manages it); your own button always shows */
+  const hid=rpHidden(),shown=list.filter(a=>a.id===me.id||!hid.includes(a.id)),nHid=list.length-shown.length,edit=me.role==="admin";
   $("#rpAccs").innerHTML='<span class="rp-accs-l">👤 Report của:</span>'+shown.map(a=>`<span class="rp-acc-w"><button type="button" class="rp-acc" data-rpacc="${esc(a.id)}" aria-pressed="${a.id===cur}" title="${rpOf(a.id,rpDate)?"Đã có report ngày này":"Chưa có report ngày này"}">${rpOf(a.id,rpDate)?"✅ ":""}${a.id===me.id?"Tôi ("+esc(a.name)+")":esc(a.name)}</button>${edit&&a.id!==me.id?`<i data-rphide="${esc(a.id)}" title="Ẩn ${esc(a.name)} khỏi Report">×</i>`:""}</span>`).join("")
     +(edit&&nHid?`<button type="button" class="rp-acc more" data-rpshow="1" title="Hiện lại tài khoản đã ẩn">👁 Đã ẩn ${nHid}</button>`:"")}
 function rpHidden(){return Array.isArray(reportCfg?.hidden)?reportCfg.hidden:[]}
@@ -1949,9 +1949,9 @@ $("#rpForm").addEventListener("input",e=>{if(e.target.matches("textarea"))rpGrow
 $("#rpForm").addEventListener("input",()=>{if(!rpIsMe())return;rpSaveDraft();$("#rpOut").textContent=rpText(rpDate,rpCollect());$("#rpState").textContent="Có thay đổi chưa lưu – bấm Cập nhật";renderRpList()});
 $("#rpDate").onchange=()=>rpLoad($("#rpDate").value||ymd(new Date()));
 $("#rpToday").onclick=()=>rpLoad(ymd(new Date()));
-$("#rpAccs").onclick=async e=>{const hide=e.target.closest("[data-rphide]");
+$("#rpAccs").onclick=async e=>{const hide=me.role==="admin"&&e.target.closest("[data-rphide]");
   if(hide){const id=hide.dataset.rphide;if(!confirm(`Ẩn ${nameOf(id)} khỏi mục Report của cả nhóm?`))return;if(rpAcc===id)rpAcc=null;await rpSaveCfg({hidden:[...new Set([...rpHidden(),id])]});toast(`Đã ẩn ${nameOf(id)}`);return}
-  if(e.target.closest("[data-rpshow]")){const hid=rpHidden();if(!hid.length)return;
+  if(me.role==="admin"&&e.target.closest("[data-rpshow]")){const hid=rpHidden();if(!hid.length)return;
     const pick=prompt("Nhập số thứ tự tài khoản muốn hiện lại (bỏ trống = hiện lại tất cả):\n"+hid.map((id,i)=>`${i+1}. ${nameOf(id)}`).join("\n"),"");if(pick===null)return;
     const i=parseInt(pick)-1,keep=pick.trim()===""?[]:hid.filter((_,k)=>k!==i);await rpSaveCfg({hidden:keep});toast("Đã hiện lại");return}
   const b=e.target.closest("[data-rpacc]");if(!b)return;if(rpIsMe())rpSaveDraft();rpAcc=b.dataset.rpacc===me.id?null:b.dataset.rpacc;rpLoad(rpDate)};
