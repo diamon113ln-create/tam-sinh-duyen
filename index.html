@@ -300,6 +300,11 @@ aside.side .logo{cursor:pointer}
 .rp-list{display:flex;flex-direction:column;gap:6px;max-height:30vh;overflow:auto}
 .rp-it{display:flex;justify-content:space-between;gap:8px;border:1px solid var(--line);border-radius:10px;background:var(--mist);padding:6px 10px;cursor:pointer;font-size:13px;text-align:left}
 .rp-it:hover,.rp-it.on{border-color:var(--crimson)}
+.rp-help{margin:6px 0 0;padding-left:18px;font-size:13px;line-height:1.8}
+.rp-help code,.rp-tpl-two code{background:var(--mist);border:1px solid var(--line);border-radius:5px;padding:0 4px;font-size:12px}
+.rp-tpl-two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+#rpTpl{min-height:300px;font:13px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace}
+.rp-tpl-two .rp-out{max-height:390px;margin-top:0}
 .rp-it span{color:var(--ink-soft)}
 /* Phát code */
 .cb-two{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
@@ -396,6 +401,7 @@ button.ask-a:hover{border-color:var(--crimson)}
   .cb-two{grid-template-columns:1fr}
   .rp-two{grid-template-columns:1fr}
   .rp-cols{grid-template-columns:1fr}
+  .rp-tpl-two{grid-template-columns:1fr}
   .rp-right{position:static}
   .ask-right{position:static}
   #askSent{min-height:160px}
@@ -741,7 +747,7 @@ button.ask-a:hover{border-color:var(--crimson)}
             <div class="row"><button type="button" class="btn" id="rpSave">🔄 Cập nhật</button><span class="hint" id="rpState" style="font-size:13px;color:var(--ink-soft)"></span></div>
           </div>
           <div class="rp-right">
-            <div class="panel"><div class="row" style="margin:0"><h4 style="margin:0;font:700 17px var(--serif);flex:1">Report</h4><button type="button" class="btn small" id="rpCopy">📋 Copy report</button></div>
+            <div class="panel"><div class="row" style="margin:0"><h4 style="margin:0;font:700 17px var(--serif);flex:1">Report</h4><button type="button" class="btn ghost small" id="rpTplEdit" title="Sửa mẫu report">✏️</button><button type="button" class="btn small" id="rpCopy">📋 Copy report</button></div>
               <pre class="rp-out" id="rpOut"></pre></div>
             <div class="panel"><h4 style="margin:0 0 6px;font:700 15px var(--serif)">Report đã lưu</h4><div class="rp-list" id="rpList"></div></div>
           </div>
@@ -836,6 +842,26 @@ button.ask-a:hover{border-color:var(--crimson)}
   <div class="v-body"><button class="v-nav v-prev" id="vPrev" aria-label="Ảnh trước">‹</button><img id="vImg" alt=""><button class="v-nav v-next" id="vNext" aria-label="Ảnh sau">›</button></div>
   <div class="v-bar"><b id="vName"></b><button class="btn small" id="vCopy">Copy ảnh</button><button class="btn ghost small" id="vDl">Tải</button><a class="btn ghost small" id="vOpen" target="_blank" rel="noopener">Mở tab mới</a><button class="btn ghost small" id="vClose">Đóng</button>
     <span class="hint">Mẹo: chuột phải vào ảnh → Sao chép hình ảnh. Phím ← → để chuyển ảnh, Esc để đóng.</span></div>
+</dialog>
+
+<dialog id="rpTplDlg" style="width:min(760px,96vw)">
+  <form id="rpTplForm">
+    <div class="dlg-head"><h3>✏️ Sửa mẫu report</h3><button type="button" class="btn ghost small" id="rpTplClose">Đóng</button></div>
+    <div class="dlg-body">
+      <p class="hint" style="font-size:13px;color:var(--ink-soft);margin:10px 0 0">Mẫu dùng chung cho cả nhóm. Các chữ trong ngoặc nhọn được tự điền:</p>
+      <ul class="rp-help">
+        <li><code>{ngay}</code> ngày report (28/09/2026) · <code>{thu}</code> thứ (Thứ Hai)</li>
+        <li><code>{moi_du_an}</code> … <code>{het}</code>: phần ở giữa được lặp lại cho <b>từng dự án</b></li>
+        <li>Trong phần lặp: <code>{du_an}</code> tên dự án · <code>{da_fix}</code> Đã fix · <code>{dang_fix}</code> Đang fix · <code>{tiep_theo}</code> Việc làm tiếp theo</li>
+      </ul>
+      <div class="rp-tpl-two">
+        <div><label for="rpTpl">Mẫu</label><textarea id="rpTpl" spellcheck="false"></textarea>
+          <label for="rpEmpty">Chữ hiện khi ô để trống</label><input id="rpEmpty" placeholder="Trống"></div>
+        <div><label>Xem trước (với nội dung đang nhập)</label><pre class="rp-out" id="rpTplPrev"></pre></div>
+      </div>
+      <div class="row"><button class="btn">Lưu mẫu</button><button type="button" class="btn ghost" id="rpTplReset">Khôi phục mẫu gốc</button><button type="button" class="btn ghost" id="rpTplCancel">Hủy</button></div>
+    </div>
+  </form>
 </dialog>
 
 <dialog id="cbDlg" style="width:min(640px,96vw)">
@@ -1856,10 +1882,28 @@ function rpCollect(){return [...document.querySelectorAll("#rpForm .rp-proj")].m
 /* rows for a date: saved report > unsaved draft of that date > empty; projects follow the shared list, keeping text of removed ones out */
 function rpLoad(date){rpDate=date;const saved=rpMine(date),d=rpDraft(),src=d&&d.date===date?d.rows:saved?.projects||[];
   rpRows=rpProjects().map(n=>({name:n,fixed:"",fixing:"",next:"",...(src.find(x=>x.name===n)||{})}));renderReport()}
-const rpBody=t=>{const v=String(t||"").replace(/\r/g,"").split("\n").map(x=>x.replace(/\s+$/,"")).join("\n").trim();return v||"Trống"};
-function rpText(date,rows){const d=date.split("-").reverse().join("/"),out=[`# Report: ${d}`,"## Việc đã hoàn thành hôm nay:"];
-  for(const r of rows)out.push(`### ${r.name}`,"**Đã fix**",rpBody(r.fixed),"**Đang fix**",rpBody(r.fixing));
-  out.push("## Việc làm tiếp theo:");for(const r of rows)out.push(`### ${r.name}`,rpBody(r.next));return out.join("\n")}
+/* the report layout is a shared, editable template; {moi_du_an} … {het} repeats once per project */
+const RP_TPL=`# Report: {ngay}
+## Việc đã hoàn thành hôm nay:
+{moi_du_an}
+### {du_an}
+**Đã fix**
+{da_fix}
+**Đang fix**
+{dang_fix}
+{het}
+## Việc làm tiếp theo:
+{moi_du_an}
+### {du_an}
+{tiep_theo}
+{het}`;
+const RP_THU=["Chủ Nhật","Thứ Hai","Thứ Ba","Thứ Tư","Thứ Năm","Thứ Sáu","Thứ Bảy"];
+const rpTplNow=()=>reportCfg?.tpl||RP_TPL,rpEmptyNow=()=>reportCfg?.empty??"Trống";
+const rpBody=(t,empty)=>{const v=String(t||"").replace(/\r/g,"").split("\n").map(x=>x.replace(/\s+$/,"")).join("\n").trim();return v||(empty??rpEmptyNow())};
+function rpText(date,rows,tpl,empty){tpl=(tpl||rpTplNow()).replace(/\r/g,"");empty=empty??rpEmptyNow();
+  const one=(b,r)=>b.replace(/\{du_an\}/g,r.name).replace(/\{da_fix\}/g,rpBody(r.fixed,empty)).replace(/\{dang_fix\}/g,rpBody(r.fixing,empty)).replace(/\{tiep_theo\}/g,rpBody(r.next,empty));
+  const out=tpl.replace(/\{moi_du_an\}\n?([\s\S]*?)\{het\}\n?/g,(_,b)=>rows.map(r=>one(b,r)).join(""));
+  return out.replace(/\{ngay\}/g,date.split("-").reverse().join("/")).replace(/\{thu\}/g,RP_THU[new Date(date+"T00:00").getDay()]).replace(/\s+$/,"")}
 function renderReport(){if(!me)return;$("#rpDate").value=rpDate;const saved=rpMine(rpDate);
   $("#rpProjChips").innerHTML=rpProjects().map(n=>`<span class="rp-chip">${esc(n)}${can("delete")?`<i data-rpdel="${esc(n)}" title="Bỏ dự án">×</i>`:""}</span>`).join("")+'<button type="button" class="rp-chip add" id="rpAddProj">+ Thêm dự án</button>';
   $("#rpForm").innerHTML=rpRows.map(r=>`<div class="rp-proj" data-name="${esc(r.name)}"><h4>${esc(r.name)}</h4>
@@ -1893,12 +1937,22 @@ $("#rpList").onclick=e=>{const b=e.target.closest("[data-rpview]");if(!b)return;
 $("#rpProjChips").onclick=async e=>{const del=e.target.closest("[data-rpdel]");const list=rpProjects();
   if(del){if(!confirm(`Bỏ dự án “${del.dataset.rpdel}” khỏi report? (Report đã lưu không bị ảnh hưởng)`))return;await rpSaveCfg(list.filter(x=>x!==del.dataset.rpdel));return}
   if(e.target.id==="rpAddProj"){const n=prompt("Tên dự án mới:");if(!n?.trim())return;if(list.includes(n.trim())){toast("Dự án đã có");return}await rpSaveCfg([...list,n.trim()])}};
-async function rpSaveCfg(projects){rpSaveDraft();const data={kind:"reportcfg",projects,updated:Date.now(),by:me.id};
+async function rpSaveCfg(patch){rpSaveDraft();if(Array.isArray(patch))patch={projects:patch};
+  const data={kind:"reportcfg",projects:rpProjects(),tpl:reportCfg?.tpl||"",empty:reportCfg?.empty??"Trống",...patch,updated:Date.now(),by:me.id};
   try{if(reportCfg?.id)await db.doc("templates/"+reportCfg.id).set(data);else await db.collection("templates").add(data);reportCfg={...reportCfg,...data};rpLoad(rpDate)}
   catch(e){toast("Không lưu được: "+errMsg(e))}}
 /* after data reloads: keep what is being typed, only refresh the saved state / list / project set */
 function rpRefresh(){if(!me)return;if(!rpRows.length||document.activeElement?.closest?.("#rpForm")){if(!rpRows.length)rpLoad(rpDate);else renderRpList();return}
   const cur=rpCollect();rpRows=rpProjects().map(n=>({name:n,fixed:"",fixing:"",next:"",...(cur.find(x=>x.name===n)||rpMine(rpDate)?.projects?.find(x=>x.name===n)||{})}));renderReport()}
+/* ✏️ edit the shared report template */
+function rpTplPrev(){$("#rpTplPrev").textContent=rpText(rpDate,rpCollect(),$("#rpTpl").value||RP_TPL,$("#rpEmpty").value)}
+$("#rpTplEdit").onclick=()=>{$("#rpTpl").value=rpTplNow();$("#rpEmpty").value=rpEmptyNow();rpTplPrev();$("#rpTplDlg").showModal()};
+$("#rpTpl").oninput=$("#rpEmpty").oninput=rpTplPrev;
+$("#rpTplReset").onclick=()=>{$("#rpTpl").value=RP_TPL;$("#rpEmpty").value="Trống";rpTplPrev()};
+$("#rpTplClose").onclick=$("#rpTplCancel").onclick=()=>$("#rpTplDlg").close();
+$("#rpTplForm").onsubmit=async e=>{e.preventDefault();const tpl=$("#rpTpl").value.replace(/\r/g,"").trim();
+  if(/\{moi_du_an\}/.test(tpl)!==/\{het\}/.test(tpl)){toast("Mỗi {moi_du_an} cần có {het} đi kèm");return}
+  await rpSaveCfg({tpl:tpl===RP_TPL?"":tpl,empty:$("#rpEmpty").value});$("#rpTplDlg").close();toast("Đã lưu mẫu report")};
 /* sub tabs inside Công việc */
 function boardTab(t){try{localStorage.setItem("tsd.boardTab",t)}catch(e){}
   document.querySelectorAll("#boardTabs button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.bt===t));
