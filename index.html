@@ -304,6 +304,9 @@ aside.side .logo{cursor:pointer}
 .rp-accs-l{font-size:13px;font-weight:700;color:var(--ink-soft);margin-right:2px}
 .rp-acc{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:5px 12px;font-size:13px;font-weight:600;cursor:pointer;color:var(--ink)}
 .rp-acc:hover{border-color:var(--crimson)}
+.rp-acc-w{display:inline-flex;align-items:center}
+.rp-acc-w i{font-style:normal;cursor:pointer;opacity:.45;padding:0 4px;font-size:15px}.rp-acc-w i:hover{opacity:1;color:var(--crimson)}
+.rp-acc.more{border-style:dashed;color:var(--ink-soft);font-weight:500}
 .rp-acc[aria-pressed="true"]{background:var(--crimson);border-color:var(--crimson);color:#fff}
 #rpForm.ro textarea{background:var(--mist);cursor:default}
 .rp-help{margin:6px 0 0;padding-left:18px;font-size:13px;line-height:1.8}
@@ -1917,7 +1920,11 @@ function rpText(date,rows,tpl,empty){tpl=(tpl||rpTplNow()).replace(/\r/g,"");emp
   return out.replace(/\{ngay\}/g,date.split("-").reverse().join("/")).replace(/\{thu\}/g,RP_THU[new Date(date+"T00:00").getDay()]).replace(/\s+$/,"")}
 function renderRpAccs(){const list=[...accounts].sort((a,b)=>(b.id===me.id)-(a.id===me.id)||String(a.name).localeCompare(String(b.name),"vi"));
   if(!list.some(a=>a.id===me.id))list.unshift({id:me.id,name:me.name});const cur=rpAcc||me.id;
-  $("#rpAccs").innerHTML='<span class="rp-accs-l">👤 Report của:</span>'+list.map(a=>`<button type="button" class="rp-acc" data-rpacc="${esc(a.id)}" aria-pressed="${a.id===cur}" title="${rpOf(a.id,rpDate)?"Đã có report ngày này":"Chưa có report ngày này"}">${rpOf(a.id,rpDate)?"✅ ":""}${a.id===me.id?"Tôi ("+esc(a.name)+")":esc(a.name)}</button>`).join("")}
+  /* accounts hidden from the report bar (shared list, Admin / Trưởng nhóm manage it); your own button always shows */
+  const hid=rpHidden(),shown=list.filter(a=>a.id===me.id||!hid.includes(a.id)),nHid=list.length-shown.length,edit=can("delete");
+  $("#rpAccs").innerHTML='<span class="rp-accs-l">👤 Report của:</span>'+shown.map(a=>`<span class="rp-acc-w"><button type="button" class="rp-acc" data-rpacc="${esc(a.id)}" aria-pressed="${a.id===cur}" title="${rpOf(a.id,rpDate)?"Đã có report ngày này":"Chưa có report ngày này"}">${rpOf(a.id,rpDate)?"✅ ":""}${a.id===me.id?"Tôi ("+esc(a.name)+")":esc(a.name)}</button>${edit&&a.id!==me.id?`<i data-rphide="${esc(a.id)}" title="Ẩn ${esc(a.name)} khỏi Report">×</i>`:""}</span>`).join("")
+    +(edit&&nHid?`<button type="button" class="rp-acc more" data-rpshow="1" title="Hiện lại tài khoản đã ẩn">👁 Đã ẩn ${nHid}</button>`:"")}
+function rpHidden(){return Array.isArray(reportCfg?.hidden)?reportCfg.hidden:[]}
 function renderReport(){if(!me)return;$("#rpDate").value=rpDate;renderRpAccs();const mine=rpIsMe(),saved=mine?rpMine(rpDate):rpOf(rpAcc,rpDate);
   ["#rpSave","#rpPrev","#rpProjChips"].forEach(id=>$(id).classList.toggle("hidden",!mine));$("#rpForm").classList.toggle("ro",!mine);
   $("#rpProjChips").innerHTML=rpProjects().map(n=>`<span class="rp-chip">${esc(n)}${can("delete")?`<i data-rpdel="${esc(n)}" title="Bỏ dự án">×</i>`:""}</span>`).join("")+'<button type="button" class="rp-chip add" id="rpAddProj">+ Thêm dự án</button>';
@@ -1942,7 +1949,12 @@ $("#rpForm").addEventListener("input",e=>{if(e.target.matches("textarea"))rpGrow
 $("#rpForm").addEventListener("input",()=>{if(!rpIsMe())return;rpSaveDraft();$("#rpOut").textContent=rpText(rpDate,rpCollect());$("#rpState").textContent="Có thay đổi chưa lưu – bấm Cập nhật";renderRpList()});
 $("#rpDate").onchange=()=>rpLoad($("#rpDate").value||ymd(new Date()));
 $("#rpToday").onclick=()=>rpLoad(ymd(new Date()));
-$("#rpAccs").onclick=e=>{const b=e.target.closest("[data-rpacc]");if(!b)return;if(rpIsMe())rpSaveDraft();rpAcc=b.dataset.rpacc===me.id?null:b.dataset.rpacc;rpLoad(rpDate)};
+$("#rpAccs").onclick=async e=>{const hide=e.target.closest("[data-rphide]");
+  if(hide){const id=hide.dataset.rphide;if(!confirm(`Ẩn ${nameOf(id)} khỏi mục Report của cả nhóm?`))return;if(rpAcc===id)rpAcc=null;await rpSaveCfg({hidden:[...new Set([...rpHidden(),id])]});toast(`Đã ẩn ${nameOf(id)}`);return}
+  if(e.target.closest("[data-rpshow]")){const hid=rpHidden();if(!hid.length)return;
+    const pick=prompt("Nhập số thứ tự tài khoản muốn hiện lại (bỏ trống = hiện lại tất cả):\n"+hid.map((id,i)=>`${i+1}. ${nameOf(id)}`).join("\n"),"");if(pick===null)return;
+    const i=parseInt(pick)-1,keep=pick.trim()===""?[]:hid.filter((_,k)=>k!==i);await rpSaveCfg({hidden:keep});toast("Đã hiện lại");return}
+  const b=e.target.closest("[data-rpacc]");if(!b)return;if(rpIsMe())rpSaveDraft();rpAcc=b.dataset.rpacc===me.id?null:b.dataset.rpacc;rpLoad(rpDate)};
 $("#rpSave").onclick=async()=>{const rows=rpCollect(),text=rpText(rpDate,rows),old=rpMine(rpDate),btn=$("#rpSave");if(!rpIsMe())return;$("#rpOut").textContent=text;btn.disabled=true;
   const data={kind:"report",date:rpDate,by:me.id,projects:rows,text,updated:Date.now()};
   try{if(old)await db.doc("templates/"+old.id).set(data);else await db.collection("templates").add(data);
@@ -1961,7 +1973,7 @@ $("#rpProjChips").onclick=async e=>{const del=e.target.closest("[data-rpdel]");c
   if(del){if(!confirm(`Bỏ dự án “${del.dataset.rpdel}” khỏi report? (Report đã lưu không bị ảnh hưởng)`))return;await rpSaveCfg(list.filter(x=>x!==del.dataset.rpdel));return}
   if(e.target.id==="rpAddProj"){const n=prompt("Tên dự án mới:");if(!n?.trim())return;if(list.includes(n.trim())){toast("Dự án đã có");return}await rpSaveCfg([...list,n.trim()])}};
 async function rpSaveCfg(patch){rpSaveDraft();if(Array.isArray(patch))patch={projects:patch};
-  const data={kind:"reportcfg",projects:rpProjects(),tpl:reportCfg?.tpl||"",empty:reportCfg?.empty??"Trống",...patch,updated:Date.now(),by:me.id};
+  const data={kind:"reportcfg",projects:rpProjects(),tpl:reportCfg?.tpl||"",empty:reportCfg?.empty??"Trống",hidden:rpHidden(),...patch,updated:Date.now(),by:me.id};
   try{if(reportCfg?.id)await db.doc("templates/"+reportCfg.id).set(data);else await db.collection("templates").add(data);reportCfg={...reportCfg,...data};rpLoad(rpDate)}
   catch(e){toast("Không lưu được: "+errMsg(e))}}
 /* after data reloads: keep what is being typed, only refresh the saved state / list / project set */
