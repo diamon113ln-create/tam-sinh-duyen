@@ -57,6 +57,15 @@ Làm lần lượt từ trên xuống. Tổng thời gian khoảng 30–45 phút
 Supabase → **SQL Editor → New query**, dán toàn bộ file `supabase/chi-admin-xem-tai-khoan.sql` → **Run**.
 Sau đó Thành viên / Trưởng nhóm chỉ thấy tên hiển thị của mọi người (để giao việc), không xem được tên đăng nhập và vai trò; tab **Tài khoản** chỉ Admin thấy.
 
+## Report ngày (tab Công việc)
+
+1. Tab **Công việc → 📝 Report ngày**: chọn ngày (mặc định hôm nay).
+2. Mỗi dự án (jx2, Phong Vân…) có 3 ô: **Đã fix**, **Đang fix**, **Việc làm tiếp theo**. Ô để trống sẽ hiện là `Trống`.
+3. Bấm **🔄 Cập nhật** để lưu; khung bên phải hiện report đúng mẫu (`# Report: dd/mm/yyyy` …), bấm **📋 Copy report** để gửi.
+- **📥 Lấy từ report trước**: chép "Đang fix" + "Việc làm tiếp theo" của report gần nhất vào ô "Đang fix" còn trống.
+- Thêm / bỏ dự án bằng các nhãn phía trên (dùng chung cả nhóm). Danh sách **Report đã lưu** xem lại được report của mọi người.
+- Bảng việc cũ vẫn ở **📋 Bảng việc fanpage**.
+
 ## Lịch tuần (viết bài theo lịch)
 
 1. Vào tab **Lịch tuần** → **Thêm hoạt động** (hoặc bấm **+** ở ngày muốn thêm).

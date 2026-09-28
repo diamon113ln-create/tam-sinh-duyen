@@ -282,6 +282,25 @@ aside.side .logo{cursor:pointer}
 .wk-days label:has(input:checked){background:var(--crimson);border-color:var(--crimson);color:#fff}
 .wk-days input{width:auto;margin:0;accent-color:var(--crimson)}
 #wkImgPrev{width:100%;max-height:220px;object-fit:contain;border-radius:10px;border:1px solid var(--line);margin-top:8px;background:var(--mist)}
+/* Report ngày */
+.seg{display:inline-flex;gap:4px;padding:4px;border:1px solid var(--line);border-radius:12px;background:var(--paper);margin-bottom:14px}
+.seg button{border:0;background:none;border-radius:9px;padding:8px 14px;font-weight:600;cursor:pointer;color:var(--ink-soft)}
+.seg button[aria-pressed="true"]{background:var(--crimson);color:#fff}
+.rp-two{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)}
+.rp-right{display:grid;gap:16px;position:sticky;top:12px}
+.rp-chips{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 4px}
+.rp-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:13px;font-weight:600;background:var(--mist)}
+.rp-chip i{font-style:normal;cursor:pointer;opacity:.5}.rp-chip i:hover{opacity:1;color:var(--crimson)}
+.rp-chip.add{border-style:dashed;cursor:pointer;color:var(--ink-soft);font-weight:500;background:none}
+.rp-proj{border:1px solid var(--line);border-left:4px solid var(--crimson);border-radius:12px;padding:6px 12px 12px;margin-top:12px;background:var(--mist)}
+.rp-proj h4{margin:6px 0 0;font:700 18px var(--serif)}
+.rp-cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.rp-cols textarea{min-height:110px;font-size:14px}
+.rp-out{white-space:pre-wrap;margin:10px 0 0;font:13px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;background:var(--mist);border:1px solid var(--line);border-radius:10px;padding:10px 12px;max-height:56vh;overflow:auto}
+.rp-list{display:flex;flex-direction:column;gap:6px;max-height:30vh;overflow:auto}
+.rp-it{display:flex;justify-content:space-between;gap:8px;border:1px solid var(--line);border-radius:10px;background:var(--mist);padding:6px 10px;cursor:pointer;font-size:13px;text-align:left}
+.rp-it:hover,.rp-it.on{border-color:var(--crimson)}
+.rp-it span{color:var(--ink-soft)}
 /* Phát code */
 .cb-two{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
 .cb-stat{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;margin:14px 0 10px}
@@ -375,6 +394,9 @@ button.ask-a:hover{border-color:var(--crimson)}
   .wk{grid-template-columns:1fr}
   .ask-two{grid-template-columns:1fr}
   .cb-two{grid-template-columns:1fr}
+  .rp-two{grid-template-columns:1fr}
+  .rp-cols{grid-template-columns:1fr}
+  .rp-right{position:static}
   .ask-right{position:static}
   #askSent{min-height:160px}
   .wk-day{min-height:0}
@@ -708,9 +730,27 @@ button.ask-a:hover{border-color:var(--crimson)}
     </div>
 
     <div id="viewBoard" class="hidden">
-      <div class="strip"><h2>Việc cần làm cho fanpage</h2><button class="btn" id="newTask">Tạo việc mới</button></div>
-      <div class="coltabs" id="colTabs"></div>
-      <div class="board" id="board"></div>
+      <div class="strip"><h2>Công việc</h2><button class="btn" id="newTask">Tạo việc mới</button></div>
+      <div class="seg" id="boardTabs"><button type="button" data-bt="report">📝 Report ngày</button><button type="button" data-bt="kanban">📋 Bảng việc fanpage</button></div>
+      <div id="rpBox">
+        <div class="two rp-two">
+          <div class="panel">
+            <div class="row" style="margin:0"><label for="rpDate" style="margin:0">Ngày report</label><input id="rpDate" type="date" style="width:auto"><button type="button" class="btn ghost small" id="rpToday">Hôm nay</button><button type="button" class="btn ghost small" id="rpPrev" title="Chép Đang fix + Việc tiếp theo của report trước vào ô Đang fix (nếu ô còn trống)">📥 Lấy từ report trước</button></div>
+            <div class="rp-chips" id="rpProjChips"></div>
+            <div id="rpForm"></div>
+            <div class="row"><button type="button" class="btn" id="rpSave">🔄 Cập nhật</button><span class="hint" id="rpState" style="font-size:13px;color:var(--ink-soft)"></span></div>
+          </div>
+          <div class="rp-right">
+            <div class="panel"><div class="row" style="margin:0"><h4 style="margin:0;font:700 17px var(--serif);flex:1">Report</h4><button type="button" class="btn small" id="rpCopy">📋 Copy report</button></div>
+              <pre class="rp-out" id="rpOut"></pre></div>
+            <div class="panel"><h4 style="margin:0 0 6px;font:700 15px var(--serif)">Report đã lưu</h4><div class="rp-list" id="rpList"></div></div>
+          </div>
+        </div>
+      </div>
+      <div id="kbBox" class="hidden">
+        <div class="coltabs" id="colTabs"></div>
+        <div class="board" id="board"></div>
+      </div>
     </div>
     <div id="viewAccounts" class="hidden">
       <div class="strip"><h2>Quản lý tài khoản</h2></div>
@@ -880,7 +920,7 @@ const STATUSES=[["todo","Chưa làm","#9A8FA8"],["doing","Đang làm","#B4661C"]
 const ROLE_NAME={admin:"Admin",lead:"Trưởng nhóm",member:"Thành viên"};
 const $=s=>document.querySelector(s);
 const sample=true, downloads=true;
-let templates=[],savedSheets=[],artStyles=[],weekActs=[],askCards=[],askMemo=null,codeBatches=[];
+let templates=[],savedSheets=[],artStyles=[],weekActs=[],askCards=[],askMemo=null,codeBatches=[],reports=[],reportCfg=null;
 const STYLES=["Ngắn gọn, rõ ý","Kiếm hiệp mạnh mẽ","Cổ phong lãng mạn","Hài hước, gần gũi","Thông báo trang trọng"];
 const LENS=[["ngắn (80–120 chữ)","Ngắn"],["vừa (150–220 chữ)","Vừa"],["dài (250–350 chữ)","Dài"]];
 let accounts=[], tasks=[], me=null, editing=null, sheet=null, abortCtl=null, mobileCol="todo";
@@ -921,7 +961,10 @@ async function refresh(name){try{
     askMemo=all.filter(x=>x.kind==="askmemo").sort((a,b)=>(b.updated||0)-(a.updated||0))[0]||null;
     /* Phát code: code lists with their ticks, kind:"codebatch" */
     codeBatches=all.filter(x=>x.kind==="codebatch").sort((a,b)=>(b.created||0)-(a.created||0));
-    templates=all.filter(x=>!x.kind).sort((a,b)=>(a.name||"").localeCompare(b.name||"","vi"));if(me){renderTemplates();fillTplSelects();renderHome();renderSaved();fillSrcSelect();renderStyles();fillStyleSel();renderWeek();renderSug();renderAskCards();renderAskMemo();renderCodes()}}
+    /* Report ngày: one row per person per day (kind:"report") + the shared project list (kind:"reportcfg") */
+    reports=all.filter(x=>x.kind==="report"&&x.date);
+    reportCfg=all.filter(x=>x.kind==="reportcfg").sort((a,b)=>(b.updated||0)-(a.updated||0))[0]||null;
+    templates=all.filter(x=>!x.kind).sort((a,b)=>(a.name||"").localeCompare(b.name||"","vi"));if(me){renderTemplates();fillTplSelects();renderHome();renderSaved();fillSrcSelect();renderStyles();fillStyleSel();renderWeek();renderSug();renderAskCards();renderAskMemo();renderCodes();rpRefresh()}}
 }catch(e){toast("Lỗi tải dữ liệu: "+errMsg(e))}}
 const db={
   collection:name=>({async add(obj){const {data,error}=await sb.from(name).insert({data:obj}).select("id").single();if(error)throw error;refresh(name);return{id:data.id}}}),
@@ -999,7 +1042,7 @@ const PORTALS=[
   {v:"week",t:"Lịch tuần",s:"hoạt động đặt sẵn trong tuần",pos:"55% 45%",n:()=>weekActs.length},
   {v:"ask",t:"Hỏi AI",s:"Hỏi nhanh, tạo code không trùng",pos:"30% 55%",n:()=>""},
   {v:"codes",t:"Phát code",s:"mã chưa phát",pos:"65% 40%",n:()=>codeBatches.reduce((n,b)=>n+cbLeft(b),0)},
-  {v:"board",t:"Công việc",s:"việc đang chờ xử lý",pos:"42% 70%",n:()=>tasks.filter(t=>t.status!=="done").length},
+  {v:"board",t:"Công việc",s:"Report ngày: đã fix, đang fix, việc tiếp theo",pos:"42% 70%",n:()=>""},
   {v:"templates",t:"Mẫu bài viết",s:"mẫu đã lưu",pos:"78% 55%",n:()=>templates.length},
   {v:"formats",t:"Format ảnh",s:"Chọn kiểu ảnh AI thiết kế",pos:"35% 15%",n:()=>""},
   {v:"art",t:"Kho ảnh",s:"ảnh để AI chọn làm nền",pos:"70% 60%",n:()=>artworks.length},
@@ -1800,6 +1843,68 @@ setInterval(()=>{if(!me||cbBusy)return;const onView=!$("#viewCodes").classList.c
 document.addEventListener("visibilitychange",()=>{if(me&&document.visibilityState==="visible"&&!$("#viewCodes").classList.contains("hidden")&&Date.now()-cbSyncAt>5000)cbSheetSync(cbCur(),true)});
 $("#cbDel").onclick=async()=>{if(!cbEditing||!confirm("Xóa đợt code này? Trạng thái đã phát cũng bị xóa."))return;
   try{await db.doc("templates/"+cbEditing).delete();$("#cbDlg").close();toast("Đã xóa đợt code")}catch(err){toast("Không xóa được: "+errMsg(err))}};
+
+/* ---------- Report ngày (tab Công việc): per project Đã fix / Đang fix / Việc làm tiếp theo → markdown report ---------- */
+const RP_DEFAULT=["jx2","Phong Vân"],RP_DRAFT="tsd.rpDraft";
+let rpDate=ymd(new Date()),rpRows=[],rpViewId=null;
+function rpProjects(){return (reportCfg?.projects?.length?reportCfg.projects:RP_DEFAULT).slice()}
+function rpMine(date){return reports.find(r=>r.by===me?.id&&r.date===date)}
+function rpDraft(){try{return JSON.parse(localStorage.getItem(RP_DRAFT)||"null")}catch(e){return null}}
+function rpSaveDraft(){try{localStorage.setItem(RP_DRAFT,JSON.stringify({date:rpDate,rows:rpCollect()}))}catch(e){}}
+function rpCollect(){return [...document.querySelectorAll("#rpForm .rp-proj")].map(el=>({name:el.dataset.name,
+  fixed:el.querySelector('[data-f="fixed"]').value,fixing:el.querySelector('[data-f="fixing"]').value,next:el.querySelector('[data-f="next"]').value}))}
+/* rows for a date: saved report > unsaved draft of that date > empty; projects follow the shared list, keeping text of removed ones out */
+function rpLoad(date){rpDate=date;const saved=rpMine(date),d=rpDraft(),src=d&&d.date===date?d.rows:saved?.projects||[];
+  rpRows=rpProjects().map(n=>({name:n,fixed:"",fixing:"",next:"",...(src.find(x=>x.name===n)||{})}));renderReport()}
+const rpBody=t=>{const v=String(t||"").replace(/\r/g,"").split("\n").map(x=>x.replace(/\s+$/,"")).join("\n").trim();return v||"Trống"};
+function rpText(date,rows){const d=date.split("-").reverse().join("/"),out=[`# Report: ${d}`,"## Việc đã hoàn thành hôm nay:"];
+  for(const r of rows)out.push(`### ${r.name}`,"**Đã fix**",rpBody(r.fixed),"**Đang fix**",rpBody(r.fixing));
+  out.push("## Việc làm tiếp theo:");for(const r of rows)out.push(`### ${r.name}`,rpBody(r.next));return out.join("\n")}
+function renderReport(){if(!me)return;$("#rpDate").value=rpDate;const saved=rpMine(rpDate);
+  $("#rpProjChips").innerHTML=rpProjects().map(n=>`<span class="rp-chip">${esc(n)}${can("delete")?`<i data-rpdel="${esc(n)}" title="Bỏ dự án">×</i>`:""}</span>`).join("")+'<button type="button" class="rp-chip add" id="rpAddProj">+ Thêm dự án</button>';
+  $("#rpForm").innerHTML=rpRows.map(r=>`<div class="rp-proj" data-name="${esc(r.name)}"><h4>${esc(r.name)}</h4>
+    <div class="rp-cols"><div><label>✅ Đã fix</label><textarea data-f="fixed" placeholder="Mỗi dòng một việc. Để trống = Trống">${esc(r.fixed)}</textarea></div>
+    <div><label>🔧 Đang fix</label><textarea data-f="fixing" placeholder="Để trống = Trống">${esc(r.fixing)}</textarea></div>
+    <div><label>➡️ Việc làm tiếp theo</label><textarea data-f="next" placeholder="Để trống = Trống">${esc(r.next)}</textarea></div></div></div>`).join("");
+  const now=rpText(rpDate,rpRows);
+  $("#rpState").textContent=!saved?"Chưa lưu report ngày này":saved.text!==now?"Có thay đổi chưa lưu – bấm Cập nhật":`Đã lưu lúc ${new Date(saved.updated).toLocaleTimeString("vi-VN")}`;
+  if(!rpViewId)$("#rpOut").textContent=now;renderRpList()}
+function renderRpList(){const list=[...reports].sort((a,b)=>b.date.localeCompare(a.date)||(b.updated||0)-(a.updated||0)).slice(0,60);
+  $("#rpList").innerHTML=list.length?list.map(r=>`<button type="button" class="rp-it${r.id===rpViewId?" on":""}" data-rpview="${r.id}"><b>${r.date.split("-").reverse().join("/")}</b><span>${esc(nameOf(r.by))}</span></button>`).join(""):'<p class="hint" style="font-size:13px;color:var(--ink-soft)">Chưa có report nào.</p>'}
+$("#rpForm").addEventListener("input",()=>{rpViewId=null;rpSaveDraft();$("#rpOut").textContent=rpText(rpDate,rpCollect());$("#rpState").textContent="Có thay đổi chưa lưu – bấm Cập nhật";renderRpList()});
+$("#rpDate").onchange=()=>{rpViewId=null;rpLoad($("#rpDate").value||ymd(new Date()))};
+$("#rpToday").onclick=()=>{rpViewId=null;rpLoad(ymd(new Date()))};
+$("#rpSave").onclick=async()=>{const rows=rpCollect(),text=rpText(rpDate,rows),old=rpMine(rpDate),btn=$("#rpSave");rpViewId=null;$("#rpOut").textContent=text;btn.disabled=true;
+  const data={kind:"report",date:rpDate,by:me.id,projects:rows,text,updated:Date.now()};
+  try{if(old)await db.doc("templates/"+old.id).set(data);else await db.collection("templates").add(data);
+    try{localStorage.removeItem(RP_DRAFT)}catch(e){}toast("Đã cập nhật report "+rpDate.split("-").reverse().join("/"))}
+  catch(e){toast("Không lưu được: "+errMsg(e))}finally{btn.disabled=false}};
+$("#rpCopy").onclick=async()=>{toast(await cbClip($("#rpOut").textContent)?"Đã copy report":"Không copy được")};
+/* the "next" of the latest earlier report becomes today's "Đang fix" when that box is still empty */
+$("#rpPrev").onclick=()=>{const prev=reports.filter(r=>r.by===me.id&&r.date<rpDate).sort((a,b)=>b.date.localeCompare(a.date))[0];
+  if(!prev){toast("Chưa có report trước đó");return}const rows=rpCollect();let n=0;
+  for(const r of rows){const p=(prev.projects||[]).find(x=>x.name===r.name);if(!p)continue;
+    const carry=[p.fixing,p.next].map(x=>String(x||"").trim()).filter(Boolean).join("\n");if(carry&&!r.fixing.trim()){r.fixing=carry;n++}}
+  rpRows=rows;rpSaveDraft();renderReport();$("#rpOut").textContent=rpText(rpDate,rpRows);
+  toast(n?`Đã chép “Đang fix” + “Việc tiếp theo” của report ${prev.date.split("-").reverse().join("/")} vào “Đang fix”`:"Không có gì để chép (ô Đang fix đã có nội dung)")};
+$("#rpList").onclick=e=>{const b=e.target.closest("[data-rpview]");if(!b)return;const r=reports.find(x=>x.id===b.dataset.rpview);if(!r)return;
+  if(r.by===me.id){rpViewId=null;rpLoad(r.date);return}
+  rpViewId=r.id;$("#rpOut").textContent=r.text||rpText(r.date,r.projects||[]);$("#rpState").textContent=`Đang xem report của ${nameOf(r.by)} (${r.date.split("-").reverse().join("/")})`;renderRpList()};
+$("#rpProjChips").onclick=async e=>{const del=e.target.closest("[data-rpdel]");const list=rpProjects();
+  if(del){if(!confirm(`Bỏ dự án “${del.dataset.rpdel}” khỏi report? (Report đã lưu không bị ảnh hưởng)`))return;await rpSaveCfg(list.filter(x=>x!==del.dataset.rpdel));return}
+  if(e.target.id==="rpAddProj"){const n=prompt("Tên dự án mới:");if(!n?.trim())return;if(list.includes(n.trim())){toast("Dự án đã có");return}await rpSaveCfg([...list,n.trim()])}};
+async function rpSaveCfg(projects){rpSaveDraft();const data={kind:"reportcfg",projects,updated:Date.now(),by:me.id};
+  try{if(reportCfg?.id)await db.doc("templates/"+reportCfg.id).set(data);else await db.collection("templates").add(data);reportCfg={...reportCfg,...data};rpLoad(rpDate)}
+  catch(e){toast("Không lưu được: "+errMsg(e))}}
+/* after data reloads: keep what is being typed, only refresh the saved state / list / project set */
+function rpRefresh(){if(!me)return;if(!rpRows.length||document.activeElement?.closest?.("#rpForm")){if(!rpRows.length)rpLoad(rpDate);else renderRpList();return}
+  const cur=rpCollect();rpRows=rpProjects().map(n=>({name:n,fixed:"",fixing:"",next:"",...(cur.find(x=>x.name===n)||rpMine(rpDate)?.projects?.find(x=>x.name===n)||{})}));renderReport()}
+/* sub tabs inside Công việc */
+function boardTab(t){try{localStorage.setItem("tsd.boardTab",t)}catch(e){}
+  document.querySelectorAll("#boardTabs button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.bt===t));
+  $("#rpBox").classList.toggle("hidden",t!=="report");$("#kbBox").classList.toggle("hidden",t!=="kanban");$("#newTask").classList.toggle("hidden",t!=="kanban")}
+$("#boardTabs").onclick=e=>{const b=e.target.closest("[data-bt]");if(b)boardTab(b.dataset.bt)};
+boardTab((()=>{try{return localStorage.getItem("tsd.boardTab")||"report"}catch(e){return "report"}})());
 
 /* ---------- templates ---------- */
 let tEditing=null;
