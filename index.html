@@ -1056,7 +1056,8 @@ $("#loginForm").onsubmit=async e=>{e.preventDefault();$("#loginErr").textContent
   $("#loginBtn").disabled=false;
   if(error){$("#loginErr").textContent="Sai tên đăng nhập hoặc mật khẩu.";return}
   $("#lPass").value="";await afterLogin(data.user)};
-function enter(){$("#login").classList.add("hidden");$("#app").classList.remove("hidden");renderShell();renderBoard();renderTemplates();fillTplSelects();renderHome();show("home");redrawW()}
+function enter(){$("#login").classList.add("hidden");$("#app").classList.remove("hidden");renderShell();renderBoard();renderTemplates();fillTplSelects();renderHome();const h=location.hash.slice(1);show(VIEWS[h]?h:"home",true);history.replaceState({v:VIEWS[h]?h:"home"},"",location.pathname+location.search+"#"+(VIEWS[h]&&!(h==="accounts"&&me.role!=="admin")?h:"home"));redrawW()}
+window.addEventListener("popstate",()=>{if(!me)return;document.querySelectorAll("dialog[open]").forEach(d=>d.close());show(location.hash.slice(1)||"home",true)});
 async function logout(){await sb.auth.signOut();me=null;showLogin()}
 $("#logout").onclick=logout;
 $("#chgPass").onclick=async()=>{const p=prompt("Nhập mật khẩu mới (ít nhất 8 ký tự):");if(!p)return;
@@ -1067,7 +1068,9 @@ function renderShell(){$("#meName").textContent=me.name;$("#meRole").textContent
 $("#tabs").onclick=e=>{const b=e.target.closest("button");if(b)show(b.dataset.view)};
 $("aside.side .logo").onclick=()=>show("home");
 const VIEWS={home:"#viewHome",write:"#viewWrite",week:"#viewWeek",ask:"#viewAsk",codes:"#viewCodes",board:"#viewBoard",templates:"#viewTemplates",sheet:"#viewSheet",formats:"#viewFormats",art:"#viewArt",acts:"#viewActs",accounts:"#viewAccounts"};
-function show(v){if(v==="accounts"&&me.role!=="admin")v="home";
+/* every tab switch is a browser history entry (#write, #codes…), so the browser / phone Back button returns to the previous tab */
+function show(v,fromHistory){if(!VIEWS[v]||(v==="accounts"&&me.role!=="admin"))v="home";
+  if(!fromHistory&&location.hash.slice(1)!==v)history.pushState({v},"","#"+v);
   document.querySelectorAll("#tabs button").forEach(b=>b.setAttribute("aria-current",b.dataset.view===v));
   if(v==="write")renderSug();if(v==="week")renderWeek();if(v==="codes"&&Date.now()-cbSyncAt>5000)cbSheetSync(cbCur(),true);if(v==="board")requestAnimationFrame(()=>rpGrowAll());
   for(const k in VIEWS)$(VIEWS[k]).classList.toggle("hidden",k!==v);scrollTo(0,0)}
