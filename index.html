@@ -364,6 +364,7 @@ details input,details select,details textarea{box-sizing:border-box}
 .ask-ph{margin:0;color:var(--ink-soft);font-size:14px;padding:24px 8px;text-align:center;border:1px dashed var(--line);border-radius:12px}
 .ask-for{font-size:12px;color:var(--ink-soft);margin-bottom:8px;padding-bottom:8px;border-bottom:1px dashed var(--line)}
 .ask-text{white-space:pre-wrap;font-size:15px;line-height:1.75}
+.ask-edit-t{width:100%;min-height:min(50vh,460px);font-size:15px;line-height:1.75;resize:vertical}
 .ask-items-h{font-size:12px;font-weight:700;color:var(--ink-soft);margin:10px 0 4px;text-transform:uppercase;letter-spacing:.05em}
 .ask-items{margin:0;padding:0;list-style:none;counter-reset:it;columns:auto 170px;column-gap:14px}
 .ask-items li{counter-increment:it;break-inside:avoid;padding:3px 0;font:14px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;border-bottom:1px dashed var(--line)}
@@ -628,7 +629,7 @@ button.ask-a:hover{border-color:var(--crimson)}
         </div>
         <div class="ask-right">
         <div class="panel ask-outbox" id="askOutBox">
-          <h4 style="margin:0 0 8px;font:700 17px var(--serif)">Kết quả</h4>
+          <div class="row" style="margin:0 0 8px"><h4 style="margin:0;font:700 17px var(--serif);flex:1">Kết quả</h4><button type="button" class="btn ghost small hidden" id="askEdit" title="Sửa nội dung kết quả">✏️</button></div>
           <div class="ask-out" id="askOut"></div>
           <div class="row hidden" id="askOutBar"><button type="button" class="btn" id="askCopy">Copy</button><button type="button" class="btn ghost hidden" id="askCopyPlain" title="Mỗi dòng một mục, không icon">Copy chỉ danh sách</button><button type="button" class="btn ghost small hidden" id="askKeep"></button></div>
           <div class="row hidden ask-savepost" id="askSaveRow"><button type="button" class="btn ghost" id="askSavePost">💾 Lưu bài viết</button><span class="hint">Lưu thành mẫu bài viết; qua <b>Viết bài nhanh</b> chọn mẫu này, đổi ngày rồi bấm Viết bài.</span></div>
@@ -1597,6 +1598,7 @@ async function saveAskMemo(text){const data={kind:"askmemo",text,updated:Date.no
   if(askMemo?.id)await db.doc("templates/"+askMemo.id).set(data);else await db.collection("templates").add(data);askMemo={...askMemo,...data}}
 $("#askSentSave").onclick=async()=>{try{await saveAskMemo($("#askSent").value.split("\n").map(x=>x.trim()).filter(Boolean).join("\n"));askMemoDirty=false;askMemoCount();toast("Đã lưu danh sách đã gửi")}catch(e){toast("Không lưu được: "+errMsg(e))}};
 let askSel=-1;/* which answer the Kết quả panel shows; -1 = latest */
+let askEditing=null;/* the answer being hand-edited in the Kết quả panel */
 /* a leading "-", "*" or "•" becomes an icon so every line start is easy to spot */
 function askFmt(t){return String(t||"").replace(/\r/g,"").split("\n").map(l=>l.replace(/^(\s*)[-*•]\s+/,"$1🔹 ").replace(/\s+$/,"")).join("\n").replace(/\n{3,}/g,"\n\n").trim()}
 function askCopyText(m,plain){if(plain)return (m.items||[]).join("\n");
@@ -1609,7 +1611,16 @@ function renderAsk(){const box=$("#askLog"),cur=askCur();
   if(askBusy)box.insertAdjacentHTML("beforeend",'<div class="ask-a"><div class="skel" style="width:60%"></div><div class="skel" style="width:40%"></div></div>');
   box.scrollTop=box.scrollHeight;$("#askGo").disabled=askBusy;$("#askStop").classList.toggle("hidden",!askBusy);renderAskOut()}
 function renderAskOut(){const m=askLog[askCur()],o=$("#askOut");
-  if(askBusy&&askSel<0){o.innerHTML='<div class="skel"></div><div class="skel" style="width:80%"></div><div class="skel" style="width:65%"></div>';$("#askOutBar").classList.add("hidden");return}
+  if(askEditing&&askEditing!==m)askEditing=null;
+  $("#askEdit").classList.toggle("hidden",!m||m.err||!!askEditing||(askBusy&&askSel<0));
+  if(askBusy&&askSel<0){o.innerHTML='<div class="skel"></div><div class="skel" style="width:80%"></div><div class="skel" style="width:65%"></div>';$("#askOutBar").classList.add("hidden");$("#askSaveRow").classList.add("hidden");return}
+  if(askEditing){$("#askOutBar").classList.add("hidden");$("#askSaveRow").classList.add("hidden");
+    if(!o.querySelector("#askEditT")){o.innerHTML=`<label for="askEditT" style="margin-top:0">Nội dung</label><textarea id="askEditT" class="ask-edit-t"></textarea>`+
+      (m.items?.length?`<label for="askEditI">Danh sách (mỗi dòng một mục)</label><textarea id="askEditI" class="ask-edit-t" style="min-height:160px"></textarea>`:"")+
+      `<div class="row"><button type="button" class="btn" id="askEditSave">Lưu</button><button type="button" class="btn ghost" id="askEditCancel">Hủy</button></div>`;
+      $("#askEditT").value=m.text||"";if(m.items?.length)$("#askEditI").value=m.items.join("\n");
+      $("#askEditSave").onclick=askEditSave;$("#askEditCancel").onclick=()=>{askEditing=null;renderAskOut()};$("#askEditT").focus()}
+    return}
   $("#askOutBar").classList.toggle("hidden",!m);
   if(!m){o.innerHTML='<p class="ask-ph">Câu trả lời của AI sẽ hiện ở đây, trình bày từng dòng rõ ràng để copy.</p>';return}
   const q=askLog.slice(0,askLog.indexOf(m)).reverse().find(x=>x.role==="user");
@@ -1664,6 +1675,12 @@ $("#askSavePost").onclick=async()=>{const m=askLog[askCur()];if(!m?.text)return;
     m.tplId=r.id;askSave();await refresh("templates");renderAskOut();
     if(confirm(`Đã lưu “${name.trim()}” vào Mẫu bài viết.\nMở Viết bài nhanh để chọn ngày mới ngay?`))openTplInWrite(r.id);else toast("Đã lưu vào Mẫu bài viết")}
   catch(err){toast("Không lưu được: "+errMsg(err))}};
+/* ✏️ lets the team fix the AI's wording by hand before copying or saving it as a post */
+$("#askEdit").onclick=()=>{const m=askLog[askCur()];if(!m||m.err)return;askEditing=m;renderAskOut()};
+function askEditSave(){const m=askEditing;if(!m)return;
+  m.text=$("#askEditT").value.replace(/\r/g,"").replace(/\s+$/,"");
+  if($("#askEditI"))m.items=$("#askEditI").value.split("\n").map(x=>x.trim()).filter(Boolean);
+  askEditing=null;askSave();renderAsk();toast("Đã lưu nội dung đã sửa")}
 $("#askCopy").onclick=()=>askCopy(false);$("#askCopyPlain").onclick=()=>askCopy(true);
 $("#askKeep").onclick=async()=>{const m=askLog[askCur()];if(!m?.items?.length)return;const cur=sentLines(),have=new Set(cur.map(askNorm)),add=m.items.filter(x=>!have.has(askNorm(x)));
   try{await saveAskMemo([...cur,...add].join("\n"));m.kept=true;askMemoDirty=false;askSave();renderAsk();renderAskMemo();toast(`Đã thêm ${add.length} mục vào danh sách đã gửi`)}catch(err){toast("Không lưu được: "+errMsg(err))}};
