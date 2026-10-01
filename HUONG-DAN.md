@@ -87,7 +87,8 @@ Sau đó Thành viên / Trưởng nhóm chỉ thấy tên hiển thị của m�
 ## Phát code riêng cho mem
 
 1. Trong Google Sheet chứa mã: **Chia sẻ → Quyền truy cập chung → Bất kỳ ai có đường liên kết (Người xem)**. Mở đúng trang tính có mã rồi copy link.
-2. Vào tab **Phát code → Thêm đợt code**: đặt tên, dán link sheet (hoặc chọn file Excel/CSV, hoặc dán danh sách mã), sửa **tin nhắn mẫu** (`{code}` là chỗ điền mã) → **Lưu**.
+2. Cách nhanh: dán link vào ô **🔗 Lấy mã từ link Google Sheet** ở đầu tab Phát code. Web tự đọc sheet, đoán cột mã / cột tick và mở hộp xác nhận, kiểm tra 5 mã xem trước rồi bấm **Lưu**. Link đã dùng ở một đợt thì web chọn đợt đó và đồng bộ, không tạo trùng.
+   Hoặc vào **Phát code → Thêm đợt code**: đặt tên, dán link sheet (hoặc chọn file Excel/CSV, hoặc dán danh sách mã), sửa **tin nhắn mẫu** (`{code}` là chỗ điền mã) → **Lưu**.
    - Web tự tìm cột mã. Nếu sheet có cột ô tick (TRUE/FALSE) thì mã đã tick được coi là đã phát.
    - Muốn chọn đúng cột: bấm **📑 Đọc sheet & chọn cột**, chọn **Cột chứa mã**, **Cột tick** và **dòng bắt đầu**, xem trước 5 mã đầu rồi Lưu. Lựa chọn được nhớ cho lần lấy mã mới.
    - Đã lỡ lấy sai cột: bấm **Chọn lại cột mã** ở tab Phát code, chọn lại cột rồi Lưu (tự tích *Thay toàn bộ danh sách*; mã đã phát vẫn giữ trạng thái).

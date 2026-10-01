@@ -317,6 +317,11 @@ aside.side .logo{cursor:pointer}
 .rp-it span{color:var(--ink-soft)}
 /* Phát code */
 .cb-two{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.cb-quick{border:1px dashed var(--crimson);border-radius:12px;padding:10px 12px;margin-bottom:6px;background:color-mix(in srgb,var(--crimson) 6%,var(--paper))}
+.cb-quick-row{display:flex;gap:8px}
+.cb-quick-row input{flex:1;min-width:0}
+.cb-quick-row .btn{flex:none}
+.cb-quick .hint{margin:6px 0 0;font-size:12px;color:var(--ink-soft)}
 .cb-stat{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;margin:14px 0 10px}
 .cb-stat b{font:700 40px/1 var(--serif);color:var(--crimson)}
 .cb-stat span{color:var(--ink-soft)}
@@ -648,8 +653,13 @@ button.ask-a:hover{border-color:var(--crimson)}
       <div class="strip"><h2>Phát code cho mem</h2><button class="btn" id="cbNew">Thêm đợt code</button></div>
       <div class="two cb-two">
         <div class="panel">
-          <label for="cbSel" style="margin-top:0">Đợt code</label><select id="cbSel"></select>
-          <div id="cbEmpty" class="empty hidden" style="margin-top:12px">Chưa có đợt code nào. Bấm <b>Thêm đợt code</b>, dán link Google Sheet chứa mã (hoặc tải file Excel/CSV, hoặc dán danh sách mã) và tin nhắn mẫu.<div class="row"><button type="button" class="btn small" id="cbNew2">Thêm đợt code</button></div></div>
+          <div class="cb-quick">
+            <label for="cbQuickUrl" style="margin-top:0">🔗 Lấy mã từ link Google Sheet</label>
+            <div class="cb-quick-row"><input id="cbQuickUrl" type="url" placeholder="Dán link Google Sheet vào đây…" autocomplete="off"><button type="button" class="btn" id="cbQuickGo">Lấy mã</button></div>
+            <p class="hint">Sheet cần chia sẻ <b>“Bất kỳ ai có đường liên kết” – Người xem</b>. Mở đúng trang tính chứa mã rồi copy link. Link đã dùng ở một đợt thì web chọn đợt đó và đồng bộ, không tạo trùng.</p>
+          </div>
+          <label for="cbSel">Đợt code</label><select id="cbSel"></select>
+          <div id="cbEmpty" class="empty hidden" style="margin-top:12px">Chưa có đợt code nào. Dán link Google Sheet vào ô ở trên, hoặc bấm <b>Thêm đợt code</b> để dán link Google Sheet chứa mã (hoặc tải file Excel/CSV, hoặc dán danh sách mã) và tin nhắn mẫu.<div class="row"><button type="button" class="btn small" id="cbNew2">Thêm đợt code</button></div></div>
           <div id="cbMain">
             <div class="cb-stat" id="cbStat"></div>
             <button type="button" class="btn cb-go" id="cbNext">📋 Copy mã tiếp theo</button>
@@ -1880,6 +1890,19 @@ function openCb(b){cbEditing=b?.id||null;$("#cbTitle").textContent=b?"Sửa đ�
   cbSrcRows=null;$("#cbMap").classList.add("hidden");$("#cbReplace").checked=false;$("#cbReplaceRow").classList.toggle("hidden",!b);
   $("#cbSrcHint").textContent=b?`Đang có ${(b.codes||[]).length} mã. Mã mới trong nguồn được thêm vào cuối; mã đã tick giữ nguyên.`:"";
   $("#cbDel").classList.toggle("hidden",!b||!can("delete"));$("#cbDlg").showModal();$("#cbName").focus()}
+/* quick box: paste a Google Sheet link → new batch with the sheet read and columns guessed (confirm in the dialog);
+   a link already used by a batch (same file + same tab) selects that batch and syncs it instead of making a duplicate */
+function sheetKey(link){const m=String(link||"").match(/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);if(!m)return "";const g=String(link).match(/[#&?]gid=(\d+)/);return m[1]+"#"+(g?g[1]:"0")}
+async function cbQuick(){const url=$("#cbQuickUrl").value.trim();if(!url)return;
+  if(!sheetCsvUrl(url)){toast("Link chưa đúng. Mở Google Sheet, copy link trên thanh địa chỉ rồi dán vào.");return}
+  const same=codeBatches.find(b=>b.sheetUrl&&sheetKey(b.sheetUrl)===sheetKey(url));
+  if(same){cbSelId=same.id;try{localStorage.setItem("tsd.cb",same.id)}catch(e){}renderCodes();$("#cbQuickUrl").value="";
+    toast(`Sheet này đang dùng ở đợt “${same.name}”, đang đồng bộ…`);await cbSheetSync(same,false);return}
+  openCb(null);$("#cbUrl").value=url;const d=new Date();$("#cbName").value=`Code ${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}`;
+  $("#cbQuickUrl").value="";$("#cbRead").click()}
+$("#cbQuickGo").onclick=cbQuick;
+$("#cbQuickUrl").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();cbQuick()}});
+$("#cbQuickUrl").addEventListener("paste",()=>setTimeout(()=>{if(sheetCsvUrl($("#cbQuickUrl").value))cbQuick()},0));
 $("#cbNew").onclick=$("#cbNew2").onclick=()=>openCb(null);$("#cbEdit").onclick=()=>openCb(cbCur());
 $("#cbPick").onclick=()=>{const b=cbCur();openCb(b);$("#cbReplace").checked=!!b;if(b?.sheetUrl)$("#cbRead").click()};/* picking the column again means the old list was wrong */
 $("#cbClose").onclick=$("#cbCancel").onclick=()=>$("#cbDlg").close();
