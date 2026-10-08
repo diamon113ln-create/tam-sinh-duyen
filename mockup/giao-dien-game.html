@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Giao diện game – bản vẽ lại</title>
+<style>
+  :root{
+    --ink:#15110e; --ink2:#221a15; --lacquer:#9e2f2a; --lacquer2:#c2453c;
+    --gold:#d8b36a; --gold2:#f3dca0; --paper:#efe3c8; --jade:#6fb39a;
+    --hp:#d9483f; --mp:#4b86d6; --xp:#e0b14a;
+    --glass:rgba(21,17,14,.72); --line:rgba(216,179,106,.55);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;background:#000;overflow:hidden;font-family:"Segoe UI",Roboto,"Noto Sans",sans-serif;color:var(--paper);user-select:none}
+  /* Khung 16:9 tự co giãn theo màn hình */
+  #stage{position:absolute;left:50%;top:50%;width:1600px;height:900px;transform-origin:center;overflow:hidden}
+
+  /* ===== Cảnh nền vẽ bằng SVG ===== */
+  #scene{position:absolute;inset:0}
+
+  /* ===== Thành phần chung ===== */
+  .panel{background:var(--glass);border:1px solid var(--line);border-radius:14px;backdrop-filter:blur(6px);box-shadow:0 6px 24px rgba(0,0,0,.45)}
+  .seal{display:grid;place-items:center;border-radius:50%;cursor:pointer;
+        background:radial-gradient(circle at 35% 30%,#3a2c22,#16110d 70%);
+        border:2px solid var(--gold);box-shadow:inset 0 0 0 3px rgba(0,0,0,.6),0 4px 10px rgba(0,0,0,.5);
+        transition:transform .12s, box-shadow .12s}
+  .seal:hover{transform:translateY(-2px) scale(1.04);box-shadow:inset 0 0 0 3px rgba(0,0,0,.6),0 0 14px rgba(243,220,160,.55)}
+  .seal:active{transform:scale(.95)}
+  .seal b{font-family:"KaiTi","STKaiti","Noto Serif SC",serif;color:var(--gold2);font-weight:700}
+  .lbl{font-size:13px;color:var(--gold2);text-shadow:0 1px 2px #000,0 0 4px #000;text-align:center;margin-top:4px;white-space:nowrap}
+
+  /* ===== 1. Thẻ nhân vật (góc trái trên) ===== */
+  #player{position:absolute;left:18px;top:16px;display:flex;align-items:center;gap:12px}
+  #avatar{position:relative;width:96px;height:96px}
+  #avatar svg{position:absolute;inset:0}
+  #avatar .face{position:absolute;inset:12px;border-radius:50%;overflow:hidden;background:linear-gradient(160deg,#f0d4bf,#b77d62)}
+  #avatar .lv{position:absolute;right:-4px;bottom:-2px;background:var(--lacquer);border:2px solid var(--gold);border-radius:10px;padding:1px 8px;font-weight:700;font-size:14px}
+  #pinfo{min-width:250px;padding:8px 12px;background:var(--glass);border:1px solid var(--line);border-radius:12px}
+  #pinfo .name{font-size:20px;font-weight:700;letter-spacing:.5px;display:flex;align-items:center;gap:8px}
+  .pill{font-size:12px;padding:2px 10px;border-radius:20px;border:1px solid var(--jade);color:#bfe9d8;background:rgba(111,179,154,.15);cursor:pointer}
+  .pill.war{border-color:var(--lacquer2);color:#ffc9c2;background:rgba(194,69,60,.2)}
+  .bar{height:9px;border-radius:5px;background:rgba(255,255,255,.08);margin-top:6px;overflow:hidden;position:relative}
+  .bar i{display:block;height:100%;border-radius:5px}
+  .bar span{position:absolute;inset:0;font-size:9px;line-height:9px;text-align:center;color:#fff;text-shadow:0 0 2px #000}
+  .power{margin-top:6px;font-size:12px;color:var(--gold2)}
+
+  /* ===== 2. Tên bản đồ (giữa trên) ===== */
+  #mapname{position:absolute;left:50%;top:18px;transform:translateX(-50%);display:flex;align-items:center;gap:10px}
+  #mapname .scroll{padding:8px 34px;font-family:"KaiTi","Noto Serif",serif;font-size:26px;font-weight:700;color:var(--ink);
+     background:linear-gradient(180deg,var(--gold2),var(--paper) 50%,#d9c69c);border-radius:4px;position:relative;box-shadow:0 4px 14px rgba(0,0,0,.5)}
+  #mapname .scroll:before,#mapname .scroll:after{content:"";position:absolute;top:-6px;bottom:-6px;width:12px;border-radius:6px;background:linear-gradient(90deg,#5b2b1c,#a6522f,#5b2b1c)}
+  #mapname .scroll:before{left:-8px} #mapname .scroll:after{right:-8px}
+  #mapname .meta{font-size:12px;line-height:1.5}
+  #mapname select{background:var(--ink2);color:var(--paper);border:1px solid var(--line);border-radius:6px;font-size:12px;padding:1px 4px}
+  #warn{position:absolute;left:50%;top:76px;transform:translateX(-50%);font-size:11px;color:rgba(239,227,200,.8);text-shadow:0 1px 2px #000}
+
+  /* ===== 3. Bản đồ nhỏ tròn (phải trên) ===== */
+  #mini{position:absolute;right:22px;top:16px;width:200px;height:200px}
+  #mini .ring{position:absolute;inset:0;border-radius:50%;border:3px solid var(--gold);box-shadow:0 0 0 6px rgba(21,17,14,.75),0 6px 20px rgba(0,0,0,.6);overflow:hidden}
+  #mini .dir{position:absolute;font-size:12px;font-weight:700;color:var(--gold2);text-shadow:0 0 3px #000}
+  #mini .coord{position:absolute;left:50%;bottom:-30px;transform:translateX(-50%);font-size:12px;background:var(--glass);border:1px solid var(--line);border-radius:10px;padding:2px 10px;white-space:nowrap}
+  #events{position:absolute;right:240px;top:22px;display:flex;flex-direction:column;gap:14px}
+  #events .seal{width:52px;height:52px}
+  #events .seal b{font-size:22px}
+
+  /* ===== 4. Theo dõi nhiệm vụ (trái giữa) ===== */
+  #quest{position:absolute;left:18px;top:140px;width:330px;padding:0;overflow:hidden}
+  #quest .tabs{display:flex}
+  #quest .tabs button{flex:1;padding:8px 0;background:transparent;border:0;border-bottom:2px solid transparent;color:rgba(239,227,200,.6);font-size:13px;cursor:pointer}
+  #quest .tabs button.on{color:var(--gold2);border-bottom-color:var(--gold);background:rgba(216,179,106,.08)}
+  #quest .body{padding:12px 14px;font-size:14px;line-height:1.6;min-height:120px}
+  #quest .qtitle{display:flex;justify-content:space-between;align-items:center;font-weight:700;color:var(--gold2)}
+  #quest .tag{font-size:11px;padding:0 8px;border-radius:8px;background:var(--lacquer);color:#fff}
+  #quest .goal{margin-top:6px;display:flex;align-items:center;gap:8px}
+  #quest .goal a{color:#9fe0b8;text-decoration:underline dotted;cursor:pointer}
+  #quest .prog{flex:1;height:6px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden}
+  #quest .prog i{display:block;height:100%;width:0;background:var(--jade);transition:width .3s}
+  #quest .hint{margin-top:6px;font-size:12px;color:rgba(239,227,200,.6)}
+  #quest .go{margin-top:10px;width:100%;padding:7px;border-radius:8px;border:1px solid var(--gold);background:linear-gradient(180deg,#b33b33,#7c231f);color:#fff;font-weight:700;cursor:pointer}
+
+  /* Nút tự động */
+  #autos{position:absolute;left:18px;top:400px;display:flex;gap:8px}
+  #autos button{padding:6px 12px;border-radius:20px;border:1px solid var(--line);background:var(--glass);color:var(--paper);font-size:13px;cursor:pointer}
+  #autos button.on{background:var(--jade);color:var(--ink);border-color:var(--jade);font-weight:700}
+
+  /* ===== 5. Cần điều khiển (trái dưới) ===== */
+  #joy{position:absolute;left:70px;bottom:70px;width:170px;height:170px;border-radius:50%;
+       background:radial-gradient(circle,rgba(216,179,106,.08),rgba(21,17,14,.55) 70%);border:2px dashed rgba(216,179,106,.45);touch-action:none}
+  #knob{position:absolute;left:50%;top:50%;width:70px;height:70px;margin:-35px 0 0 -35px;border-radius:50%;
+        background:radial-gradient(circle at 35% 30%,var(--gold2),var(--gold) 45%,#7a5a25);box-shadow:0 4px 12px rgba(0,0,0,.6)}
+
+  /* ===== 6. Chat (giữa dưới, thu gọn được) ===== */
+  #chat{position:absolute;left:300px;bottom:118px;width:420px;padding:8px 12px;font-size:14px;cursor:pointer}
+  #chat .ch{color:var(--gold)} #chat .more{display:none;margin-top:6px;font-size:13px;color:rgba(239,227,200,.75)}
+  #chat.open .more{display:block}
+
+  /* ===== 7. Thanh chức năng dưới + EXP ===== */
+  #dock{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);display:flex;gap:14px;padding:10px 22px 8px}
+  #dock .item{display:flex;flex-direction:column;align-items:center}
+  #dock .seal{width:58px;height:58px} #dock .seal b{font-size:24px}
+  #dock .badge{position:absolute;margin:-4px 0 0 44px;width:12px;height:12px;border-radius:50%;background:var(--hp);border:2px solid var(--ink)}
+  #xp{position:absolute;left:0;right:0;bottom:0;height:8px;background:rgba(0,0,0,.6)}
+  #xp i{display:block;height:100%;width:38%;background:linear-gradient(90deg,#a87a22,var(--xp),var(--gold2))}
+  #xp span{position:absolute;right:10px;bottom:10px;font-size:11px;color:var(--gold2)}
+  #fps{position:absolute;left:10px;bottom:12px;font-size:11px;color:rgba(239,227,200,.55)}
+
+  /* ===== 8. Vòng kỹ năng (phải dưới) ===== */
+  #skills{position:absolute;right:40px;bottom:40px;width:300px;height:300px}
+  #skills .atk{position:absolute;right:20px;bottom:20px;width:120px;height:120px}
+  #skills .atk b{font-size:52px}
+  #skills .sk{position:absolute;width:66px;height:66px;overflow:hidden}
+  #skills .sk b{font-size:26px;position:relative;z-index:1}
+  #skills .cd{position:absolute;inset:0;background:conic-gradient(rgba(0,0,0,.7) var(--p,0%),transparent 0);border-radius:50%}
+  #skills .cdn{position:absolute;inset:0;display:grid;place-items:center;font-weight:700;font-size:18px;z-index:2;text-shadow:0 0 4px #000}
+  #skills .jump{width:54px;height:54px}
+
+  /* ===== 9. Ngăn menu mở rộng (cạnh phải) ===== */
+  #menuBtn{position:absolute;right:22px;top:262px;width:56px;height:56px}
+  #menuBtn b{font-size:24px}
+  #drawer{position:absolute;right:92px;top:240px;width:0;overflow:hidden;transition:width .3s ease;white-space:nowrap}
+  #drawer.open{width:380px}
+  #drawer .grid{display:grid;grid-template-columns:repeat(5,64px);gap:10px 8px;padding:14px;width:380px}
+  #drawer .item{display:flex;flex-direction:column;align-items:center}
+  #drawer .seal{width:50px;height:50px} #drawer .seal b{font-size:20px}
+  #drawer .lbl{font-size:11px}
+
+  /* Popup nhỏ khi bấm */
+  #toast{position:absolute;left:50%;top:150px;transform:translateX(-50%);padding:10px 22px;font-size:15px;opacity:0;transition:opacity .25s;pointer-events:none}
+  #toast.show{opacity:1}
+  .dmg{position:absolute;font-weight:800;font-size:26px;color:#ffd36b;text-shadow:0 2px 0 #7a1c12,0 0 6px #000;pointer-events:none;animation:up 0.9s ease-out forwards}
+  @keyframes up{to{transform:translateY(-60px);opacity:0}}
+</style>
+</head>
+<body>
+<div id="stage">
+
+  <!-- ================= CẢNH NỀN ================= -->
+  <svg id="scene" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#2b2a3a"/><stop offset=".45" stop-color="#6b5a5a"/><stop offset=".8" stop-color="#c79a6e"/><stop offset="1" stop-color="#8f8a63"/>
+      </linearGradient>
+      <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#7d8c5c"/><stop offset="1" stop-color="#3f4a2e"/>
+      </linearGradient>
+      <radialGradient id="sun" cx=".5" cy=".5" r=".5">
+        <stop offset="0" stop-color="#c2453c" stop-opacity=".9"/><stop offset="1" stop-color="#c2453c" stop-opacity="0"/>
+      </radialGradient>
+      <filter id="blur"><feGaussianBlur stdDeviation="3"/></filter>
+    </defs>
+    <rect width="1600" height="900" fill="url(#sky)"/>
+    <circle cx="1000" cy="330" r="140" fill="url(#sun)"/><circle cx="1000" cy="330" r="46" fill="#d4573f" opacity=".85"/>
+    <!-- Núi xa kiểu tranh thủy mặc -->
+    <path d="M0 420 L120 300 L210 360 L330 230 L460 380 L560 300 L700 400 L820 260 L980 390 L1100 300 L1240 380 L1380 250 L1520 360 L1600 320 L1600 560 L0 560Z" fill="#6f7a66" opacity=".45" filter="url(#blur)"/>
+    <path d="M0 500 L160 380 L300 470 L420 360 L600 490 L760 370 L900 480 L1060 380 L1220 490 L1400 370 L1600 470 L1600 620 L0 620Z" fill="#4d5a45" opacity=".65"/>
+    <!-- Mặt đất -->
+    <path d="M0 560 Q400 520 800 560 T1600 540 L1600 900 L0 900Z" fill="url(#ground)"/>
+    <!-- Con đường -->
+    <path d="M560 900 C640 760 780 690 900 640 C1000 600 1120 590 1240 560 L1300 575 C1180 615 1060 640 980 690 C860 760 760 820 720 900Z" fill="#b59b70" opacity=".85"/>
+    <!-- Chòi tre -->
+    <g transform="translate(1040 420)">
+      <rect x="20" y="90" width="220" height="110" fill="#6b4a2c"/>
+      <rect x="20" y="90" width="220" height="110" fill="none" stroke="#3a2616" stroke-width="3"/>
+      <g stroke="#3a2616" stroke-width="2">
+        <line x1="60" y1="90" x2="60" y2="200"/><line x1="100" y1="90" x2="100" y2="200"/>
+        <line x1="160" y1="90" x2="160" y2="200"/><line x1="200" y1="90" x2="200" y2="200"/>
+      </g>
+      <rect x="112" y="125" width="40" height="75" fill="#24170d"/>
+      <path d="M-20 100 L130 0 L280 100 Z" fill="#a78a4f"/>
+      <path d="M-20 100 L130 0 L280 100" fill="none" stroke="#5c4523" stroke-width="5"/>
+      <path d="M10 98 L130 18 M60 98 L130 30 M200 98 L130 30 M250 98 L130 18" stroke="#7c6234" stroke-width="2"/>
+      <rect x="110" y="40" width="40" height="22" fill="#9e2f2a" stroke="#d8b36a"/>
+      <text x="130" y="57" text-anchor="middle" font-size="15" fill="#f3dca0" font-family="KaiTi,serif">茶</text>
+    </g>
+    <!-- Hàng rào -->
+    <g stroke="#4a3520" stroke-width="5" stroke-linecap="round">
+      <line x1="880" y1="600" x2="880" y2="560"/><line x1="910" y1="595" x2="910" y2="555"/>
+      <line x1="940" y1="590" x2="940" y2="550"/><line x1="970" y1="585" x2="970" y2="545"/>
+      <line x1="1000" y1="580" x2="1000" y2="540"/><line x1="870" y1="575" x2="1010" y2="555"/>
+    </g>
+    <!-- Cây, bụi -->
+    <g fill="#2f3d26">
+      <circle cx="140" cy="700" r="120"/><circle cx="300" cy="760" r="110"/><circle cx="40" cy="820" r="130"/>
+      <circle cx="420" cy="860" r="90"/><circle cx="1500" cy="820" r="140"/><circle cx="1350" cy="880" r="100"/>
+    </g>
+    <g fill="#435633">
+      <circle cx="180" cy="660" r="70"/><circle cx="330" cy="720" r="60"/><circle cx="1470" cy="760" r="70"/>
+    </g>
+    <!-- Cây thông nét mực -->
+    <g stroke="#1f1a14" stroke-width="7" fill="none" stroke-linecap="round">
+      <path d="M720 560 C710 470 740 420 700 330"/><path d="M705 400 C660 380 640 390 610 370"/><path d="M716 450 C770 430 790 440 820 420"/>
+    </g>
+    <g fill="#33452b" opacity=".9">
+      <ellipse cx="610" cy="360" rx="60" ry="22"/><ellipse cx="820" cy="410" rx="64" ry="22"/><ellipse cx="700" cy="320" rx="70" ry="26"/>
+    </g>
+    <!-- Hoa -->
+    <g fill="#c2453c"><circle cx="820" cy="610" r="6"/><circle cx="836" cy="602" r="5"/><circle cx="808" cy="620" r="5"/></g>
+    <g fill="#e2a7c4"><circle cx="1010" cy="640" r="5"/><circle cx="1024" cy="634" r="5"/></g>
+
+    <!-- Quái: Cáo Trắng -->
+    <g id="fox" transform="translate(1180 680)" style="cursor:pointer">
+      <ellipse cx="0" cy="22" rx="40" ry="8" fill="#000" opacity=".25"/>
+      <path d="M-34 4 Q-50 -16 -62 -4 Q-48 6 -34 10Z" fill="#f4efe6"/>
+      <ellipse cx="0" cy="0" rx="34" ry="18" fill="#f4efe6"/>
+      <circle cx="30" cy="-12" r="13" fill="#f4efe6"/>
+      <path d="M24 -22 L28 -36 L34 -22Z M32 -22 L40 -34 L42 -18Z" fill="#f4efe6"/>
+      <circle cx="35" cy="-13" r="2" fill="#15110e"/>
+      <g stroke="#f4efe6" stroke-width="5" stroke-linecap="round"><line x1="-18" y1="12" x2="-20" y2="24"/><line x1="18" y1="12" x2="20" y2="24"/></g>
+      <text x="0" y="-38" text-anchor="middle" font-size="14" fill="#ffb4a8" stroke="#000" stroke-width=".6">Cáo Trắng</text>
+      <rect x="-28" y="-32" width="56" height="5" fill="#000" opacity=".5"/><rect id="foxhp" x="-28" y="-32" width="56" height="5" fill="#d9483f"/>
+    </g>
+
+    <!-- Nhân vật -->
+    <g id="hero" transform="translate(760 600)">
+      <ellipse cx="0" cy="58" rx="26" ry="7" fill="#000" opacity=".3"/>
+      <path d="M-16 0 L16 0 L24 54 L-24 54Z" fill="#9e2f2a"/>
+      <path d="M-16 0 L16 0 L12 20 L-12 20Z" fill="#d8b36a"/>
+      <circle cx="0" cy="-14" r="13" fill="#f0d4bf"/>
+      <path d="M-14 -16 Q0 -38 14 -16 Q10 -28 0 -28 Q-10 -28 -14 -16Z" fill="#15110e"/>
+      <path d="M12 -20 Q30 0 20 30" stroke="#15110e" stroke-width="5" fill="none"/>
+      <line x1="20" y1="10" x2="40" y2="-30" stroke="#cfd6dc" stroke-width="3"/>
+      <text x="0" y="-62" text-anchor="middle" font-size="15" fill="#9fe0b8" stroke="#000" stroke-width=".5">Người Mở Đường</text>
+      <text x="0" y="-44" text-anchor="middle" font-size="17" fill="#fff" stroke="#000" stroke-width=".7" font-weight="700">ĐoànTuyết</text>
+    </g>
+  </svg>
+
+  <!-- ================= 1. NHÂN VẬT ================= -->
+  <div id="player">
+    <div id="avatar">
+      <svg viewBox="0 0 96 96">
+        <circle cx="48" cy="48" r="44" fill="#15110e" stroke="#d8b36a" stroke-width="2"/>
+        <circle cx="48" cy="48" r="40" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="5"/>
+        <circle id="hpRing" cx="48" cy="48" r="40" fill="none" stroke="#d9483f" stroke-width="5" stroke-linecap="round"
+                stroke-dasharray="251" stroke-dashoffset="0" transform="rotate(-90 48 48)"/>
+      </svg>
+      <div class="face">
+        <svg viewBox="0 0 72 72" width="100%" height="100%">
+          <path d="M8 72 Q8 44 36 44 Q64 44 64 72Z" fill="#9e2f2a"/>
+          <circle cx="36" cy="30" r="16" fill="#f0d4bf"/>
+          <path d="M18 30 Q18 8 36 8 Q54 8 54 30 Q50 16 36 16 Q22 16 18 30Z" fill="#15110e"/>
+          <path d="M50 22 Q62 40 56 60" stroke="#15110e" stroke-width="6" fill="none"/>
+          <circle cx="30" cy="31" r="1.8" fill="#15110e"/><circle cx="42" cy="31" r="1.8" fill="#15110e"/>
+          <path d="M33 38 Q36 40 39 38" stroke="#b5413a" stroke-width="2" fill="none"/>
+          <circle cx="36" cy="20" r="2.5" fill="#c2453c"/>
+        </svg>
+      </div>
+      <div class="lv">4</div>
+    </div>
+    <div id="pinfo">
+      <div class="name">ĐoànTuyết <span class="pill" id="pk" title="Đổi trạng thái PK">Hòa bình</span></div>
+      <div class="bar"><i id="hpBar" style="width:100%;background:linear-gradient(90deg,#8c241e,var(--hp))"></i><span id="hpTxt">1240/1240</span></div>
+      <div class="bar"><i style="width:82%;background:linear-gradient(90deg,#24508f,var(--mp))"></i><span>410/500</span></div>
+      <div class="power">⚔ Lực chiến <b>2.318</b> &nbsp;·&nbsp; Line <select><option>1</option><option>2</option><option>3</option></select></div>
+    </div>
+  </div>
+
+  <!-- ================= 2. BẢN ĐỒ ================= -->
+  <div id="mapname">
+    <div class="scroll">Chung Nam Sơn · II</div>
+  </div>
+  <div id="warn">18+ · Chơi game quá 180 phút một ngày sẽ ảnh hưởng xấu đến sức khỏe</div>
+
+  <!-- ================= 3. MINIMAP + SỰ KIỆN ================= -->
+  <div id="events">
+    <div class="item" style="text-align:center"><div class="seal" data-t="Rương động"><b>箱</b></div><div class="lbl">Rương</div></div>
+    <div class="item" style="text-align:center"><div class="seal" data-t="Cửa hàng"><b>商</b></div><div class="lbl">Cửa hàng</div></div>
+    <div class="item" style="text-align:center"><div class="seal" data-t="Bảng xếp hạng"><b>榜</b></div><div class="lbl">BXH</div></div>
+  </div>
+  <div id="mini">
+    <div class="ring">
+      <svg viewBox="0 0 200 200" width="100%" height="100%">
+        <rect width="200" height="200" fill="#5d6b45"/>
+        <path d="M0 60 Q60 40 100 70 T200 50 L200 0 L0 0Z" fill="#3c4a2f"/>
+        <path d="M60 200 C80 150 110 120 150 100 L165 108 C125 130 100 160 90 200Z" fill="#b59b70"/>
+        <rect x="128" y="70" width="34" height="24" fill="#a78a4f" stroke="#3a2616"/>
+        <circle cx="50" cy="90" r="10" fill="none" stroke="#7fb8e6" stroke-width="3"/>
+        <circle cx="152" cy="122" r="5" fill="#ff6a5a"/>
+        <circle cx="140" cy="140" r="5" fill="#ff6a5a"/>
+        <circle cx="166" cy="140" r="5" fill="#ff6a5a"/>
+        <path id="me" d="M100 92 L108 112 L100 106 L92 112Z" fill="#f3dca0" stroke="#000"/>
+      </svg>
+    </div>
+    <span class="dir" style="left:94px;top:-2px">B</span><span class="dir" style="left:94px;bottom:-2px">N</span>
+    <span class="dir" style="left:2px;top:92px">T</span><span class="dir" style="right:2px;top:92px">Đ</span>
+    <div class="coord">📍 <span id="xy">198, 90</span> · <span id="clock">19:90</span></div>
+  </div>
+
+  <!-- ================= 4. NHIỆM VỤ ================= -->
+  <div id="quest" class="panel">
+    <div class="tabs">
+      <button class="on" data-tab="q">📜 Nhiệm vụ</button>
+      <button data-tab="t">👥 Đội</button>
+      <button data-tab="h">✕ Ẩn</button>
+    </div>
+    <div class="body" id="qbody">
+      <div class="qtitle">Xua Đuổi Cáo Trắng <span class="tag">Chính tuyến</span></div>
+      <div class="goal">Đánh bại <a id="foxLink">Cáo Trắng</a> <span id="cnt">0/3</span>
+        <div class="prog"><i id="qprog"></i></div></div>
+      <div class="hint">Mẹo: chạm vào quái hoặc bấm “Đi ngay” để tự tìm đường.</div>
+      <button class="go" id="goBtn">⚡ Đi ngay</button>
+    </div>
+  </div>
+  <div id="autos">
+    <button data-a="Tùy chỉnh">⚙ Tùy chỉnh</button>
+    <button data-a="Tự đánh">⚔ Tự đánh</button>
+    <button data-a="Tự chơi">▶ Tự chơi</button>
+  </div>
+
+  <!-- ================= 5. JOYSTICK ================= -->
+  <div id="joy"><div id="knob"></div></div>
+
+  <!-- ================= 6. CHAT ================= -->
+  <div id="chat" class="panel">
+    <span class="ch">[Hệ thống]</span> Chào mừng đại hiệp đến với Mộng Chí Tôn!
+    <div class="more">
+      <div><span class="ch">[Thế giới]</span> Hoa Vũ: tổ đội đánh boss Chung Nam, ai đi không?</div>
+      <div><span class="ch">[Bang]</span> Lão Đại: tối nay 20h công thành nhé.</div>
+    </div>
+  </div>
+
+  <!-- ================= 7. DOCK DƯỚI ================= -->
+  <div id="dock" class="panel">
+    <div class="item"><div class="seal" data-t="Võ công"><b>武</b></div><div class="lbl">Võ Công</div></div>
+    <div class="item"><div class="seal" data-t="Thú cưỡi"><b>騎</b></div><div class="lbl">Thú Cưỡi</div></div>
+    <div class="item"><span class="badge"></span><div class="seal" data-t="Nhân vật"><b>人</b></div><div class="lbl">Nhân Vật</div></div>
+    <div class="item"><div class="seal" data-t="Túi đồ"><b>囊</b></div><div class="lbl">Túi Đồ</div></div>
+    <div class="item"><div class="seal" data-t="Ngồi thiền"><b>禪</b></div><div class="lbl">Thiền</div></div>
+  </div>
+  <div id="fps">v97 · 59 FPS · 09/10/2026</div>
+  <div id="xp"><i></i><span>EXP 38%</span></div>
+
+  <!-- ================= 8. KỸ NĂNG ================= -->
+  <div id="skills">
+    <div class="seal atk" id="atk" title="Đánh thường"><b>劍</b></div>
+    <div class="seal sk" style="right:150px;bottom:24px" data-cd="4"><b>風</b><div class="cd"></div><div class="cdn"></div></div>
+    <div class="seal sk" style="right:136px;bottom:104px" data-cd="6"><b>雷</b><div class="cd"></div><div class="cdn"></div></div>
+    <div class="seal sk" style="right:84px;bottom:166px" data-cd="8"><b>火</b><div class="cd"></div><div class="cdn"></div></div>
+    <div class="seal sk" style="right:6px;bottom:166px" data-cd="12"><b>冰</b><div class="cd"></div><div class="cdn"></div></div>
+    <div class="seal sk jump" style="right:240px;bottom:20px" data-cd="2"><b>躍</b><div class="cd"></div><div class="cdn"></div></div>
+  </div>
+
+  <!-- ================= 9. MENU ================= -->
+  <div class="seal" id="menuBtn" title="Mở menu"><b>☰</b></div>
+  <div id="drawer" class="panel">
+    <div class="grid">
+      <div class="item"><div class="seal" data-t="Nhiệm vụ"><b>任</b></div><div class="lbl">Nhiệm Vụ</div></div>
+      <div class="item"><div class="seal" data-t="Hoạt động"><b>活</b></div><div class="lbl">Hoạt Động</div></div>
+      <div class="item"><div class="seal" data-t="Chiến lực"><b>戰</b></div><div class="lbl">Chiến Lực</div></div>
+      <div class="item"><div class="seal" data-t="Khúc tình"><b>情</b></div><div class="lbl">Khúc Tình</div></div>
+      <div class="item"><div class="seal" data-t="Cài đặt"><b>設</b></div><div class="lbl">Cài Đặt</div></div>
+      <div class="item"><div class="seal" data-t="Hảo hữu"><b>友</b></div><div class="lbl">Hảo Hữu</div></div>
+      <div class="item"><div class="seal" data-t="Tổ đội"><b>隊</b></div><div class="lbl">Tổ Đội</div></div>
+      <div class="item"><div class="seal" data-t="Bang hội"><b>幫</b></div><div class="lbl">Bang Hội</div></div>
+      <div class="item"><div class="seal" data-t="Ghi hình"><b>錄</b></div><div class="lbl">Ghi Hình</div></div>
+      <div class="item"><div class="seal" data-t="Tự động"><b>自</b></div><div class="lbl">Tự Động</div></div>
+    </div>
+  </div>
+
+  <div id="toast" class="panel"></div>
+</div>
+
+<script>
+(() => {
+  const $ = s => document.querySelector(s), $$ = s => document.querySelectorAll(s);
+  const stage = $('#stage');
+
+  // Co giãn khung 1600x900 theo màn hình
+  function fit(){ const k = Math.min(innerWidth/1600, innerHeight/900);
+    stage.style.transform = `translate(-50%,-50%) scale(${k})`; }
+  addEventListener('resize', fit); fit();
+
+  // Thông báo nhỏ
+  let tt; function toast(t){ const el=$('#toast'); el.textContent=t; el.classList.add('show');
+    clearTimeout(tt); tt=setTimeout(()=>el.classList.remove('show'),1300); }
+  $$('[data-t]').forEach(b => b.addEventListener('click', () => toast('Mở: ' + b.dataset.t)));
+
+  // PK
+  $('#pk').onclick = e => { const p=e.target; const war = p.classList.toggle('war');
+    p.textContent = war ? 'Chiến đấu' : 'Hòa bình'; };
+
+  // Menu kéo ra
+  $('#menuBtn').onclick = () => $('#drawer').classList.toggle('open');
+
+  // Chat thu gọn/mở rộng
+  $('#chat').onclick = () => $('#chat').classList.toggle('open');
+
+  // Tab nhiệm vụ
+  const qHTML = $('#qbody').innerHTML;
+  $$('#quest .tabs button').forEach(b => b.onclick = () => {
+    $$('#quest .tabs button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
+    const body=$('#qbody');
+    if (b.dataset.tab==='h'){ body.style.display='none'; return; }
+    body.style.display='';
+    if (b.dataset.tab==='t') body.innerHTML='<div class="hint" style="margin-top:0">Chưa có đội.</div><button class="go" onclick="this.textContent=\'Đang tìm đội…\'">＋ Tạo / Tìm đội</button>';
+    else { body.innerHTML=qHTML; bindQuest(); }
+  });
+
+  // Nút tự động
+  $$('#autos button').forEach(b => b.onclick = () => { b.classList.toggle('on');
+    toast(b.dataset.a + (b.classList.contains('on') ? ': BẬT' : ': TẮT')); });
+
+  // ---- Nhân vật di chuyển bằng joystick ----
+  const hero = {x:760, y:600}, heroEl = $('#hero');
+  let vx=0, vy=0;
+  const joy=$('#joy'), knob=$('#knob');
+  function joyMove(e){ const r=joy.getBoundingClientRect(); const k=r.width/170;
+    let dx=(e.clientX-(r.left+r.width/2))/k, dy=(e.clientY-(r.top+r.height/2))/k;
+    const d=Math.hypot(dx,dy), m=55; if(d>m){dx=dx/d*m; dy=dy/d*m;}
+    knob.style.transform=`translate(${dx}px,${dy}px)`; vx=dx/m; vy=dy/m; }
+  joy.addEventListener('pointerdown', e=>{ joy.setPointerCapture(e.pointerId); joyMove(e); });
+  joy.addEventListener('pointermove', e=>{ if(joy.hasPointerCapture(e.pointerId)) joyMove(e); });
+  joy.addEventListener('pointerup', ()=>{ knob.style.transform=''; vx=vy=0; });
+  const keys={}; addEventListener('keydown',e=>keys[e.key.toLowerCase()]=1); addEventListener('keyup',e=>keys[e.key.toLowerCase()]=0);
+
+  let target=null;
+  function loop(){
+    let kx=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0), ky=(keys.s||keys.arrowdown?1:0)-(keys.w||keys.arrowup?1:0);
+    let mx=vx||kx, my=vy||ky;
+    if(target && !mx && !my){ const dx=target.x-hero.x, dy=target.y-hero.y, d=Math.hypot(dx,dy);
+      if(d<70){ target=null; toast('Đã tới mục tiêu – bấm 劍 để tấn công'); } else { mx=dx/d; my=dy/d; } }
+    hero.x=Math.max(450,Math.min(1350,hero.x+mx*4)); hero.y=Math.max(540,Math.min(760,hero.y+my*4));
+    heroEl.setAttribute('transform',`translate(${hero.x} ${hero.y})${mx<0?' scale(-1 1)':''}`);
+    heroEl.querySelectorAll('text').forEach(t=>t.setAttribute('transform', mx<0?'scale(-1 1)':''));
+    $('#me').setAttribute('transform',`translate(${(hero.x-760)/12} ${(hero.y-600)/12})`);
+    $('#xy').textContent = `${Math.round(198+(hero.x-760)/10)}, ${Math.round(90+(hero.y-600)/10)}`;
+    requestAnimationFrame(loop);
+  }
+  loop();
+
+  // ---- Nhiệm vụ đánh cáo ----
+  let kills=0, foxHp=100; const fox={x:1180,y:680};
+  function bindQuest(){
+    $('#goBtn').onclick = $('#foxLink').onclick = () => { target=fox; toast('Đang tự tìm đường tới Cáo Trắng…'); };
+    $('#cnt').textContent=`${kills}/3`; $('#qprog').style.width=(kills/3*100)+'%';
+  }
+  bindQuest();
+  function hit(dmg){
+    if (Math.hypot(fox.x-hero.x, fox.y-hero.y) > 160){ toast('Mục tiêu quá xa'); return; }
+    foxHp=Math.max(0,foxHp-dmg); $('#foxhp').setAttribute('width',56*foxHp/100);
+    const r=stage.getBoundingClientRect(), k=r.width/1600, n=document.createElement('div');
+    n.className='dmg'; n.textContent='-'+dmg*12; n.style.left=(fox.x-20)+'px'; n.style.top=(fox.y-90)+'px'; stage.appendChild(n);
+    setTimeout(()=>n.remove(),900);
+    if(foxHp===0){ kills=Math.min(3,kills+1); foxHp=100; $('#foxhp').setAttribute('width',56);
+      if($('#cnt')){ $('#cnt').textContent=`${kills}/3`; $('#qprog').style.width=(kills/3*100)+'%'; }
+      toast(kills<3?`Hạ Cáo Trắng (${kills}/3)`:'Hoàn thành nhiệm vụ! Nhận 500 EXP');
+      if(kills===3){ $('#xp i').style.width='64%'; $('#xp span').textContent='EXP 64%'; } }
+    // cáo phản đòn
+    const hp = Math.max(300, parseInt($('#hpTxt').textContent) - 25);
+    $('#hpTxt').textContent=`${hp}/1240`; $('#hpBar').style.width=(hp/1240*100)+'%';
+    $('#hpRing').setAttribute('stroke-dashoffset', 251*(1-hp/1240));
+  }
+  $('#atk').onclick = () => hit(10);
+  $('#fox').addEventListener('click', () => { target=fox; });
+
+  // ---- Hồi chiêu kỹ năng ----
+  $$('#skills .sk').forEach(s => s.onclick = () => {
+    if (s.dataset.busy) return;
+    const cd=+s.dataset.cd, t0=performance.now(); s.dataset.busy=1;
+    if(!s.classList.contains('jump')) hit(25); else { hero.y-=0; toast('Khinh công!'); }
+    (function tick(){ const left=cd-(performance.now()-t0)/1000;
+      if(left<=0){ s.querySelector('.cd').style.setProperty('--p','0%'); s.querySelector('.cdn').textContent=''; delete s.dataset.busy; return; }
+      s.querySelector('.cd').style.setProperty('--p',(left/cd*100)+'%'); s.querySelector('.cdn').textContent=Math.ceil(left);
+      requestAnimationFrame(tick); })();
+  });
+
+  // Đồng hồ
+  setInterval(()=>{ const d=new Date(); $('#clock').textContent=d.toTimeString().slice(0,5); },1000);
+})();
+</script>
+</body>
+</html>
