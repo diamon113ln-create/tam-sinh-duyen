@@ -29,7 +29,8 @@ Deno.serve(async (req) => {
       ? [{ type: "image", source: { type: "base64", media_type: image.media_type, data: image.data } }, { type: "text", text: prompt }]
       : prompt;
 
-    const key = Deno.env.get("ANTHROPIC_API_KEY");
+    // A key pasted into Secrets often carries a stray space or line break, which the API rejects
+    const key = (Deno.env.get("ANTHROPIC_API_KEY") || "").trim();
     if (!key) return json({ error: "Chưa cài ANTHROPIC_API_KEY trong Secrets" }, 500);
 
     // max_tokens covers the model's thinking as well as the answer; too small cuts the JSON off mid-way.
@@ -43,6 +44,10 @@ Deno.serve(async (req) => {
       body: JSON.stringify(payload),
     });
     const data = await r.json();
+    if (r.status === 401 || data?.error?.type === "authentication_error")
+      return json({ error: "Khóa ANTHROPIC_API_KEY sai hoặc đã bị xóa. Tạo khóa mới ở console.anthropic.com rồi cập nhật Secret trong Supabase" }, 502);
+    if (data?.error?.message?.includes("credit balance"))
+      return json({ error: "Tài khoản Anthropic đã hết credit, nạp thêm ở console.anthropic.com mục Billing" }, 502);
     if (!r.ok) return json({ error: data?.error?.message || "Lỗi gọi AI" }, 502);
     if (data.stop_reason === "max_tokens") return json({ error: "Nội dung quá dài nên AI bị cắt giữa chừng, hãy rút gọn bài rồi thử lại" }, 502);
     if (data.stop_reason === "refusal") return json({ error: "AI từ chối xử lý nội dung này" }, 502);
