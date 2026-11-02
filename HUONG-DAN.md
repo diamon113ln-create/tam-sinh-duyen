@@ -112,6 +112,11 @@ Sau đó Thành viên / Trưởng nhóm chỉ thấy tên hiển thị của m�
   - Cập nhật tiện ích: tải bản mới, giải nén đè lên thư mục cũ, vào `chrome://extensions` bấm ⟳ ở tiện ích.
   - Đổi phím: `chrome://extensions/shortcuts`. Sửa file trong thư mục `tien-ich-phat-code` thì chạy lại lệnh đóng gói zip (hoặc nhờ Claude) để nút Tải tiện ích có bản mới.
 
+## Tên miền riêng (tamsinhduyenpanel.io.vn)
+
+- Tạm gỡ vì tên miền đang bị tạm ngưng phía VNNIC (tra DNS trả NXDOMAIN dù còn hạn đến 26/09/2027). Web đang chạy ở `https://diamon113ln-create.github.io/tam-sinh-duyen/`.
+- Khi P.A / VNNIC mở lại tên miền: tạo lại file `CNAME` ở gốc repo với nội dung `tamsinhduyenpanel.io.vn` (hoặc GitHub → Settings → Pages → Custom domain), chờ vài phút rồi bật **Enforce HTTPS**.
+
 ## Sửa code sau này
 
 - Mở kho code trên GitHub, bấm phím **.** (dấu chấm) → hiện trình soạn thảo giống VS Code ngay trên trình duyệt.
