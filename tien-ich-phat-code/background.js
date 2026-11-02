@@ -1,4 +1,4 @@
-// Phím tắt → tìm tab web Tam Sinh Duyên đang mở → lấy mã tiếp theo ở đó → copy vào clipboard → hiện thông báo.
+// Phím tắt → tìm tab web Bàn Làm Việc đang mở → lấy mã tiếp theo ở đó → copy vào clipboard → hiện thông báo.
 // Bấm biểu tượng tiện ích: mở bảng nhỏ để BẬT / TẮT phím tắt.
 const SITES = ["https://tamsinhduyenpanel.io.vn/*", "https://*.github.io/tam-sinh-duyen/*"];
 let busy = false;
@@ -28,7 +28,7 @@ async function run(fromPopup) {
   busy = true;
   try {
     const tabs = await chrome.tabs.query({ url: SITES });
-    if (!tabs.length) return fail("Chưa mở web Tam Sinh Duyên", "Mở web, vào tab Phát code và giữ tab đó mở rồi bấm lại.");
+    if (!tabs.length) return fail("Chưa mở web Bàn Làm Việc", "Mở web, vào tab Phát code và giữ tab đó mở rồi bấm lại.");
     let res = null;
     for (const t of tabs) {
       try {
@@ -40,7 +40,7 @@ async function run(fromPopup) {
         if (r && r.result) { res = r.result; break; }
       } catch (e) { /* tab đang tải hoặc bị trình duyệt ngủ đông: thử tab khác */ }
     }
-    if (!res) return fail("Web chưa sẵn sàng", "Tải lại (F5) tab web Tam Sinh Duyên, đăng nhập và mở tab Phát code.");
+    if (!res) return fail("Web chưa sẵn sàng", "Tải lại (F5) tab web Bàn Làm Việc, đăng nhập và mở tab Phát code.");
     if (!res.ok) return fail("Không lấy được mã", res.error || "Lỗi không rõ");
     await copy(res.msg);
     await chrome.storage.local.set({ left: res.left, batch: res.batch || "" });
